@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {View} from 'react-native';
 import AuthNavigation from '../../navigations/AuthNavigation';
 import {
@@ -9,11 +9,10 @@ import {
 } from '../../AuthContext';
 import MainNavigation from '../../navigations/MainNavigation';
 import PermitNavigation from '../../navigations/PermitNavigation';
-
+import auth from '@react-native-firebase/auth';
 export default () => {
   const isLoggedIn = useIsLoggedIn();
   const confirmPermit = usePermit();
-
   confirmPermit();
 
   const isPermit = useIsPermit();

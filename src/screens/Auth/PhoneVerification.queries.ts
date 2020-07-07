@@ -10,12 +10,13 @@ export const REQUEST_PHONE_VERIFICATION = gql`
 `;
 
 export const CONFIRM_PHONE_VERIFICATION = gql`
-    mutation CompletePhoneVerification($phoneNumber: String!, $key: String!, $nickName: String!, $gender: String!, $birth: String!, $fbId: String, $ggId: String) {
-        CompletePhoneVerification(phoneNumber: $phoneNumber, key: $key, nickName: $nickName, gender: $gender, birth: $birth, fbId: $fbId, ggId: $ggId) {
+    mutation CompletePhoneVerification($phoneNumber: String!, $key: String!, $fbId: String, $ggId: String, $kkId: String) {
+        CompletePhoneVerification(phoneNumber: $phoneNumber, key: $key,fbId: $fbId, ggId: $ggId, kkId: $kkId) {
             ok
             error
             userId
             token
+            isNew
         }
     }
 `;

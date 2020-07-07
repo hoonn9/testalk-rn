@@ -4,6 +4,31 @@
 // This file was automatically generated and should not be edited.
 
 // ====================================================
+// GraphQL query operation: GetCustomToken
+// ====================================================
+
+export interface GetCustomToken_GetCustomToken {
+  __typename: "GetCustomTokenResponse";
+  ok: boolean;
+  error: string | null;
+  token: string | null;
+}
+
+export interface GetCustomToken {
+  GetCustomToken: GetCustomToken_GetCustomToken | null;
+}
+
+export interface GetCustomTokenVariables {
+  means: CustomTokenMeansOptions;
+  socialId: string;
+}
+
+/* tslint:disable */
+/* eslint-disable */
+// @generated
+// This file was automatically generated and should not be edited.
+
+// ====================================================
 // GraphQL mutation operation: StartPhoneVerification
 // ====================================================
 
@@ -36,6 +61,7 @@ export interface CompletePhoneVerification_CompletePhoneVerification {
   error: string | null;
   userId: number | null;
   token: string | null;
+  isNew: boolean | null;
 }
 
 export interface CompletePhoneVerification {
@@ -45,11 +71,9 @@ export interface CompletePhoneVerification {
 export interface CompletePhoneVerificationVariables {
   phoneNumber: string;
   key: string;
-  nickName: string;
-  gender: string;
-  birth: string;
   fbId?: string | null;
   ggId?: string | null;
+  kkId?: string | null;
 }
 
 /* tslint:disable */
@@ -265,6 +289,10 @@ export interface GetMyProfile {
 //==============================================================
 // START Enums and Input Objects
 //==============================================================
+
+export enum CustomTokenMeansOptions {
+  KAKAO = "KAKAO",
+}
 
 //==============================================================
 // END Enums and Input Objects

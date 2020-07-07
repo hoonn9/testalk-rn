@@ -2,4 +2,5 @@
     <string name="app_name">testalkRn</string>
     <string name="facebook_app_id">2955043544603413</string> 
     <string name="fb_login_protocol_scheme">fb2955043544603413</string>
+    <string name="kakao_app_key">8165016ac10dfcdc70884e306713e88f</string>
 </resources>

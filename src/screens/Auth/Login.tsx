@@ -3,10 +3,16 @@ import {TouchableWithoutFeedback, Keyboard} from 'react-native';
 import styled from 'styled-components/native';
 import useInput from '../../hooks/useInput';
 import {Alert} from 'react-native';
-import {useMutation} from '@apollo/react-hooks';
+import {useMutation, useLazyQuery} from '@apollo/react-hooks';
 import AuthButton from '../../components/AuthButton';
 import {GoogleSignin, statusCodes} from '@react-native-community/google-signin';
-import {LoginButton, AccessToken} from 'react-native-fbsdk';
+import {
+  LoginButton,
+  AccessToken,
+  LoginManager,
+  GraphRequest,
+  GraphRequestManager,
+} from 'react-native-fbsdk';
 import {
   FACEBOOK_APP_ID,
   GOOGLE_ID_ANDROID,
@@ -15,10 +21,11 @@ import {
 } from '../../enviroments';
 import {NavigationStackScreenProps} from 'react-navigation-stack';
 import {toast} from '../../tools';
+import KakaoLogins from '@react-native-seoul/kakao-login';
 
 GoogleSignin.configure({
-  scopes: [],
   webClientId: FIREBASE_WEB_ID,
+  offlineAccess: true,
 });
 
 const View = styled.View`
@@ -31,8 +38,9 @@ const Text = styled.Text``;
 
 interface IProp extends NavigationStackScreenProps {}
 
-const FACEBOOK = 'fb';
-const GOOGLE = 'go';
+const FACEBOOK = 'FACEBOOK';
+const GOOGLE = 'GOOGLE';
+const KAKAO = 'KAKAO';
 
 const SignUp: React.FunctionComponent<IProp> = ({navigation}) => {
   const [loading, setLoading] = useState(false);
@@ -42,8 +50,13 @@ const SignUp: React.FunctionComponent<IProp> = ({navigation}) => {
       setLoading(true);
       await GoogleSignin.hasPlayServices();
       const result = await GoogleSignin.signIn();
+
+      console.log(result);
       toast(`${result.user.name}님 반가워요!`);
-      navigation.navigate('SignUp', {ggId: result.idToken, means: GOOGLE});
+      navigation.navigate('PhoneVerification', {
+        ggId: result.idToken,
+        means: GOOGLE,
+      });
       setLoading(false);
     } catch (error) {
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
@@ -55,30 +68,76 @@ const SignUp: React.FunctionComponent<IProp> = ({navigation}) => {
       } else {
         // some other error happened
       }
+      console.log(error.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const facebookOnPress = (error, result) => {
+  const facebookOnPress = () => {
     try {
       setLoading(true);
-      if (error) {
-        toast('문제가 발생하여 페이스북 로그인에 실패하였습니다.');
-      } else if (result.isCancelled) {
-        toast('로그인이 취소 되었습니다.');
-      } else {
-        AccessToken.getCurrentAccessToken().then(data => {
-          console.log(data);
-          toast(`${'tsest'} ${'test'}님 반가워요!`);
-          navigation.navigate('SignUp', {
-            fbId: data.accessToken.toString(),
-            means: FACEBOOK,
-          });
-        });
-      }
+      LoginManager.logInWithPermissions(['public_profile']).then(
+        function(result) {
+          if (result.isCancelled) {
+          } else {
+            const infoRequest = new GraphRequest(
+              '/me',
+              null,
+              (error: any, result: any) => {
+                if (error) {
+                  toast('페이스북 계정과 연결을 실패했습니다.');
+                } else {
+                  toast(`${result.name}님 반가워요!`);
+                  navigation.navigate('PhoneVerification', {
+                    fbId: result.id,
+                    means: FACEBOOK,
+                  });
+                }
+              },
+            );
+            new GraphRequestManager().addRequest(infoRequest).start();
+          }
+        },
+        function(error) {
+          console.log('Login fail with error: ' + error);
+          toast('페이스북 계정과 연결을 실패했습니다.');
+        },
+      );
     } catch (error) {
       toast(`Facebook Login Error: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+  console.log('check');
+  const kakaoLogin = () => {
+    setLoading(true);
+    try {
+      KakaoLogins.login()
+        .then(result => {
+          KakaoLogins.getProfile()
+            .then(result => {
+              if (result.id) {
+                navigation.navigate('PhoneVerification', {
+                  kkId: result.id,
+                  means: KAKAO,
+                });
+              }
+            })
+            .catch(err => {
+              console.log(err);
+            });
+        })
+        .catch(err => {
+          console.log(err);
+          if (err.code === 'E_CANCELLED_OPERATION') {
+          } else {
+            toast(`Login Failed:${err.code} ${err.message}`);
+          }
+        });
+    } catch (error) {
+      console.log(error);
     } finally {
       setLoading(false);
     }
@@ -93,7 +152,18 @@ const SignUp: React.FunctionComponent<IProp> = ({navigation}) => {
           loading={loading}
           bgColor="#000000"
         />
-        <LoginButton onLoginFinished={facebookOnPress} />
+        <AuthButton
+          text="페이스북으로 로그인"
+          onClick={facebookOnPress}
+          loading={loading}
+          bgColor="#000000"
+        />
+        <AuthButton
+          text="카카오로 로그인"
+          onClick={kakaoLogin}
+          loading={loading}
+          bgColor="#000000"
+        />
       </View>
     </TouchableWithoutFeedback>
   );

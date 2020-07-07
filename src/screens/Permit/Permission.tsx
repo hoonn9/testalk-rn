@@ -15,7 +15,7 @@ import {
   PERMISSIONS,
 } from 'react-native-permissions';
 import auth from '@react-native-firebase/auth';
-
+import messaging from '@react-native-firebase/messaging';
 const Container = styled.SafeAreaView`
   justify-content: center;
   align-items: center;
@@ -65,28 +65,23 @@ const People: React.FunctionComponent<IProp> = ({navigation}) => {
         setLoading(false);
         return;
       }
-      const idTokenResult = await auth().currentUser.getIdTokenResult();
-      console.log(idTokenResult);
-      if (idTokenResult) {
-        console.log(idTokenResult);
-        const {data} = await setNotifyId({
-          variables: {token: idTokenResult.token},
-        });
-        if (data) {
+      // FCM TOKEN 저장
+      messaging()
+        .getToken()
+        .then(async token => {
+          const {data} = await setNotifyId({
+            variables: {
+              token,
+            },
+          });
           if (data.SetUserNotify.ok) {
             setIsNotifyGranted(true);
             resolve();
           } else {
             toast('권한을 얻는 데 실패했어요. 다시 시도해주세요.');
             setLoading(false);
-            return;
           }
-        }
-      } else {
-        toast('권한을 얻는 데 실패했어요. 다시 시도해주세요.');
-        setLoading(false);
-        return;
-      }
+        });
     }).then(async () => {
       const locationStatus = await request(
         PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,

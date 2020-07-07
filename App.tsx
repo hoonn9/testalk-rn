@@ -227,12 +227,12 @@ export default function App() {
       });
 
       // 개발용 로그인 코드
-      await AsyncStorage.setItem(
-        'jwt',
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTUsImlhdCI6MTU5MzU5MzcyNH0.6Dap2IeU4U9iksb-Pz8PlggHNM5JG-gnc3HVWRzvWGw',
-      );
-      await AsyncStorage.setItem('isLoggedIn', 'true');
-      await AsyncStorage.setItem('userId', '15');
+      // await AsyncStorage.setItem(
+      //   'jwt',
+      //   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTUsImlhdCI6MTU5MzU5MzcyNH0.6Dap2IeU4U9iksb-Pz8PlggHNM5JG-gnc3HVWRzvWGw',
+      // );
+      // await AsyncStorage.setItem('isLoggedIn', 'true');
+      // await AsyncStorage.setItem('userId', '15');
 
       // await AsyncStorage.setItem(
       //   "jwt",

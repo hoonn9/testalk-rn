@@ -51,6 +51,7 @@ export const AuthProvider: React.FunctionComponent<IProps> = ({
   const permitUser = async () => {
     check(PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION)
       .then(result => {
+        console.log(result);
         switch (result) {
           case RESULTS.GRANTED:
             setIsPermit(true);
