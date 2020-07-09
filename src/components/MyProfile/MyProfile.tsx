@@ -1,9 +1,9 @@
-import React from "react";
-import styled from "styled-components/native";
-import { Image, StyleSheet } from "react-native";
-import { TouchableOpacityProps } from "react-native";
-import constants from "../../constants";
-import { getAge } from "../../utils";
+import React from 'react';
+import styled from 'styled-components/native';
+import {Image, StyleSheet} from 'react-native';
+import {TouchableOpacityProps} from 'react-native';
+import constants from '../../constants';
+import {getAge} from '../../utils';
 
 const Container = styled.View`
   width: ${`${constants.width / 1.05}px`};
@@ -11,8 +11,8 @@ const Container = styled.View`
 `;
 const Wrapper = styled.View``;
 const Touchable = styled.TouchableOpacity`
-  width: 125;
-  height: 125;
+  width: 125px;
+  height: 125px;
 `;
 const Text = styled.Text``;
 
@@ -33,7 +33,7 @@ const InfoWrapper = styled.View`
   flex-direction: row;
   justify-content: center;
   align-items: flex-end;
-  padding-top: 10;
+  padding-top: 10px;
 `;
 
 const GenderWrapper = styled.View`
@@ -41,17 +41,17 @@ const GenderWrapper = styled.View`
 `;
 
 const NameText = styled.Text`
-  font-size: 26;
+  font-size: 26px;
   padding: 0px 5px;
   font-weight: 700;
 `;
 
 const AgeText = styled.Text`
-  font-size: 21;
+  font-size: 21px;
   padding: 0px 5px;
 `;
 const GenderText = styled.Text`
-  font-size: 24;
+  font-size: 24px;
 `;
 
 const styles = StyleSheet.create({
@@ -82,7 +82,7 @@ const MyProfile: React.FunctionComponent<IProp> = ({
           <ImageWrapper>
             <Touchable>
               <Image
-                source={{ uri: "https://i.stack.imgur.com/l60Hf.png" }}
+                source={{uri: 'https://i.stack.imgur.com/l60Hf.png'}}
                 style={styles.image}
               />
             </Touchable>
@@ -90,13 +90,13 @@ const MyProfile: React.FunctionComponent<IProp> = ({
           <InfoWrapper>
             <NameText numberOfLines={1}>
               {nick.length > maxNameLength
-                ? nick.substring(0, maxNameLength - 3) + "..."
+                ? nick.substring(0, maxNameLength - 3) + '...'
                 : nickName}
             </NameText>
             <AgeText>{getAge(birth)}</AgeText>
-            <GenderText>{gender === "female" ? "♀" : "♂"}</GenderText>
+            <GenderText>{gender === 'female' ? '♀' : '♂'}</GenderText>
           </InfoWrapper>
-          <GenderWrapper></GenderWrapper>
+          <GenderWrapper />
         </InfoContainer>
       </Wrapper>
     </Container>

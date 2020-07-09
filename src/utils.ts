@@ -1,5 +1,5 @@
-export const dateConverter = (date: Date) => {
-    const convertDate = new Date(date);
+export const dateConverter = (timestamp: number) => {
+    const convertDate = new Date(timestamp);
     return `${convertDate.getFullYear()}년 ${
         convertDate.getMonth() + 1
         }월 ${convertDate.getDate()}일`;

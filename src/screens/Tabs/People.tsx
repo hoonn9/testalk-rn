@@ -127,8 +127,12 @@ const People: React.FunctionComponent<IProp> = ({ navigation }) => {
     return new Promise((resolve, reject) => {
       Geolocation.getCurrentPosition((success) => {
         resolve(success);
+        setIsRequested(true);
+        setIsGranted(true);
       }, (error) => {
         reject(error);
+        setIsRequested(true);
+        setIsGranted(false);
       })
     }).catch(error => {
       console.log(error);
@@ -136,21 +140,27 @@ const People: React.FunctionComponent<IProp> = ({ navigation }) => {
   };
 
   const getLocation = async () => {
-      const position = await getPosition();
+      const position: any = await getPosition();
       console.log(position);
-          // const { data } = await updateLocationMutation({
-          //   variables: {
-          //     lastLat: resLocation.coords.latitude,
-          //     lastLng: resLocation.coords.longitude,
-          //   },
-          //   fetchPolicy: "no-cache",
-          // });
-          // if (!data?.ReportMovement.ok) {
-          //   Alert.alert("위치 갱신 실패");
-          // }
-          // setIsRefreshing(true);
-          // setGetUserListSkip(false);
-          // getUserList();
+      const { data } = await updateLocationMutation({
+        variables: {
+          lastLat: position.coords.latitude,
+          lastLng: position.coords.longitude,
+        },
+        fetchPolicy: "no-cache",
+      });
+      if (!data?.ReportMovement.ok) {
+        Alert.alert("위치 갱신 실패");
+      }
+      setLocation({
+        coords: {
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude
+        }
+      })
+      setIsRefreshing(true);
+      setGetUserListSkip(false);
+      getUserList();
         
       
   };

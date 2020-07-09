@@ -21,6 +21,8 @@ import {vibration} from './src/tools';
 import gql from 'graphql-tag';
 //import {setItemChatRooms, addMessage, createTable} from './src/dbTools';
 import messaging from '@react-native-firebase/messaging';
+import {createTable, setItemChatRooms, addMessage} from './src/dbTools';
+import PushNotification from 'react-native-push-notification';
 
 export default function App() {
   const [loaded, setLoaded] = useState<boolean>(false);
@@ -263,26 +265,29 @@ export default function App() {
   };
 
   const handleNotification = (notification: any) => {
-    console.log('handle notify');
+    console.log(notification);
     vibration();
     const {
-      request: {
-        content: {
-          data: {chatId, messageId, userId, receiveUserId, content, createdAt},
-        },
-      },
+      data: {chatId, messageId, userId, receiveUserId, content, createdAt},
     } = notification;
-    //setItemChatRooms(userId, chatId, content, createdAt);
+    setItemChatRooms(userId, chatId, content, createdAt);
     // 받은 메시지의 인수는 보낸 USER ID
-    //addMessage(chatId, messageId, userId, userId, content, createdAt);
+    addMessage(chatId, messageId, userId, userId, content, createdAt);
   };
 
   useEffect(() => {
-    //createTable();
+    createTable();
     preLoad();
-    const unsubscribe = messaging().onMessage(async remoteMessage => {
-      Alert.alert('A new FCM message arrived!', JSON.stringify(remoteMessage));
+
+    PushNotification.configure({
+      onNotification: function(notification) {
+        console.log('NOTIFICATION:', notification);
+      },
+      popInitialNotification: true,
+      requestPermissions: true,
     });
+
+    const unsubscribe = messaging().onMessage(handleNotification);
 
     return unsubscribe;
     // return () => {

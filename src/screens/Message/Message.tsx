@@ -23,6 +23,7 @@ import MessageRow from "../../components/MessageRow";
 import { setItemChatRooms, getChatLogs, addMessage } from "../../dbTools";
 import { GET_LOCAL_CHAT_MESSAGES } from "../../sharedQueries.local";
 import { ChatLogRowProp } from "../../dbTools";
+import { dateConverter } from "../../utils";
 
 const Container = styled.View`
   flex: 1;
@@ -40,6 +41,13 @@ const View = styled.View`
   flex: 1;
 `;
 const Text = styled.Text``;
+const DateSeparaterWrapper = styled.View`
+  justify-content: center;
+  align-items:center;
+`;
+const DateSeparaterText = styled.Text`
+  font-size: 15px;
+`;
 
 interface IProp extends NavigationStackScreenProps {}
 
@@ -52,11 +60,13 @@ const Message: React.FunctionComponent<IProp> = ({ navigation }) => {
   const [messageList, setMessageList] = useState<Array<ChatLogRowProp>>([]);
   const MESSAGES_LIMIT: number = 10;
   const [offset, setOffset] = useState<number>(10);
-
+  const [selectCount, setSelectCount]  = useState<number>(0);
   const [messageLoading, setMessageLoading] = useState<boolean>(false);
   const [requestTime, setRequestTime] = useState<string>(
     navigation.getParam("requestTime", null)
   );
+  const [compareDate, setCompareDate]  = useState<string>("");
+  const [dateSeparater, setDateSeparater] = useState<{[key: string]: string;}>({})
 
   const { data: subscribeData, loading: subscribeLoading } = useSubscription<
     MessageSubscription
@@ -65,8 +75,9 @@ const Message: React.FunctionComponent<IProp> = ({ navigation }) => {
   const onEndReached = async () => {
     const chatLogs = await getChatLogs(chatId, MESSAGES_LIMIT, offset);
     if (chatLogs) {
-      setMessageList([...messageList, ...chatLogs._array]);
+      setMessageList([...messageList, ...chatLogs.array]);
       setOffset(offset + MESSAGES_LIMIT);
+      setSelectCount(selectCount + 1);
     }
   };
 
@@ -74,6 +85,33 @@ const Message: React.FunctionComponent<IProp> = ({ navigation }) => {
     SendChatMessage,
     SendChatMessageVariables
   >(SEND_MESSAGE);
+
+  const genDateSeparater = (messages: Array<ChatLogRowProp>) => {
+    let tempDate = compareDate;
+    for (let i=0; i<messages.length; i++) {
+      const createdAt = new Date(messages[i].created_at);
+      const date = `${createdAt.getFullYear()}-${createdAt.getMonth()}-${createdAt.getDate()}`
+      console.log(i, date)
+      if (date !== tempDate) {
+        
+        console.log("cp", tempDate, "d", date)
+        
+        
+        setDateSeparater(Object.assign({}, dateSeparater, {
+          [messages[i]._id]: tempDate
+        }))
+        tempDate = date;
+      }
+    }
+    setCompareDate(tempDate)
+  }
+  useEffect(() => {
+    console.log(messageList.length)
+    if (messageList.length > 0) {
+      genDateSeparater(messageList.slice(selectCount * MESSAGES_LIMIT, undefined));
+    }
+    console.log(dateSeparater)
+  }, [messageList])
 
   useEffect(() => {
     const initChat = async () => {
@@ -89,12 +127,23 @@ const Message: React.FunctionComponent<IProp> = ({ navigation }) => {
       const chatLogs = await getChatLogs(chatId, MESSAGES_LIMIT);
 
       if (chatLogs) {
-        setMessageList([...chatLogs._array]);
+        if (chatLogs.array.length > 0) {
+          // Date sparater 비교할 날짜 초기화
+          const initDate = new Date(chatLogs.array[0].created_at);
+          setCompareDate(`${initDate.getFullYear()}-${initDate.getMonth()}-${initDate.getDate()}`)
+
+          const messages = [...chatLogs.array];
+          setMessageList(messages);
+          return messages;
+        } else {
+          return null
+        }
       }
     };
     initChat();
+    
   }, []);
-
+  
   useEffect(() => {
     if (subscribeData) {
       if (subscribeData.MessageSubscription) {
@@ -186,6 +235,12 @@ const Message: React.FunctionComponent<IProp> = ({ navigation }) => {
     }
   };
 
+  const separaterDateConverter = (date: string) => {
+    const temp = date.split("-");
+    return `${temp[0]}년 ${parseInt(temp[1]) + 1}월 ${temp[2]}일`
+  }
+ 
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <Container>
@@ -198,36 +253,24 @@ const Message: React.FunctionComponent<IProp> = ({ navigation }) => {
             keyExtractor={(e, i) => i.toString()}
             renderItem={(data) => {
               if (data.item?.id) {
-                // const ymd = formatYMD(data.item?.createdAt);
-                // console.log(dateTrigger.find((element) => element === ymd));
-                // if (!dateTrigger.find((element) => element === ymd)) {
-                //   setDateTrigger([...dateTrigger, ymd]);
                 return (
                   <>
-                    <Text>{data.item.created_at}</Text>
+                    {
+                    Object.keys(dateSeparater).includes(data.item._id.toString()) ? 
+                    <DateSeparaterWrapper>
+                      <DateSeparaterText>{separaterDateConverter(dateSeparater[data.item._id.toString()])}</DateSeparaterText>
+                      </DateSeparaterWrapper> 
+                      : null
+                      }
                     <MessageRow
                       id={data.item.id.toString()}
                       message={data.item.content}
                       createdAt={data.item.created_at}
                       mine={data.item.user_id === myId ? true : false}
                     />
+                    
                   </>
                 );
-                //   } else {
-                //     return (
-                //       <>
-                //         <MessageRow
-                //           id={data.item.id.toString()}
-                //           message={data.item.text}
-                //           createdAt={data.item.createdAt}
-                //           mine={data.item.userId === myId ? true : false}
-                //         />
-                //       </>
-                //     );
-                //   }
-                // } else {
-                //   return null;
-                // }
               } else {
                 return null;
               }

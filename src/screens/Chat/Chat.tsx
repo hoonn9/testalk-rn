@@ -1,15 +1,14 @@
-import React, { useEffect, useState, useCallback } from "react";
-import styled from "styled-components/native";
-import * as Location from "expo-location";
-import { ScrollView } from "react-native-gesture-handler";
-import { useQuery, useLazyQuery, useMutation } from "@apollo/react-hooks";
-import UserProfile from "../../components/UserProfile";
-import { NavigationTabScreenProps } from "react-navigation-tabs";
-import { withNavigation, NavigationEvents } from "react-navigation";
-import { getItemChatRow, getChatLogs } from "../../dbTools";
-import AsyncStorage from "@react-native-community/async-storage";
-import ChatRoomRow from "../../components/ChatRoomRow";
-import { ActivityIndicator, FlatList } from "react-native";
+import React, {useEffect, useState, useCallback} from 'react';
+import styled from 'styled-components/native';
+import {ScrollView} from 'react-native-gesture-handler';
+import {useQuery, useLazyQuery, useMutation} from '@apollo/react-hooks';
+import UserProfile from '../../components/UserProfile';
+import {NavigationTabScreenProps} from 'react-navigation-tabs';
+import {withNavigation, NavigationEvents} from 'react-navigation';
+import {getItemChatRow, getChatLogs} from '../../dbTools';
+import AsyncStorage from '@react-native-community/async-storage';
+import ChatRoomRow from '../../components/ChatRoomRow';
+import {ActivityIndicator, FlatList} from 'react-native';
 
 const View = styled.View`
   justify-content: center;
@@ -42,13 +41,13 @@ interface ChatRoomProp {
   createdAt: string;
   requestTime: string;
 }
-const Chat: React.FunctionComponent<IProp> = ({ navigation }) => {
+const Chat: React.FunctionComponent<IProp> = ({navigation}) => {
   const [chatRoom, setChatRoom] = useState<Array<ChatRoomProp> | null>(null);
 
   const getChatRoom = async () => {
-    const chatItem = await AsyncStorage.getItem("Chat");
+    const chatItem = await AsyncStorage.getItem('Chat');
     if (chatItem) {
-      const chatRooms = JSON.parse(chatItem)["rooms"];
+      const chatRooms = JSON.parse(chatItem)['rooms'];
       console.log(chatItem);
       let rooms: Array<ChatRoomProp> = [];
       for (let k in chatRooms) {
@@ -60,14 +59,14 @@ const Chat: React.FunctionComponent<IProp> = ({ navigation }) => {
 
   const navigateChatRoom = useCallback(
     (chatId: number, receiveUserId: number, requestTime: string) => {
-      console.log("Clicked row req Time", requestTime);
-      navigation.navigate("MessageNavigation", {
+      console.log('Clicked row req Time', requestTime);
+      navigation.navigate('MessageNavigation', {
         receiveUserId,
         chatId,
         requestTime,
       });
     },
-    []
+    [],
   );
   const getChatLog = async () => {
     const chatLogs = await getChatLogs(126);
@@ -86,14 +85,14 @@ const Chat: React.FunctionComponent<IProp> = ({ navigation }) => {
           onWillFocus={() => {
             getChatRoom();
             getChatLog();
-            console.log("focus");
+            console.log('focus');
           }}
         />
         {chatRoom ? (
           <FlatList
             data={chatRoom}
             keyExtractor={(e, i) => i.toString()}
-            renderItem={(data) => {
+            renderItem={data => {
               return (
                 <ChatRoomRow
                   id={data.item.chatId}

@@ -1,7 +1,6 @@
-import React from "react";
-import styled from "styled-components/native";
-import { SendChatMessage_SendChatMessage_message } from "../../types/api";
-import { dateMessageConverter } from "../../utils";
+import React from 'react';
+import styled from 'styled-components/native';
+import {dateMessageConverter} from '../../utils';
 
 interface WrapperProp {
   mine: boolean;
@@ -10,7 +9,7 @@ interface WrapperProp {
 const Container = styled.TouchableOpacity``;
 const ChatWrapper = styled.View<WrapperProp>`
   flex-direction: row;
-  align-self: ${(props: any) => (props.mine ? "flex-end" : "flex-start")};
+  align-self: ${(props: any) => (props.mine ? 'flex-end' : 'flex-start')};
 `;
 const Wrapper = styled.View<WrapperProp>`
   background-color: ${(props: any) =>
@@ -18,8 +17,8 @@ const Wrapper = styled.View<WrapperProp>`
   color: white;
   padding: 10px 20px;
   border-radius: 20px;
-  border-bottom-right-radius: ${(props: any) => (props.mine ? "0px" : "20px")};
-  border-bottom-left-radius: ${(props: any) => (!props.mine ? "0px" : "20px")};
+  border-bottom-right-radius: ${(props: any) => (props.mine ? '0px' : '20px')};
+  border-bottom-left-radius: ${(props: any) => (!props.mine ? '0px' : '20px')};
   margin-bottom: 10px;
   max-width: 70%;
 `;
