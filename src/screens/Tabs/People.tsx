@@ -1,17 +1,21 @@
 import React, {
   useState,
   useEffect,
-  useRef,
   createRef,
   useCallback,
 } from "react";
+import {
+  Alert,
+  ActivityIndicator,
+  RefreshControl,
+  FlatList,
+} from "react-native";
 import styled from "styled-components/native";
-import { ScrollView } from "react-native-gesture-handler";
-import { useQuery, useLazyQuery, useMutation } from "@apollo/react-hooks";
-import UserProfile from "../../components/UserProfile";
+import { useLazyQuery, useMutation } from "@apollo/react-hooks";
 import { NavigationTabScreenProps } from "react-navigation-tabs";
-import { GET_MY_PROFILE } from "./Profile.queries";
-import MyProfile from "../../components/MyProfile";
+import AsyncStorage from "@react-native-community/async-storage";
+import { withNavigation } from "react-navigation";
+import Geolocation from '@react-native-community/geolocation';
 import {
   ReportMovement,
   ReportMovementVariables,
@@ -19,22 +23,12 @@ import {
   GetUserListVariables,
   GetUserList_GetUserList_users,
 } from "../../types/api";
-import withSuspense from "../../withSuspense";
-import {
-  Alert,
-  ActivityIndicator,
-  RefreshControl,
-  FlatList,
-} from "react-native";
-import AsyncStorage from "@react-native-community/async-storage";
-import RequestPermission from "../../components/RequestPermission";
 import { UPDATE_LOCATION, GET_USER_LIST } from "./People.queries";
-import PeopleRowItem from "../../components/PeopleRowItem";
-import { distance } from "../../utils";
+import RequestPermission from "../../components/RequestPermission";
+import PeopleRow from "../../components/PeopleRow";
 import RowSeparator from "../../components/RowSeparator";
+import { distance } from "../../utils";
 import { toast } from "../../tools";
-import { withNavigation } from "react-navigation";
-import Geolocation from '@react-native-community/geolocation';
 
 const View = styled.View`
   justify-content: center;
@@ -56,9 +50,6 @@ const IndicatorView = styled.View`
   justify-content: center;
 `;
 
-const Text = styled.Text``;
-const Touchable = styled.TouchableOpacity``;
-
 interface IProp extends NavigationTabScreenProps {}
 interface LocationProp {
   coords: {
@@ -66,11 +57,15 @@ interface LocationProp {
     longitude: number;
   };
 }
+
 Geolocation.setRNConfiguration({
   skipPermissionRequests: false,
   authorizationLevel: "auto"
 });
+
 const People: React.FunctionComponent<IProp> = ({ navigation }) => {
+  const PEOPLE_LIMIT = 10;
+
   const [location, setLocation] = useState<LocationProp>({
     coords: {
       latitude: 126,
@@ -81,23 +76,22 @@ const People: React.FunctionComponent<IProp> = ({ navigation }) => {
   const [isGranted, setIsGranted] = useState<boolean>(false);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const [userId, setUserId] = useState<number | null>(null);
+  const [listData, setListData] = useState<Array<any>>([]);
+  const [updateTime, setUpdateTime] = useState<string>(Date.now().toString());
+  const [skip, setSkip] = useState<number>(0);
+  const [take, setTake] = useState<number>(PEOPLE_LIMIT);
+  const [flatRef, setFlatRef] = useState<
+  | FlatList<GetUserList_GetUserList_users | null>
+  | null
+  | React.RefObject<unknown>
+  >(() => createRef());
+
   const [updateLocationMutation] = useMutation<
     ReportMovement,
     ReportMovementVariables
   >(UPDATE_LOCATION);
 
-  const skipUnit = 10;
-  const [listData, setListData] = useState<Array<any>>([]);
-  const [updateTime, setUpdateTime] = useState<string>(Date.now().toString());
-  const [skip, setSkip] = useState<number>(0);
-  const [take, setTake] = useState<number>(skipUnit);
-  const [getUserListSkip, setGetUserListSkip] = useState<boolean>(true);
-  const [flatRef, setFlatRef] = useState<
-    | FlatList<GetUserList_GetUserList_users | null>
-    | null
-    | React.RefObject<unknown>
-  >(() => createRef());
-  const [getUserList, { called, loading, data, refetch }] = useLazyQuery<
+  const [getUserList] = useLazyQuery<
     GetUserList,
     GetUserListVariables
   >(GET_USER_LIST, {
@@ -110,7 +104,6 @@ const People: React.FunctionComponent<IProp> = ({ navigation }) => {
     onCompleted: (data) => {
       if (data) {
         setIsRefreshing(false);
-        setGetUserListSkip(true);
 
         if (data.GetUserList.users) {
           setListData([...listData, ...data.GetUserList.users]);
@@ -159,7 +152,6 @@ const People: React.FunctionComponent<IProp> = ({ navigation }) => {
         }
       })
       setIsRefreshing(true);
-      setGetUserListSkip(false);
       getUserList();
         
       
@@ -176,23 +168,17 @@ const People: React.FunctionComponent<IProp> = ({ navigation }) => {
   };
 
   const onRefresh = () => {
-    console.log("스킵: ", getUserListSkip);
     setUpdateTime(Date.now().toString());
     setSkip(0);
     setListData([]);
   };
 
   const onEndReached = () => {
-    // console.log("end");
-    setSkip(skip + skipUnit);
-    setGetUserListSkip(false);
-    //.log(data?.GetUserList.users);
+    setSkip(skip + PEOPLE_LIMIT);
   };
 
-  const infoOnPress = useCallback((id) => {
-    console.log(id);
-    //console.log(newSelected);
-    navigation.navigate("MessageNavigation", { receiveUserId: id });
+  const infoOnPress = useCallback((userId) => {
+    navigation.navigate("MessageNavigation", { userId });
   }, []);
 
   useEffect(() => {
@@ -230,12 +216,13 @@ const People: React.FunctionComponent<IProp> = ({ navigation }) => {
                 data={listData}
                 renderItem={(data) => {
                   return data.item?.id !== userId ? (
-                    <PeopleRowItem
+                    <PeopleRow
                       id={data.item?.id.toString()}
                       nickName={data.item?.nickName}
                       gender={data.item?.gender}
                       birth={data.item?.birth}
                       intro={data.item?.intro}
+                      profilePhoto={"https://i.stack.imgur.com/l60Hf.png"}
                       updatedAt={data.item?.updatedAt}
                       lastLat={data.item?.lastLat}
                       lastLng={data.item?.lastLng}

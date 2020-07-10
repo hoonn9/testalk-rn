@@ -3,6 +3,17 @@ import { toast } from "./tools";
 import AsyncStorage from "@react-native-community/async-storage";
 import SQLite from "react-native-sqlite-storage";
 
+export interface UserInfoProp {
+    _id: number;
+    id: number;
+    chat_id: number;
+    nick_name: string;
+    birth: string;
+    gender: string;
+    intro: string;
+    profile_photo: string;
+}
+
 const db = SQLite.openDatabase({ name: "db.db", location: "default" }, () => { }, (error) => {
     console.log(error)
 });
@@ -11,12 +22,14 @@ export const createTable = () => {
 
     // 테이블 삭제 (재생성 용도)
     // db.transaction(tx => {
-    //     tx.executeSql("drop table message, chatRoom");
+    //     tx.executeSql("drop table friends");
     // })
     db.transaction(tx => {
-        tx.executeSql("create table if not exists chat_room (_id integer primary key not null, id integer, receive_user_id integer)");
-        tx.executeSql("create table if not exists chat_logs (_id integer primary key not null, id integer, " +
-            "chat_id integer, user_id integer, content text, created_at integer, FOREIGN KEY (chat_id) REFERENCES chat_room (id))");
+        tx.executeSql("create table if not exists chat_room (_id INTEGER PRIMARY KEY NOT NULL, id INTEGER, receive_user_id INTEGER)");
+        tx.executeSql("create table if not exists chat_logs (_id INTEGER PRIMARY KEY NOT NULL, id INTEGER, " +
+            "chat_id INTEGER, user_id INTEGER, content TEXT, created_at INTEGER, FOREIGN KEY (chat_id) REFERENCES chat_room (id))");
+        tx.executeSql("create table if not exists friends (_id INTEGER PRIMARY KEY NOT NULL, id INTEGER, " +
+            "chat_id INTEGER, nick_name TEXT, birth INTEGER, gender TEXT, intro TEXT, profile_photo TEXT, FOREIGN KEY (chat_id) REFERENCES chat_room (id))");
     });
 }
 
@@ -98,7 +111,6 @@ export const getChatLogs = async (chatId: number, limit: number = 10, offset: nu
     })
 }
 
-//AsyncStorage
 
 export const getChatRoomMessages = async (chat_id: number) => {
     return new Promise<any>((resolve, reject) => {
@@ -113,6 +125,50 @@ export const getChatRoomMessages = async (chat_id: number) => {
     })
 }
 
+
+
+export const addFriends = (userId: number, chatId: number, nickName: string, birth: number, gender: string, intro: string, profilePhoto: string) => {
+    console.log("add friends");
+    db.transaction(tx => {
+        tx.executeSql("insert or replace into friends(_id, id, chat_id, nick_name, birth, gender, intro, profile_photo) " +
+            "values ((select _id from friends where id = ? ), ?, ?, ?, ? ,? ,? ,?)", [userId, userId, chatId, nickName, birth, gender, intro, profilePhoto], (_, { insertId }) => {
+                //TODO
+            });
+    }, (error) => {
+        console.log(error);
+    }
+    );
+}
+
+export const getUserInfoFromId = async (userId: number) => {
+    return new Promise<UserInfoProp>((resolve, reject) => {
+        db.transaction(tx => {
+            tx.executeSql("select * from friends where id = ?", [userId], (_: any, { rows }: any) => {
+                const friend = rows.item(0)
+                resolve(friend);
+            })
+        }
+        );
+    })
+}
+
+export const getFriends = async () => {
+    return new Promise<any>((resolve, reject) => {
+        db.transaction(tx => {
+            tx.executeSql("select * from friends", [], (_: any, { rows }: any) => {
+                let friends = []
+                for (let i = 0; i < rows.length; i++) {
+                    friends.push(rows.item(i))
+                }
+                resolve(friends);
+            })
+        }
+        );
+    })
+}
+
+// AsyncStorage //
+
 export const getChatFromUser = async (receiveUserId: number) => {
     const chatRooms = await getChatRooms();
     //console.log(chatRooms, receiveUserId);
@@ -123,10 +179,6 @@ export const getChatFromUser = async (receiveUserId: number) => {
         }
     }
 
-}
-
-interface ChatStorageProp {
-    rooms: Array<any>
 }
 
 export const setItemChatRooms = (userId: number, chatId: number, text: string, createdAt: string) => {

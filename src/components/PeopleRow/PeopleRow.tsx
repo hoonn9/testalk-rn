@@ -1,13 +1,13 @@
-import React from "react";
-import styled from "styled-components/native";
+import React from 'react';
+import styled from 'styled-components/native';
 import {
   View,
   Text,
   Image,
   StyleSheet,
   GestureResponderEvent,
-} from "react-native";
-import { getAge, dateSimpleConverter } from "../../utils";
+} from 'react-native';
+import {getAge, dateSimpleConverter} from '../../utils';
 
 const Container = styled.View`
   flex-direction: row;
@@ -45,7 +45,7 @@ const styles = (gender?: string) =>
       width: 50,
       height: 50,
       borderRadius: 50 / 2,
-      borderColor: gender === "male" ? "#3897f0" : "#ED4956",
+      borderColor: gender === 'male' ? '#3897f0' : '#ED4956',
       borderWidth: 1,
     },
   });
@@ -56,6 +56,7 @@ interface IProp {
   birth: string | undefined;
   gender: string | undefined;
   intro: string | undefined;
+  profilePhoto: string | undefined;
   updatedAt: string | undefined | null;
   lastLat: number | undefined | null;
   lastLng: number | undefined | null;
@@ -69,6 +70,7 @@ const PeopleRowItem: React.FunctionComponent<IProp> = ({
   nickName,
   birth,
   gender,
+  profilePhoto,
   updatedAt,
   lastLat,
   lastLng,
@@ -79,24 +81,24 @@ const PeopleRowItem: React.FunctionComponent<IProp> = ({
     <Container>
       <ImageWrapper>
         <Image
-          source={{ uri: "https://i.stack.imgur.com/l60Hf.png" }}
+          source={{uri: profilePhoto}}
           style={gender ? styles(gender).image : styles().image}
         />
       </ImageWrapper>
       <Touchable onPress={() => onSelected(id)}>
         <InfoWrapper>
           <Wrapper>
-            <FirstText>{intro ? intro : "안녕하세요. 반갑습니다"}</FirstText>
+            <FirstText>{intro ? intro : '안녕하세요. 반갑습니다'}</FirstText>
           </Wrapper>
           <Wrapper>
             <SecondText>
-              {nickName} {birth ? getAge(birth) : "??"} {gender}
+              {nickName} {birth ? getAge(birth) : '??'} {gender}
             </SecondText>
           </Wrapper>
           <Wrapper>
             <ThirdText>
               {`${getDistance(lastLat, lastLng)} km `}
-              {updatedAt ? dateSimpleConverter(updatedAt) : "??"}
+              {updatedAt ? dateSimpleConverter(updatedAt) : '??'}
             </ThirdText>
           </Wrapper>
         </InfoWrapper>

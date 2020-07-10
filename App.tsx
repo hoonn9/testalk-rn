@@ -19,7 +19,6 @@ import NavContoller from './src/components/NavContoller/NavContoller';
 import styles from './src/styles';
 import {vibration} from './src/tools';
 import gql from 'graphql-tag';
-//import {setItemChatRooms, addMessage, createTable} from './src/dbTools';
 import messaging from '@react-native-firebase/messaging';
 import {createTable, setItemChatRooms, addMessage} from './src/dbTools';
 import PushNotification from 'react-native-push-notification';

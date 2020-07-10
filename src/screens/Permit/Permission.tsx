@@ -1,21 +1,20 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState} from 'react';
 import styled from 'styled-components/native';
 import {useMutation} from '@apollo/react-hooks';
 import {NavigationTabScreenProps} from 'react-navigation-tabs';
-import {SetUserNotify, SetUserNotifyVariables} from '../../types/api';
-import {toast} from '../../tools';
 import {withNavigation} from 'react-navigation';
-import {SET_USER_NOTIFY} from './Permission.queries';
-import AuthButton from '../../components/AuthButton';
-import {usePermit} from '../../AuthContext';
-import {Platform} from 'react-native';
 import {
   request,
   requestNotifications,
   PERMISSIONS,
 } from 'react-native-permissions';
-import auth from '@react-native-firebase/auth';
 import messaging from '@react-native-firebase/messaging';
+import {SetUserNotify, SetUserNotifyVariables} from '../../types/api';
+import {toast} from '../../tools';
+import {SET_USER_NOTIFY} from './Permission.queries';
+import AuthButton from '../../components/AuthButton';
+import {usePermit} from '../../AuthContext';
+
 const Container = styled.SafeAreaView`
   justify-content: center;
   align-items: center;
@@ -74,7 +73,7 @@ const People: React.FunctionComponent<IProp> = ({navigation}) => {
               token,
             },
           });
-          if (data.SetUserNotify.ok) {
+          if (data && data.SetUserNotify.ok) {
             setIsNotifyGranted(true);
             resolve();
           } else {

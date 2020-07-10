@@ -1,27 +1,17 @@
 import React, {useState} from 'react';
 import {TouchableWithoutFeedback, Keyboard} from 'react-native';
 import styled from 'styled-components/native';
-import useInput from '../../hooks/useInput';
-import {Alert} from 'react-native';
-import {useMutation, useLazyQuery} from '@apollo/react-hooks';
-import AuthButton from '../../components/AuthButton';
-import {GoogleSignin, statusCodes} from '@react-native-community/google-signin';
+import {NavigationStackScreenProps} from 'react-navigation-stack';
 import {
-  LoginButton,
-  AccessToken,
   LoginManager,
   GraphRequest,
   GraphRequestManager,
 } from 'react-native-fbsdk';
-import {
-  FACEBOOK_APP_ID,
-  GOOGLE_ID_ANDROID,
-  GOOGLE_ID_IOS,
-  FIREBASE_WEB_ID,
-} from '../../enviroments';
-import {NavigationStackScreenProps} from 'react-navigation-stack';
-import {toast} from '../../tools';
+import {GoogleSignin, statusCodes} from '@react-native-community/google-signin';
 import KakaoLogins from '@react-native-seoul/kakao-login';
+import AuthButton from '../../components/AuthButton';
+import {FIREBASE_WEB_ID} from '../../enviroments';
+import {toast} from '../../tools';
 
 GoogleSignin.configure({
   webClientId: FIREBASE_WEB_ID,

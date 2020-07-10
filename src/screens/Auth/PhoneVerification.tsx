@@ -2,8 +2,9 @@ import React, {useState, useEffect} from 'react';
 import {TouchableWithoutFeedback, Keyboard, StyleSheet} from 'react-native';
 import styled from 'styled-components/native';
 import useInput from '../../hooks/useInput';
+import {Picker} from '@react-native-community/picker';
 import {Alert} from 'react-native';
-import {useMutation, useLazyQuery, useQuery} from '@apollo/react-hooks';
+import {useMutation, useLazyQuery} from '@apollo/react-hooks';
 import AuthButton from '../../components/AuthButton';
 import {NavigationStackScreenProps} from 'react-navigation-stack';
 import AuthInput from '../../components/AuthInput';
@@ -22,7 +23,6 @@ import {
 } from '../../types/api';
 import countries from '../../countries';
 import {toast, vibration} from '../../tools';
-import constants from '../../constants';
 import {AccessToken} from 'react-native-fbsdk';
 import auth from '@react-native-firebase/auth';
 import {GET_CUSTOM_TOKEN} from './Login.queries';
@@ -48,7 +48,7 @@ const InputWrapper = styled.View`
 `;
 const Text = styled.Text``;
 const Touchable = styled.TouchableOpacity``;
-const Picker = styled.Picker`
+const DatePicker = styled.Picker`
   flex: 2;
   width: auto;
   align-items: center;
@@ -84,8 +84,8 @@ const PhoneVerification: React.FunctionComponent<IProp> = ({navigation}) => {
   const [dialPhoneNumber, setDialPhoneNumber] = useState<string>('');
   const secretCode = useInput('');
   const login = useLogIn();
-  const [token, setToken] = useState<string>(null);
-  const [userId, setUserId] = useState<number>(null);
+  const [token, setToken] = useState<string | null>(null);
+  const [userId, setUserId] = useState<number | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [sendSuccess, setSendSuccess] = useState<boolean>(false);
 
@@ -273,18 +273,26 @@ const PhoneVerification: React.FunctionComponent<IProp> = ({navigation}) => {
 
   useEffect(() => {
     if (means === 'KAKAO' && customTokenData) {
-      if (customTokenData.GetCustomToken.ok) {
-        const customToken = customTokenData.GetCustomToken.token;
-        auth()
-          .signInWithCustomToken(customToken)
-          .then(response => {
-            console.log('res:', response);
-            login(token, userId);
-          })
-          .catch(error => {
-            console.log(error);
-            toast('카카오 연결 실패.');
-          });
+      if (customTokenData.GetCustomToken) {
+        if (customTokenData.GetCustomToken.ok) {
+          const customToken = customTokenData.GetCustomToken.token;
+          if (customToken) {
+            auth()
+              .signInWithCustomToken(customToken)
+              .then(response => {
+                console.log('res:', response);
+                login(token, userId);
+              })
+              .catch(error => {
+                console.log(error);
+                toast('카카오 연결 실패.');
+              });
+          } else {
+            toast('잘못 된 접근입니다.');
+          }
+        } else {
+          toast('잘못 된 접근입니다.');
+        }
       } else {
         toast('권한이 없습니다.');
       }
@@ -328,17 +336,17 @@ const PhoneVerification: React.FunctionComponent<IProp> = ({navigation}) => {
             ) : (
               <>
                 <Wrapper>
-                  <Picker
+                  <DatePicker
                     selectedValue={dialCode}
                     onValueChange={(e, i) => setDialCode(e)}>
                     {sortedCountries.map((country, index) => (
-                      <Picker.Item
+                      <DatePicker.Item
                         label={country.dial_code}
                         key={index}
                         value={country.dial_code}
                       />
                     ))}
-                  </Picker>
+                  </DatePicker>
                   <InputWrapper>
                     <AuthInput
                       placeholder={'휴대폰 번호를 입력해주세요.'}

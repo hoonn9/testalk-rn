@@ -1,19 +1,17 @@
 import React, {useState, useEffect} from 'react';
 import {TouchableWithoutFeedback, Keyboard} from 'react-native';
 import styled from 'styled-components/native';
-import useInput from '../../hooks/useInput';
-import {Alert} from 'react-native';
+import {useLazyQuery} from '@apollo/react-hooks';
 import {NavigationStackScreenProps} from 'react-navigation-stack';
-import SignUpForm from '../../components/SignUpForm';
 import auth from '@react-native-firebase/auth';
 import {AccessToken} from 'react-native-fbsdk';
 import {useLogIn} from '../../AuthContext';
-import {toast} from '../../tools';
-import {useLazyQuery} from '@apollo/react-hooks';
 import {GET_CUSTOM_TOKEN} from './Login.queries';
-import messaging from '@react-native-firebase/messaging';
 import {GetCustomToken, GetCustomTokenVariables} from '../../types/api';
-import {SET_USER_NOTIFY} from '../Permit/Permission.queries';
+import useInput from '../../hooks/useInput';
+import SignUpForm from '../../components/SignUpForm';
+import {toast} from '../../tools';
+
 const View = styled.View`
   justify-content: center;
   align-items: center;
@@ -97,18 +95,22 @@ const Login: React.FunctionComponent<IProp> = ({navigation}) => {
   };
   useEffect(() => {
     if (means === 'KAKAO' && customTokenData) {
-      if (customTokenData.GetCustomToken.ok) {
+      if (customTokenData.GetCustomToken && customTokenData.GetCustomToken.ok) {
         const customToken = customTokenData.GetCustomToken.token;
-        auth()
-          .signInWithCustomToken(customToken)
-          .then(response => {
-            console.log('res:', response);
-            login(token, userId);
-          })
-          .catch(error => {
-            console.log(error);
-            toast('카카오 연결 실패.');
-          });
+        if (customToken) {
+          auth()
+            .signInWithCustomToken(customToken)
+            .then(response => {
+              console.log('res:', response);
+              login(token, userId);
+            })
+            .catch(error => {
+              console.log(error);
+              toast('카카오 연결 실패.');
+            });
+        } else {
+          toast('잘못 된 접근입니다.');
+        }
       } else {
         toast('권한이 없습니다.');
       }

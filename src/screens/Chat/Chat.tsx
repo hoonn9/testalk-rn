@@ -1,14 +1,11 @@
 import React, {useEffect, useState, useCallback} from 'react';
+import {ActivityIndicator, FlatList} from 'react-native';
 import styled from 'styled-components/native';
-import {ScrollView} from 'react-native-gesture-handler';
-import {useQuery, useLazyQuery, useMutation} from '@apollo/react-hooks';
-import UserProfile from '../../components/UserProfile';
 import {NavigationTabScreenProps} from 'react-navigation-tabs';
 import {withNavigation, NavigationEvents} from 'react-navigation';
-import {getItemChatRow, getChatLogs} from '../../dbTools';
 import AsyncStorage from '@react-native-community/async-storage';
 import ChatRoomRow from '../../components/ChatRoomRow';
-import {ActivityIndicator, FlatList} from 'react-native';
+import {getChatLogs} from '../../dbTools';
 
 const View = styled.View`
   justify-content: center;
@@ -18,16 +15,6 @@ const View = styled.View`
 
 const SafeAreaView = styled.SafeAreaView`
   flex: 1;
-`;
-
-const IndicatorView = styled.View`
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  align-items: center;
-  justify-content: center;
 `;
 
 const Text = styled.Text``;
@@ -57,17 +44,11 @@ const Chat: React.FunctionComponent<IProp> = ({navigation}) => {
     }
   };
 
-  const navigateChatRoom = useCallback(
-    (chatId: number, receiveUserId: number, requestTime: string) => {
-      console.log('Clicked row req Time', requestTime);
-      navigation.navigate('MessageNavigation', {
-        receiveUserId,
-        chatId,
-        requestTime,
-      });
-    },
-    [],
-  );
+  const navigateChatRoom = useCallback((userId: number) => {
+    navigation.navigate('MessageNavigation', {
+      userId,
+    });
+  }, []);
   const getChatLog = async () => {
     const chatLogs = await getChatLogs(126);
     console.log(chatLogs);

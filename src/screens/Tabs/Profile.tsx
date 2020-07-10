@@ -1,13 +1,12 @@
-import React, { useEffect } from "react";
-import styled from "styled-components/native";
-import { ScrollView } from "react-native-gesture-handler";
-import { useQuery } from "@apollo/react-hooks";
-import UserProfile from "../../components/UserProfile";
-import { NavigationTabScreenProps } from "react-navigation-tabs";
-import { GET_MY_PROFILE } from "./Profile.queries";
-import MyProfile from "../../components/MyProfile";
-import { GetMyProfile, GetMyProfile_GetMyProfile } from "../../types/api";
-import withSuspense from "../../withSuspense";
+import React from 'react';
+import styled from 'styled-components/native';
+import {ScrollView} from 'react-native-gesture-handler';
+import {useQuery} from '@apollo/react-hooks';
+import {NavigationTabScreenProps} from 'react-navigation-tabs';
+import {GET_MY_PROFILE} from './Profile.queries';
+import MyProfile from '../../components/MyProfile';
+import {GetMyProfile, GetMyProfile_GetMyProfile} from '../../types/api';
+import withSuspense from '../../withSuspense';
 
 const View = styled.View`
   justify-content: center;
@@ -20,13 +19,13 @@ const Touchable = styled.TouchableOpacity``;
 
 interface IProp extends NavigationTabScreenProps {}
 
-const Profile: React.FunctionComponent<IProp> = ({ navigation }) => {
-  const { loading, error, refetch, data } = useQuery<GetMyProfile>(
-    GET_MY_PROFILE,
-    {
-      fetchPolicy: "network-only",
-    }
-  );
+const Profile: React.FunctionComponent<IProp> = ({navigation}) => {
+  const {loading, error, refetch, data} = useQuery<
+    GetMyProfile,
+    GetMyProfile_GetMyProfile
+  >(GET_MY_PROFILE, {
+    fetchPolicy: 'network-only',
+  });
 
   if (
     data &&
@@ -34,7 +33,7 @@ const Profile: React.FunctionComponent<IProp> = ({ navigation }) => {
     data.GetMyProfile.ok &&
     data.GetMyProfile.user
   ) {
-    const { id, nickName, gender, birth } = data.GetMyProfile.user;
+    const {id, nickName, gender, birth} = data.GetMyProfile.user;
     return (
       <ScrollView>
         <View>

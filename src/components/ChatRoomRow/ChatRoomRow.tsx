@@ -39,11 +39,7 @@ interface IProp {
   content: string;
   createdAt: string;
   requestTime: string;
-  navigateCallback: (
-    id: number,
-    userId: number,
-    requestTime: string,
-  ) => void | undefined;
+  navigateCallback: (userId: number) => void | undefined;
 }
 const styles = () =>
   StyleSheet.create({
@@ -71,7 +67,7 @@ const ChatRoomRow: React.FunctionComponent<IProp> = ({
           style={styles().image}
         />
       </ImageWrapper>
-      <Touchable onPress={() => navigateCallback(chatId, userId, requestTime)}>
+      <Touchable onPress={() => navigateCallback(userId)}>
         <Wrapper>
           <ContentWrapper>
             <NameText>{userId}</NameText>
