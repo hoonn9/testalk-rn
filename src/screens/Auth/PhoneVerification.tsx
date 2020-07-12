@@ -48,13 +48,6 @@ const InputWrapper = styled.View`
 `;
 const Text = styled.Text``;
 const Touchable = styled.TouchableOpacity``;
-const DatePicker = styled.Picker`
-  flex: 2;
-  width: auto;
-  align-items: center;
-  justify-content: flex-end;
-  font-size: 21px;
-`;
 interface IProp extends NavigationStackScreenProps {}
 
 const styles = StyleSheet.create({
@@ -67,6 +60,13 @@ const styles = StyleSheet.create({
     paddingTop: 40,
     textAlign: 'right',
     backgroundColor: '#000',
+    fontSize: 21,
+  },
+  picker: {
+    flex: 2,
+    width: 'auto',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
     fontSize: 21,
   },
 });
@@ -336,17 +336,18 @@ const PhoneVerification: React.FunctionComponent<IProp> = ({navigation}) => {
             ) : (
               <>
                 <Wrapper>
-                  <DatePicker
+                  <Picker
+                    style={styles.picker}
                     selectedValue={dialCode}
-                    onValueChange={(e, i) => setDialCode(e)}>
+                    onValueChange={(e, i) => setDialCode(e.toString())}>
                     {sortedCountries.map((country, index) => (
-                      <DatePicker.Item
+                      <Picker.Item
                         label={country.dial_code}
                         key={index}
                         value={country.dial_code}
                       />
                     ))}
-                  </DatePicker>
+                  </Picker>
                   <InputWrapper>
                     <AuthInput
                       placeholder={'휴대폰 번호를 입력해주세요.'}

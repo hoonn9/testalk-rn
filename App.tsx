@@ -20,7 +20,7 @@ import styles from './src/styles';
 import {vibration} from './src/tools';
 import gql from 'graphql-tag';
 import messaging from '@react-native-firebase/messaging';
-import {createTable, setItemChatRooms, addMessage} from './src/dbTools';
+import {createTable, addMessage} from './src/dbTools';
 import PushNotification from 'react-native-push-notification';
 
 export default function App() {
@@ -269,9 +269,8 @@ export default function App() {
     const {
       data: {chatId, messageId, userId, receiveUserId, content, createdAt},
     } = notification;
-    setItemChatRooms(userId, chatId, content, createdAt);
     // 받은 메시지의 인수는 보낸 USER ID
-    addMessage(chatId, messageId, userId, userId, content, createdAt);
+    addMessage(chatId, messageId, userId, userId, content, parseInt(createdAt));
   };
 
   useEffect(() => {

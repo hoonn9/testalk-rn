@@ -38,7 +38,10 @@ interface IProp {
   chatId: number;
   content: string;
   createdAt: string;
-  requestTime: string;
+  nickName: string;
+  profilePhoto: string;
+  gender: string;
+  birth: number;
   navigateCallback: (userId: number) => void | undefined;
 }
 const styles = () =>
@@ -56,21 +59,21 @@ const ChatRoomRow: React.FunctionComponent<IProp> = ({
   chatId,
   content,
   createdAt,
-  requestTime,
+  nickName,
+  profilePhoto,
+  gender,
+  birth,
   navigateCallback = () => null,
 }) => {
   return (
     <Container>
       <ImageWrapper>
-        <Image
-          source={{uri: 'https://i.stack.imgur.com/l60Hf.png'}}
-          style={styles().image}
-        />
+        <Image source={{uri: profilePhoto}} style={styles().image} />
       </ImageWrapper>
       <Touchable onPress={() => navigateCallback(userId)}>
         <Wrapper>
           <ContentWrapper>
-            <NameText>{userId}</NameText>
+            <NameText>{nickName}</NameText>
             <ContentText>{content}</ContentText>
           </ContentWrapper>
           <DateWrapper>

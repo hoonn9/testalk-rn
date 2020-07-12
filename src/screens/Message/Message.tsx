@@ -2,7 +2,7 @@ import React, {useEffect, useState, createRef} from 'react';
 import {TouchableWithoutFeedback, Keyboard, FlatList} from 'react-native';
 import styled from 'styled-components/native';
 import {NavigationStackScreenProps} from 'react-navigation-stack';
-import {useMutation, useSubscription} from '@apollo/react-hooks';
+import {useMutation, useSubscription, useLazyQuery} from '@apollo/react-hooks';
 import AsyncStorage from '@react-native-community/async-storage';
 import {withNavigation} from 'react-navigation';
 import SendMessage from '../../components/SendMessage';
@@ -14,17 +14,18 @@ import {
   SendChatMessage,
   SendChatMessageVariables,
   MessageSubscription,
+  GetUserProfile,
+  GetUserProfileVariables,
 } from '../../types/api';
 import {
-  setItemChatRooms,
   getChatLogs,
   addMessage,
   addFriends,
-  getFriends,
   ChatLogRowProp,
   getUserInfoFromId,
   UserInfoProp,
 } from '../../dbTools';
+import {GET_USER_PROFILE} from '../../sharedQueries.queries';
 
 const Container = styled.View`
   flex: 1;
@@ -55,6 +56,7 @@ interface IProp extends NavigationStackScreenProps {}
 const Message: React.FunctionComponent<IProp> = ({navigation}) => {
   const [myId, setMyId] = useState<number | null>(null);
   const userId = navigation.getParam('userId');
+  const receiveUserInfo = navigation.getParam('userInfo', null);
   const [chatId, setChatId] = useState<number | null>(null);
   const messageContent = useInput('');
   const [flatRef, setFlatRef] = useState<any>(() => createRef());
@@ -66,7 +68,16 @@ const Message: React.FunctionComponent<IProp> = ({navigation}) => {
   const [dateSeparater, setDateSeparater] = useState<{[key: string]: string}>(
     {},
   );
-  const [userInfo, setUserInfo] = useState<UserInfoProp | null>(null);
+  const [userInfo, setUserInfo] = useState<UserInfoProp>();
+
+  const [
+    getUserProfile,
+    {
+      data: userProfileData,
+      loading: userProfileLoading,
+      error: userProfileError,
+    },
+  ] = useLazyQuery<GetUserProfile, GetUserProfileVariables>(GET_USER_PROFILE);
 
   const {data: subscribeData, loading: subscribeLoading} = useSubscription<
     MessageSubscription
@@ -93,9 +104,9 @@ const Message: React.FunctionComponent<IProp> = ({navigation}) => {
     for (let i = 0; i < messages.length; i++) {
       const createdAt = new Date(messages[i].created_at);
       const date = `${createdAt.getFullYear()}-${createdAt.getMonth()}-${createdAt.getDate()}`;
-      console.log(i, date);
+      //console.log(i, date);
       if (date !== tempDate) {
-        console.log('cp', tempDate, 'd', date);
+        //console.log('cp', tempDate, 'd', date);
 
         setDateSeparater(
           Object.assign({}, dateSeparater, {
@@ -108,13 +119,13 @@ const Message: React.FunctionComponent<IProp> = ({navigation}) => {
     setCompareDate(tempDate);
   };
   useEffect(() => {
-    console.log(messageList.length);
+    //console.log(messageList.length);
     if (messageList.length > 0) {
       genDateSeparater(
         messageList.slice(selectCount * MESSAGES_LIMIT, undefined),
       );
     }
-    console.log(dateSeparater);
+    //console.log(dateSeparater);
   }, [messageList]);
 
   useEffect(() => {
@@ -137,7 +148,7 @@ const Message: React.FunctionComponent<IProp> = ({navigation}) => {
         setUserInfo(getUserInfo);
         if (chatId) {
           const chatLogs = await getChatLogs(chatId, MESSAGES_LIMIT);
-
+          console.log(chatLogs);
           if (chatLogs) {
             if (chatLogs.array.length > 0) {
               // Date sparater 비교할 날짜 초기화
@@ -202,6 +213,7 @@ const Message: React.FunctionComponent<IProp> = ({navigation}) => {
             text: messageContent.value,
           },
         });
+        console.log(data);
 
         if (data && data.SendChatMessage.ok && data.SendChatMessage.message) {
           const {
@@ -212,30 +224,38 @@ const Message: React.FunctionComponent<IProp> = ({navigation}) => {
             createdAt,
           } = data.SendChatMessage.message;
           if (sendedChatId) {
-            setItemChatRooms(
-              userId,
-              sendedChatId,
-              messageContent.value,
-              createdAt,
-            );
             addMessage(
               sendedChatId,
               id,
               sendedUserId || myId,
               userId,
               content,
-              createdAt,
+              parseInt(createdAt),
             );
             if (userInfo) {
-              addFriends(
+              addFriends({
                 userId,
-                sendedChatId,
-                userInfo.nick_name,
-                parseInt(userInfo.birth),
-                userInfo.gender,
-                userInfo.intro,
-                userInfo.profile_photo,
-              );
+                chatId: sendedChatId,
+                nickName: userInfo.nick_name,
+                birth: userInfo.birth,
+                gender: userInfo.gender,
+                intro: userInfo.intro,
+                profilePhoto: userInfo.profile_photo,
+              });
+            } else {
+              if (receiveUserInfo) {
+                addFriends({
+                  userId,
+                  chatId: sendedChatId,
+                  nickName: receiveUserInfo.nickName,
+                  birth: receiveUserInfo.birth,
+                  gender: receiveUserInfo.gender,
+                  intro: receiveUserInfo.intro,
+                  profilePhoto: receiveUserInfo.profilePhoto,
+                });
+              } else {
+                toast('상대를 저장하는데 실패했어요.');
+              }
             }
             // 채팅방 처음 생성 되었을 때
             if (!chatId) {

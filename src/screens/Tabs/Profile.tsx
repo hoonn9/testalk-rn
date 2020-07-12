@@ -34,6 +34,7 @@ const Profile: React.FunctionComponent<IProp> = ({navigation}) => {
     data.GetMyProfile.user
   ) {
     const {id, nickName, gender, birth} = data.GetMyProfile.user;
+    console.log('get profile');
     return (
       <ScrollView>
         <View>

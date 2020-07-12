@@ -85,7 +85,16 @@ const PeopleRowItem: React.FunctionComponent<IProp> = ({
           style={gender ? styles(gender).image : styles().image}
         />
       </ImageWrapper>
-      <Touchable onPress={() => onSelected(id)}>
+      <Touchable
+        onPress={() =>
+          onSelected(id, {
+            nickName,
+            birth,
+            gender,
+            intro,
+            profilePhoto,
+          })
+        }>
         <InfoWrapper>
           <Wrapper>
             <FirstText>{intro ? intro : '안녕하세요. 반갑습니다'}</FirstText>

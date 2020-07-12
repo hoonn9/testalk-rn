@@ -177,8 +177,8 @@ const People: React.FunctionComponent<IProp> = ({ navigation }) => {
     setSkip(skip + PEOPLE_LIMIT);
   };
 
-  const infoOnPress = useCallback((userId) => {
-    navigation.navigate("MessageNavigation", { userId });
+  const infoOnPress = useCallback((userId, userInfo) => {
+    navigation.navigate("MessageNavigation", { userId, userInfo });
   }, []);
 
   useEffect(() => {

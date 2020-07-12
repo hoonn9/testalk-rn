@@ -6,7 +6,7 @@ import {AppRegistry} from 'react-native';
 import messaging from '@react-native-firebase/messaging';
 import App from './App';
 import {name as appName} from './app.json';
-import {setItemChatRooms, addMessage} from './src/dbTools';
+import {addMessage} from './src/dbTools';
 import PushNotification from 'react-native-push-notification';
 
 messaging().setBackgroundMessageHandler(async notification => {
@@ -23,6 +23,7 @@ messaging().setBackgroundMessageHandler(async notification => {
         createdAt,
       },
     } = notification;
+
     PushNotification.localNotification({
       id: userId,
       title: nickName,
@@ -30,7 +31,7 @@ messaging().setBackgroundMessageHandler(async notification => {
       group: 'b5a4l4o2g4o4',
       channelId: userId,
     });
-    setItemChatRooms(parseInt(userId), parseInt(chatId), content, createdAt);
+
     // 받은 메시지의 인수는 보낸 USER ID
     addMessage(
       parseInt(chatId),
@@ -38,7 +39,7 @@ messaging().setBackgroundMessageHandler(async notification => {
       parseInt(userId),
       parseInt(userId),
       content,
-      createdAt,
+      parseInt(createdAt),
     );
   } catch (error) {
     console.log(error);

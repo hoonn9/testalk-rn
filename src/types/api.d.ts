@@ -15,7 +15,7 @@ export interface GetCustomToken_GetCustomToken {
 }
 
 export interface GetCustomToken {
-  GetCustomToken: GetCustomToken_GetCustomToken | null;
+  GetCustomToken: GetCustomToken_GetCustomToken;
 }
 
 export interface GetCustomTokenVariables {
@@ -74,6 +74,31 @@ export interface CompletePhoneVerificationVariables {
   fbId?: string | null;
   ggId?: string | null;
   kkId?: string | null;
+}
+
+/* tslint:disable */
+/* eslint-disable */
+// @generated
+// This file was automatically generated and should not be edited.
+
+// ====================================================
+// GraphQL query operation: GetMyChat
+// ====================================================
+
+export interface GetMyChat_GetMyChat_chat {
+  __typename: "Chat";
+  id: number;
+}
+
+export interface GetMyChat_GetMyChat {
+  __typename: "GetMyChatResponse";
+  ok: boolean;
+  error: string | null;
+  chat: (GetMyChat_GetMyChat_chat | null)[] | null;
+}
+
+export interface GetMyChat {
+  GetMyChat: GetMyChat_GetMyChat;
 }
 
 /* tslint:disable */
@@ -279,6 +304,39 @@ export interface GetMyProfile_GetMyProfile {
 
 export interface GetMyProfile {
   GetMyProfile: GetMyProfile_GetMyProfile;
+}
+
+/* tslint:disable */
+/* eslint-disable */
+// @generated
+// This file was automatically generated and should not be edited.
+
+// ====================================================
+// GraphQL query operation: GetUserProfile
+// ====================================================
+
+export interface GetUserProfile_GetUserProfile_user {
+  __typename: "User";
+  id: number;
+  nickName: string;
+  gender: string;
+  birth: string;
+  phoneNumber: string;
+}
+
+export interface GetUserProfile_GetUserProfile {
+  __typename: "GetUserProfileResponse";
+  ok: boolean;
+  error: string | null;
+  user: GetUserProfile_GetUserProfile_user | null;
+}
+
+export interface GetUserProfile {
+  GetUserProfile: GetUserProfile_GetUserProfile;
+}
+
+export interface GetUserProfileVariables {
+  id: number;
 }
 
 /* tslint:disable */
