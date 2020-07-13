@@ -1,8 +1,7 @@
 import React from 'react';
 import styled from 'styled-components/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import {withNavigation} from 'react-navigation';
-import {NavigationStackScreenProps} from 'react-navigation-stack';
+import {useNavigation} from '@react-navigation/native';
 
 const Container = styled.View`
   margin-right: 14px;
@@ -11,11 +10,10 @@ const Container = styled.View`
 `;
 const Touchable = styled.TouchableOpacity``;
 
-interface IProp {
-  navigation: any;
-}
+interface IProp {}
 
-const ChatLink: React.FunctionComponent<IProp> = ({navigation}) => {
+const ChatLink: React.FunctionComponent<IProp> = () => {
+  const navigation = useNavigation();
   return (
     <Container>
       <Touchable onPress={() => navigation.navigate('Chat')}>
@@ -25,4 +23,4 @@ const ChatLink: React.FunctionComponent<IProp> = ({navigation}) => {
   );
 };
 
-export default withNavigation(ChatLink);
+export default ChatLink;

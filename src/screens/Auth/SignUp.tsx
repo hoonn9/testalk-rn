@@ -2,15 +2,16 @@ import React, {useState, useEffect} from 'react';
 import {TouchableWithoutFeedback, Keyboard} from 'react-native';
 import styled from 'styled-components/native';
 import {useLazyQuery} from '@apollo/react-hooks';
-import {NavigationStackScreenProps} from 'react-navigation-stack';
+import {} from '@react-navigation/stack';
 import auth from '@react-native-firebase/auth';
 import {AccessToken} from 'react-native-fbsdk';
 import {useLogIn} from '../../AuthContext';
 import {GET_CUSTOM_TOKEN} from './Login.queries';
-import {GetCustomToken, GetCustomTokenVariables} from '../../types/api';
+import {GetCustomToken} from '../../types/api';
 import useInput from '../../hooks/useInput';
 import SignUpForm from '../../components/SignUpForm';
 import {toast} from '../../tools';
+import {RouteProp} from '@react-navigation/native';
 
 const View = styled.View`
   justify-content: center;
@@ -20,19 +21,35 @@ const View = styled.View`
 
 const Text = styled.Text``;
 
-interface IProp extends NavigationStackScreenProps {}
+type RouteParamProp = {
+  PhoneVerification: {
+    token: string;
+    userId: number;
+    ggId: string | null;
+    kkId: string | null;
+    fbId: string | null;
+    means: string;
+  };
+};
+
+type SignupRouteProp = RouteProp<RouteParamProp, 'PhoneVerification'>;
+
+interface IProp {
+  route: SignupRouteProp;
+}
 
 type GenderProp = 'male' | 'female';
 
-const Login: React.FunctionComponent<IProp> = ({navigation}) => {
+const Login: React.FunctionComponent<IProp> = ({route}) => {
   const [loading, setLoading] = useState(false);
   const login = useLogIn();
-  const token = navigation.getParam('token');
-  const userId = navigation.getParam('userId');
-  const means = navigation.getParam('means');
-  const fbId = navigation.getParam('fbId');
-  const ggId = navigation.getParam('ggId');
-  const kkId = navigation.getParam('kkId');
+  const {token, userId, means, fbId, ggId, kkId} = route.params;
+  // const token = navigation.getParam('token');
+  // const userId = navigation.getParam('userId');
+  // const means = navigation.getParam('means');
+  // const fbId = navigation.getParam('fbId');
+  // const ggId = navigation.getParam('ggId');
+  // const kkId = navigation.getParam('kkId');
 
   //console.log(token, userId, means, fbId, ggId, kkId);
 
@@ -43,7 +60,7 @@ const Login: React.FunctionComponent<IProp> = ({navigation}) => {
   const [
     getCustomToken,
     {data: customTokenData, loading: customTokenLoading},
-  ] = useLazyQuery<GetCustomToken, GetCustomTokenVariables>(GET_CUSTOM_TOKEN);
+  ] = useLazyQuery<GetCustomToken>(GET_CUSTOM_TOKEN);
 
   const onNext = async () => {
     if (nickName.value && gender && birth) {

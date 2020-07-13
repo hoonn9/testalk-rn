@@ -51,7 +51,7 @@ const styles = (gender?: string) =>
   });
 
 interface IProp {
-  id: string | undefined;
+  id: number | undefined;
   nickName: string | undefined;
   birth: string | undefined;
   gender: string | undefined;

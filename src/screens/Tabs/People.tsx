@@ -12,9 +12,7 @@ import {
 } from "react-native";
 import styled from "styled-components/native";
 import { useLazyQuery, useMutation } from "@apollo/react-hooks";
-import { NavigationTabScreenProps } from "react-navigation-tabs";
 import AsyncStorage from "@react-native-community/async-storage";
-import { withNavigation } from "react-navigation";
 import Geolocation from '@react-native-community/geolocation';
 import {
   ReportMovement,
@@ -29,6 +27,7 @@ import PeopleRow from "../../components/PeopleRow";
 import RowSeparator from "../../components/RowSeparator";
 import { distance } from "../../utils";
 import { toast } from "../../tools";
+import { StackNavigationProp } from "@react-navigation/stack";
 
 const View = styled.View`
   justify-content: center;
@@ -50,7 +49,24 @@ const IndicatorView = styled.View`
   justify-content: center;
 `;
 
-interface IProp extends NavigationTabScreenProps {}
+type FeedsTabParamList = {
+  MessageNavigation: {
+    userId: number;
+    userInfo: {
+      nickName: string;
+      birth: number;
+      gender: string;
+      intro: string;
+      profilePhoto: string;
+    };
+  };
+};
+
+type NavigationProp = StackNavigationProp<FeedsTabParamList, "MessageNavigation">
+interface IProp {
+  navigation: NavigationProp;
+}
+
 interface LocationProp {
   coords: {
     latitude: number;
@@ -217,7 +233,7 @@ const People: React.FunctionComponent<IProp> = ({ navigation }) => {
                 renderItem={(data) => {
                   return data.item?.id !== userId ? (
                     <PeopleRow
-                      id={data.item?.id.toString()}
+                      id={data.item?.id}
                       nickName={data.item?.nickName}
                       gender={data.item?.gender}
                       birth={data.item?.birth}
@@ -255,4 +271,4 @@ const People: React.FunctionComponent<IProp> = ({ navigation }) => {
   );
 };
 
-export default withNavigation(People);
+export default People;

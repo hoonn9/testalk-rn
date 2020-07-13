@@ -1,18 +1,32 @@
-import {createAppContainer} from 'react-navigation';
-import {createStackNavigator} from 'react-navigation-stack';
+import React from 'react';
+import {NavigationContainer} from '@react-navigation/native';
+import {createStackNavigator} from '@react-navigation/stack';
 import Login from '../screens/Auth/Login';
 import SignUp from '../screens/Auth/SignUp';
 import PhoneVerification from '../screens/Auth/PhoneVerification';
 
-const AuthNavigation = createStackNavigator(
-  {
-    Login,
-    PhoneVerification,
-    SignUp,
-  },
-  {
-    headerMode: 'none',
-  },
-);
+const Stack = createStackNavigator();
 
-export default createAppContainer(AuthNavigation);
+const AuthNavigation = () => {
+  return (
+    <NavigationContainer>
+      <Stack.Navigator
+        initialRouteName="Login"
+        headerMode="screen"
+        screenOptions={{
+          headerTintColor: 'white',
+          headerStyle: {backgroundColor: 'tomato'},
+        }}>
+        <Stack.Screen name="Login" component={Login} options={{}} />
+        <Stack.Screen
+          name="PhoneVerification"
+          component={PhoneVerification}
+          options={{}}
+        />
+        <Stack.Screen name="SignUp" component={SignUp} options={{}} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+};
+
+export default AuthNavigation;

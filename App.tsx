@@ -22,6 +22,7 @@ import gql from 'graphql-tag';
 import messaging from '@react-native-firebase/messaging';
 import {createTable, addMessage} from './src/dbTools';
 import PushNotification from 'react-native-push-notification';
+import {OverflowMenuProvider} from 'react-navigation-header-buttons';
 
 export default function App() {
   const [loaded, setLoaded] = useState<boolean>(false);
@@ -297,9 +298,11 @@ export default function App() {
   return loaded && client && isLoggedIn !== null ? (
     <ApolloProvider client={client}>
       <ThemeProvider theme={styles}>
-        <AuthProvider isLoggedIn={isLoggedIn} setIsRoomIn={setIsRoomIn}>
-          <NavContoller />
-        </AuthProvider>
+        <OverflowMenuProvider>
+          <AuthProvider isLoggedIn={isLoggedIn} setIsRoomIn={setIsRoomIn}>
+            <NavContoller />
+          </AuthProvider>
+        </OverflowMenuProvider>
       </ThemeProvider>
     </ApolloProvider>
   ) : null;

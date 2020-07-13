@@ -163,6 +163,42 @@ export interface GetChatMessagesVariables {
 // This file was automatically generated and should not be edited.
 
 // ====================================================
+// GraphQL query operation: GetChatUser
+// ====================================================
+
+export interface GetChatUser_GetChatUser_user {
+  __typename: "User";
+  id: number;
+  nickName: string;
+  birth: string;
+  gender: string;
+  intro: string;
+  updatedAt: string | null;
+  lastLat: number | null;
+  lastLng: number | null;
+}
+
+export interface GetChatUser_GetChatUser {
+  __typename: "GetChatUserResponse";
+  ok: boolean;
+  error: string | null;
+  user: GetChatUser_GetChatUser_user | null;
+}
+
+export interface GetChatUser {
+  GetChatUser: GetChatUser_GetChatUser | null;
+}
+
+export interface GetChatUserVariables {
+  id: number;
+}
+
+/* tslint:disable */
+/* eslint-disable */
+// @generated
+// This file was automatically generated and should not be edited.
+
+// ====================================================
 // GraphQL mutation operation: SendChatMessage
 // ====================================================
 
@@ -190,6 +226,29 @@ export interface SendChatMessageVariables {
   chatId?: number | null;
   receiveUserId?: number | null;
   text: string;
+}
+
+/* tslint:disable */
+/* eslint-disable */
+// @generated
+// This file was automatically generated and should not be edited.
+
+// ====================================================
+// GraphQL mutation operation: LeaveChat
+// ====================================================
+
+export interface LeaveChat_LeaveChat {
+  __typename: "LeaveChatResponse";
+  ok: boolean;
+  error: string | null;
+}
+
+export interface LeaveChat {
+  LeaveChat: LeaveChat_LeaveChat;
+}
+
+export interface LeaveChatVariables {
+  id: number;
 }
 
 /* tslint:disable */

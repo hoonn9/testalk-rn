@@ -6,7 +6,7 @@ import {Picker} from '@react-native-community/picker';
 import {Alert} from 'react-native';
 import {useMutation, useLazyQuery} from '@apollo/react-hooks';
 import AuthButton from '../../components/AuthButton';
-import {NavigationStackScreenProps} from 'react-navigation-stack';
+import {StackNavigationProp} from '@react-navigation/stack';
 import AuthInput from '../../components/AuthInput';
 import {useLogIn} from '../../AuthContext';
 import {
@@ -26,6 +26,7 @@ import {toast, vibration} from '../../tools';
 import {AccessToken} from 'react-native-fbsdk';
 import auth from '@react-native-firebase/auth';
 import {GET_CUSTOM_TOKEN} from './Login.queries';
+import {RouteProp} from '@react-navigation/native';
 const KeyboardAvoidingView = styled.KeyboardAvoidingView`
   justify-content: center;
   align-items: center;
@@ -48,7 +49,6 @@ const InputWrapper = styled.View`
 `;
 const Text = styled.Text``;
 const Touchable = styled.TouchableOpacity``;
-interface IProp extends NavigationStackScreenProps {}
 
 const styles = StyleSheet.create({
   container: {
@@ -71,11 +71,48 @@ const styles = StyleSheet.create({
   },
 });
 
-const PhoneVerification: React.FunctionComponent<IProp> = ({navigation}) => {
-  const ggId = navigation.getParam('ggId');
-  const fbId = navigation.getParam('fbId');
-  const kkId = navigation.getParam('kkId');
-  const means = navigation.getParam('means');
+type RouteParamProp = {
+  Login: {
+    ggId: string | null;
+    kkId: string | null;
+    fbId: string | null;
+    means: string;
+  };
+};
+
+type PhoneVerificationRouteProp = RouteProp<RouteParamProp, 'Login'>;
+
+type SignUpParamList = {
+  SignUp: {
+    token: string;
+    userId: number;
+    ggId: string | null;
+    kkId: string | null;
+    fbId: string | null;
+    means: string;
+  };
+};
+
+type NavigationProp = StackNavigationProp<SignUpParamList, 'SignUp'>;
+
+interface IProp {
+  route: PhoneVerificationRouteProp;
+  navigation: NavigationProp;
+}
+
+const FACEBOOK = 'FACEBOOK';
+const GOOGLE = 'GOOGLE';
+const KAKAO = 'KAKAO';
+
+const PhoneVerification: React.FunctionComponent<IProp> = ({
+  route,
+  navigation,
+}) => {
+  const {ggId, fbId, kkId, means} = route.params;
+  // const ggId = navigation.getParam('ggId');
+  // const fbId = navigation.getParam('fbId');
+  // const kkId = navigation.getParam('kkId');
+  // const means = navigation.getParam('means');
   const [dialCode, setDialCode] = useState<string>('+82');
   const [isGlobal, setIsGlobal] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
@@ -115,7 +152,7 @@ const PhoneVerification: React.FunctionComponent<IProp> = ({navigation}) => {
   const [
     getCustomToken,
     {data: customTokenData, loading: customTokenLoading},
-  ] = useLazyQuery<GetCustomToken, GetCustomTokenVariables>(GET_CUSTOM_TOKEN);
+  ] = useLazyQuery<GetCustomToken>(GET_CUSTOM_TOKEN);
 
   const verifyMutation = async () => {
     if (!loading && !sendSuccess) {
@@ -198,16 +235,20 @@ const PhoneVerification: React.FunctionComponent<IProp> = ({navigation}) => {
               setUserId(userId);
 
               if (data.CompletePhoneVerification.isNew) {
-                navigation.navigate('SignUp', {
-                  token,
-                  userId,
-                  fbId,
-                  ggId,
-                  kkId,
-                  means,
-                });
+                if (token && userId) {
+                  navigation.navigate('SignUp', {
+                    token,
+                    userId,
+                    fbId,
+                    ggId,
+                    kkId,
+                    means,
+                  });
+                } else {
+                  toast('올바르지 않은 접근입니다.');
+                }
               } else {
-                if (means === 'FACEBOOK' && fbId) {
+                if (means === FACEBOOK && fbId) {
                   const fbData = await AccessToken.getCurrentAccessToken();
 
                   if (fbData) {
@@ -241,7 +282,7 @@ const PhoneVerification: React.FunctionComponent<IProp> = ({navigation}) => {
                       console.log(error);
                       toast('구글 연결 실패.');
                     });
-                } else if (means === 'KAKAO' && kkId) {
+                } else if (means === KAKAO && kkId) {
                   const customToken = await getCustomToken({
                     variables: {means, socialId: kkId},
                   });

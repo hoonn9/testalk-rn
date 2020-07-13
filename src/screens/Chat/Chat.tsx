@@ -1,14 +1,12 @@
 import React, {useEffect, useState, useCallback} from 'react';
 import {ActivityIndicator, FlatList} from 'react-native';
 import styled from 'styled-components/native';
-import {NavigationTabScreenProps} from 'react-navigation-tabs';
-import {withNavigation, NavigationEvents} from 'react-navigation';
 import ChatRoomRow from '../../components/ChatRoomRow';
 import {getChatRooms, ChatRoomProp} from '../../dbTools';
 import {useQuery} from '@apollo/react-hooks';
 import {GetMyChat, GetMyChat_GetMyChat_chat} from '../../types/api';
 import {GET_MY_CHAT} from './Chat.queries';
-import {lessThan} from 'react-native-reanimated';
+import {useNavigation} from '@react-navigation/native';
 
 const View = styled.View`
   justify-content: center;
@@ -23,9 +21,10 @@ const SafeAreaView = styled.SafeAreaView`
 const Text = styled.Text``;
 const Touchable = styled.TouchableOpacity``;
 
-interface IProp extends NavigationTabScreenProps {}
+interface IProp {}
 
-const Chat: React.FunctionComponent<IProp> = ({navigation}) => {
+const Chat: React.FunctionComponent<IProp> = () => {
+  const navigation = useNavigation();
   const [chatRoom, setChatRoom] = useState<Array<ChatRoomProp> | null>(null);
   const {data, loading, error} = useQuery<GetMyChat>(GET_MY_CHAT, {
     fetchPolicy: 'network-only',
@@ -47,46 +46,22 @@ const Chat: React.FunctionComponent<IProp> = ({navigation}) => {
     return result;
   };
 
-  const checkValidateChat = (chats: Array<GetMyChat_GetMyChat_chat | null>) => {
+  const checkValidateChat = (chats: Array<GetMyChat_GetMyChat_chat>) => {
     console.log(chats[0]);
     // 상대가 나간 채팅
     let leaveChat = [];
     let dbChats = [];
     let serverChats = [];
     if (chatRoom) {
-      for (let i = 0; i < chats.length; i++) {
-        if (chats[i]) serverChats.push(chats[i].id);
+      for (let i in chats) {
+        if (chats[i].id) serverChats.push(chats[i].id);
       }
-      for (let i = 0; i < chatRoom.length; i++) {
+
+      for (let i in chatRoom) {
         dbChats.push(chatRoom[i].chat_id);
       }
       console.log(setDifference(dbChats, serverChats));
     }
-
-    // if (chatRoom && chats.length > 0) {
-    //   const dbChats = chatRoom.sort((a: ChatRoomProp, b: ChatRoomProp) =>
-    //     a.chat_id > b.chat_id ? 1 : a.chat_id < b.chat_id ? -1 : 0,
-    //   );
-    //   const serverChats = chats.sort((a: any, b: any) =>
-    //     a.id > b.id ? 1 : a.id < b.id ? -1 : 0,
-    //   );
-    //   dbChats.diff
-    //   if (dbChats && serverChats) {
-    //     console.log(serverChats);
-    //     for (let i = 0; i < serverChats.length; i++) {
-    //       // 로컬 DB 랑 비교해서 없으면 제거
-    //       for (let j = 0; j < dbChats.length; j++) {
-    //         if (serverChats[i]) {
-    //           if (serverChats[i].id === dbChats[j].chat_id) {
-
-    //           }
-    //         } else {
-
-    //         }
-    //       }
-    //     }
-    //   }
-    // }
   };
 
   const navigateChatRoom = useCallback((userId: number) => {
@@ -102,18 +77,26 @@ const Chat: React.FunctionComponent<IProp> = ({navigation}) => {
   useEffect(() => {
     if (data && data.GetMyChat && data.GetMyChat.ok) {
       if (data.GetMyChat.chat && data.GetMyChat.chat.length > 0) {
-        checkValidateChat(data.GetMyChat.chat);
+        const notNullData = [];
+        for (let chat of data.GetMyChat.chat) {
+          if (chat) notNullData.push(chat);
+        }
+        checkValidateChat(notNullData);
       }
     }
   }, [data]);
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      getChatRoom();
+    });
+
+    return unsubscribe;
+  }, [navigation]);
+
   return (
     <>
       <SafeAreaView>
-        <NavigationEvents
-          onWillFocus={() => {
-            getChatRoom();
-          }}
-        />
         {chatRoom ? (
           <FlatList
             data={chatRoom}
@@ -143,4 +126,4 @@ const Chat: React.FunctionComponent<IProp> = ({navigation}) => {
   );
 };
 
-export default withNavigation(Chat);
+export default Chat;

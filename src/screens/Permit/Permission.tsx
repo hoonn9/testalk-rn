@@ -1,8 +1,6 @@
 import React, {useState} from 'react';
 import styled from 'styled-components/native';
 import {useMutation} from '@apollo/react-hooks';
-import {NavigationTabScreenProps} from 'react-navigation-tabs';
-import {withNavigation} from 'react-navigation';
 import {
   request,
   requestNotifications,
@@ -14,6 +12,7 @@ import {toast} from '../../tools';
 import {SET_USER_NOTIFY} from './Permission.queries';
 import AuthButton from '../../components/AuthButton';
 import {usePermit} from '../../AuthContext';
+import {useNavigation} from '@react-navigation/native';
 
 const Container = styled.SafeAreaView`
   justify-content: center;
@@ -40,9 +39,10 @@ const IndicatorView = styled.View`
 const Text = styled.Text``;
 const Touchable = styled.TouchableOpacity``;
 
-interface IProp extends NavigationTabScreenProps {}
+interface IProp {}
 
-const People: React.FunctionComponent<IProp> = ({navigation}) => {
+const People: React.FunctionComponent<IProp> = () => {
+  const navigation = useNavigation();
   const [isRequested, setIsRequested] = useState<boolean>(false);
   const [isLocationGranted, setIsLocationGranted] = useState<boolean>(false);
   const [isNotifyGranted, setIsNotifyGranted] = useState<boolean>(false);
@@ -131,4 +131,4 @@ const People: React.FunctionComponent<IProp> = ({navigation}) => {
   );
 };
 
-export default withNavigation(People);
+export default People;

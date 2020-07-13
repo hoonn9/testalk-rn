@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import {TouchableWithoutFeedback, Keyboard} from 'react-native';
 import styled from 'styled-components/native';
-import {NavigationStackScreenProps} from 'react-navigation-stack';
+import {StackNavigationProp} from '@react-navigation/stack';
 import {
   LoginManager,
   GraphRequest,
@@ -26,7 +26,22 @@ const View = styled.View`
 
 const Text = styled.Text``;
 
-interface IProp extends NavigationStackScreenProps {}
+type FeedsTabParamList = {
+  PhoneVerification: {
+    ggId: string | null;
+    kkId: string | null;
+    fbId: string | null;
+    means: string;
+  };
+};
+
+type NavigationProp = StackNavigationProp<
+  FeedsTabParamList,
+  'PhoneVerification'
+>;
+interface IProp {
+  navigation: NavigationProp;
+}
 
 const FACEBOOK = 'FACEBOOK';
 const GOOGLE = 'GOOGLE';
@@ -45,6 +60,8 @@ const SignUp: React.FunctionComponent<IProp> = ({navigation}) => {
       toast(`${result.user.name}님 반가워요!`);
       navigation.navigate('PhoneVerification', {
         ggId: result.idToken,
+        fbId: null,
+        kkId: null,
         means: GOOGLE,
       });
       setLoading(false);
@@ -80,7 +97,9 @@ const SignUp: React.FunctionComponent<IProp> = ({navigation}) => {
                 } else {
                   toast(`${result.name}님 반가워요!`);
                   navigation.navigate('PhoneVerification', {
+                    ggId: null,
                     fbId: result.id,
+                    kkId: null,
                     means: FACEBOOK,
                   });
                 }
@@ -110,6 +129,8 @@ const SignUp: React.FunctionComponent<IProp> = ({navigation}) => {
             .then(result => {
               if (result.id) {
                 navigation.navigate('PhoneVerification', {
+                  ggId: null,
+                  fbId: null,
                   kkId: result.id,
                   means: KAKAO,
                 });
