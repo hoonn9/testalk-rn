@@ -237,11 +237,11 @@ export default function App() {
       // await AsyncStorage.setItem('userId', '15');
 
       // await AsyncStorage.setItem(
-      //   "jwt",
-      //   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTQsImlhdCI6MTU5MzYwMzg4N30.TKboTzBUx1lFDUE-7yB3bulQzF1I6vO4ehkOs8hvJhk"
+      //   'jwt',
+      //   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTQsImlhdCI6MTU5MzYwMzg4N30.TKboTzBUx1lFDUE-7yB3bulQzF1I6vO4ehkOs8hvJhk',
       // );
-      // await AsyncStorage.setItem("isLoggedIn", "true");
-      // await AsyncStorage.setItem("userId", "14");
+      // await AsyncStorage.setItem('isLoggedIn', 'true');
+      // await AsyncStorage.setItem('userId', '14');
 
       const isLoggedIn = await AsyncStorage.getItem('isLoggedIn');
 

@@ -37,6 +37,9 @@ export const GET_CHAT_USER = gql`
                 id
                 nickName
                 birth
+                profilePhoto {
+                    url
+                }
                 gender
                 intro
                 updatedAt

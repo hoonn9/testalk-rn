@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react';
 import {TouchableWithoutFeedback, Keyboard} from 'react-native';
 import styled from 'styled-components/native';
 import {useLazyQuery} from '@apollo/react-hooks';
-import {} from '@react-navigation/stack';
+import {StackNavigationProp} from '@react-navigation/stack';
 import auth from '@react-native-firebase/auth';
 import {AccessToken} from 'react-native-fbsdk';
 import {useLogIn} from '../../AuthContext';
@@ -22,9 +22,7 @@ const View = styled.View`
 const Text = styled.Text``;
 
 type RouteParamProp = {
-  PhoneVerification: {
-    token: string;
-    userId: number;
+  SignUpNavigation: {
     ggId: string | null;
     kkId: string | null;
     fbId: string | null;
@@ -32,109 +30,57 @@ type RouteParamProp = {
   };
 };
 
-type SignupRouteProp = RouteProp<RouteParamProp, 'PhoneVerification'>;
+type SignUpRouteProp = RouteProp<RouteParamProp, 'SignUpNavigation'>;
+
+type NavigationParamProp = {
+  SignUpPhoneVerification: {
+    ggId: string | null;
+    kkId: string | null;
+    fbId: string | null;
+    means: string;
+    nickName: string;
+    gender: string;
+    birth: string;
+  };
+};
+
+type NavigationProp = StackNavigationProp<
+  NavigationParamProp,
+  'SignUpPhoneVerification'
+>;
 
 interface IProp {
-  route: SignupRouteProp;
+  route: SignUpRouteProp;
+  navigation: NavigationProp;
 }
 
 type GenderProp = 'male' | 'female';
 
-const Login: React.FunctionComponent<IProp> = ({route}) => {
+const Login: React.FunctionComponent<IProp> = ({navigation, route}) => {
   const [loading, setLoading] = useState(false);
-  const login = useLogIn();
-  const {token, userId, means, fbId, ggId, kkId} = route.params;
-  // const token = navigation.getParam('token');
-  // const userId = navigation.getParam('userId');
-  // const means = navigation.getParam('means');
-  // const fbId = navigation.getParam('fbId');
-  // const ggId = navigation.getParam('ggId');
-  // const kkId = navigation.getParam('kkId');
+  const {means, fbId, ggId, kkId} = route.params;
 
-  //console.log(token, userId, means, fbId, ggId, kkId);
+  console.log(means, fbId, ggId, kkId);
 
   const nickName = useInput('');
   const [gender, setGender] = useState<GenderProp>('male');
   const [birth, setBirth] = useState<Date>(new Date(946728736000));
 
-  const [
-    getCustomToken,
-    {data: customTokenData, loading: customTokenLoading},
-  ] = useLazyQuery<GetCustomToken>(GET_CUSTOM_TOKEN);
-
   const onNext = async () => {
-    if (nickName.value && gender && birth) {
-      if (token && userId) {
-        if (means === 'FACEBOOK' && fbId) {
-          const fbData = await AccessToken.getCurrentAccessToken();
-
-          if (fbData) {
-            const facebookCredential = auth.FacebookAuthProvider.credential(
-              fbData.accessToken,
-            );
-            //Firebase Login
-            auth()
-              .signInWithCredential(facebookCredential)
-              .then(response => {
-                console.log('res:', response);
-                login(token, userId);
-              })
-              .catch(error => {
-                console.log(error);
-                toast('페이스북 연결 실패.');
-              });
-          }
-        } else if (means === 'GOOGLE' && ggId) {
-          const googleCredential = auth.GoogleAuthProvider.credential(ggId);
-
-          auth()
-            .signInWithCredential(googleCredential)
-            .then(response => {
-              console.log('res:', response);
-              login(token, userId);
-            })
-            .catch(error => {
-              console.log(error);
-              toast('구글 연결 실패.');
-            });
-        } else if (means === 'KAKAO' && kkId) {
-          const customToken = await getCustomToken({
-            variables: {means, socialId: kkId},
-          });
-          console.log(customToken);
-        }
-      } else {
-        toast('잘못 된 접근입니다.');
-      }
+    if ((ggId || fbId || kkId) && means && nickName.value && gender && birth) {
+      navigation.navigate('SignUpPhoneVerification', {
+        ggId,
+        kkId,
+        fbId,
+        means,
+        nickName: nickName.value,
+        gender,
+        birth: birth.toString(),
+      });
     } else {
       // 폼 작성 안 됐을때
     }
   };
-  useEffect(() => {
-    if (means === 'KAKAO' && customTokenData) {
-      if (customTokenData.GetCustomToken && customTokenData.GetCustomToken.ok) {
-        const customToken = customTokenData.GetCustomToken.token;
-        if (customToken) {
-          auth()
-            .signInWithCustomToken(customToken)
-            .then(response => {
-              console.log('res:', response);
-              login(token, userId);
-            })
-            .catch(error => {
-              console.log(error);
-              toast('카카오 연결 실패.');
-            });
-        } else {
-          toast('잘못 된 접근입니다.');
-        }
-      } else {
-        toast('권한이 없습니다.');
-      }
-    } else {
-      toast('잘못 된 접근입니다.');
-    }
-  }, [customTokenData]);
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>

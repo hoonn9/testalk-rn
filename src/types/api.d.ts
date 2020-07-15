@@ -29,20 +29,20 @@ export interface GetCustomTokenVariables {
 // This file was automatically generated and should not be edited.
 
 // ====================================================
-// GraphQL mutation operation: StartPhoneVerification
+// GraphQL mutation operation: SignUpStartPhoneVerification
 // ====================================================
 
-export interface StartPhoneVerification_StartPhoneVerification {
-  __typename: "StartPhoneVerificationResponse";
+export interface SignUpStartPhoneVerification_SignUpStartPhoneVerification {
+  __typename: "SignUpStartPhoneVerificationResponse";
   ok: boolean;
   error: string | null;
 }
 
-export interface StartPhoneVerification {
-  StartPhoneVerification: StartPhoneVerification_StartPhoneVerification | null;
+export interface SignUpStartPhoneVerification {
+  SignUpStartPhoneVerification: SignUpStartPhoneVerification_SignUpStartPhoneVerification;
 }
 
-export interface StartPhoneVerificationVariables {
+export interface SignUpStartPhoneVerificationVariables {
   phoneNumber: string;
 }
 
@@ -52,28 +52,79 @@ export interface StartPhoneVerificationVariables {
 // This file was automatically generated and should not be edited.
 
 // ====================================================
-// GraphQL mutation operation: CompletePhoneVerification
+// GraphQL mutation operation: SignUpCompletePhoneVerification
 // ====================================================
 
-export interface CompletePhoneVerification_CompletePhoneVerification {
-  __typename: "CompletePhoneVerificationResponse";
+export interface SignUpCompletePhoneVerification_SignUpCompletePhoneVerification {
+  __typename: "SignUpCompletePhoneVerificationResponse";
   ok: boolean;
   error: string | null;
   userId: number | null;
   token: string | null;
-  isNew: boolean | null;
 }
 
-export interface CompletePhoneVerification {
-  CompletePhoneVerification: CompletePhoneVerification_CompletePhoneVerification;
+export interface SignUpCompletePhoneVerification {
+  SignUpCompletePhoneVerification: SignUpCompletePhoneVerification_SignUpCompletePhoneVerification;
 }
 
-export interface CompletePhoneVerificationVariables {
+export interface SignUpCompletePhoneVerificationVariables {
   phoneNumber: string;
   key: string;
   fbId?: string | null;
   ggId?: string | null;
   kkId?: string | null;
+  nickName: string;
+  gender: string;
+  birth: string;
+}
+
+/* tslint:disable */
+/* eslint-disable */
+// @generated
+// This file was automatically generated and should not be edited.
+
+// ====================================================
+// GraphQL mutation operation: LoginStartPhoneVerification
+// ====================================================
+
+export interface LoginStartPhoneVerification_LoginStartPhoneVerification {
+  __typename: "LoginStartPhoneVerificationResponse";
+  ok: boolean;
+  error: string | null;
+}
+
+export interface LoginStartPhoneVerification {
+  LoginStartPhoneVerification: LoginStartPhoneVerification_LoginStartPhoneVerification | null;
+}
+
+export interface LoginStartPhoneVerificationVariables {
+  phoneNumber: string;
+}
+
+/* tslint:disable */
+/* eslint-disable */
+// @generated
+// This file was automatically generated and should not be edited.
+
+// ====================================================
+// GraphQL mutation operation: LoginCompletePhoneVerification
+// ====================================================
+
+export interface LoginCompletePhoneVerification_LoginCompletePhoneVerification {
+  __typename: "LoginCompletePhoneVerificationResponse";
+  ok: boolean;
+  error: string | null;
+  userId: number | null;
+  token: string | null;
+}
+
+export interface LoginCompletePhoneVerification {
+  LoginCompletePhoneVerification: LoginCompletePhoneVerification_LoginCompletePhoneVerification;
+}
+
+export interface LoginCompletePhoneVerificationVariables {
+  phoneNumber: string;
+  key: string;
 }
 
 /* tslint:disable */
@@ -149,7 +200,7 @@ export interface GetChatMessages_GetChatMessages {
 }
 
 export interface GetChatMessages {
-  GetChatMessages: GetChatMessages_GetChatMessages | null;
+  GetChatMessages: GetChatMessages_GetChatMessages;
 }
 
 export interface GetChatMessagesVariables {
@@ -166,11 +217,17 @@ export interface GetChatMessagesVariables {
 // GraphQL query operation: GetChatUser
 // ====================================================
 
+export interface GetChatUser_GetChatUser_user_profilePhoto {
+  __typename: "File";
+  url: string;
+}
+
 export interface GetChatUser_GetChatUser_user {
   __typename: "User";
   id: number;
   nickName: string;
   birth: string;
+  profilePhoto: GetChatUser_GetChatUser_user_profilePhoto[] | null;
   gender: string;
   intro: string;
   updatedAt: string | null;
@@ -186,7 +243,7 @@ export interface GetChatUser_GetChatUser {
 }
 
 export interface GetChatUser {
-  GetChatUser: GetChatUser_GetChatUser | null;
+  GetChatUser: GetChatUser_GetChatUser;
 }
 
 export interface GetChatUserVariables {

@@ -10,14 +10,14 @@ import {StackNavigationProp} from '@react-navigation/stack';
 import AuthInput from '../../components/AuthInput';
 import {useLogIn} from '../../AuthContext';
 import {
-  REQUEST_PHONE_VERIFICATION,
-  CONFIRM_PHONE_VERIFICATION,
+  REQUEST_SIGNUP_PHONE_VERIFICATION,
+  CONFIRM_SIGNUP_PHONE_VERIFICATION,
 } from './PhoneVerification.queries';
 import {
-  StartPhoneVerification,
-  StartPhoneVerificationVariables,
-  CompletePhoneVerification,
-  CompletePhoneVerificationVariables,
+  SignUpStartPhoneVerification,
+  SignUpStartPhoneVerificationVariables,
+  SignUpCompletePhoneVerification,
+  SignUpCompletePhoneVerificationVariables,
   GetCustomToken,
   GetCustomTokenVariables,
 } from '../../types/api';
@@ -72,43 +72,29 @@ const styles = StyleSheet.create({
 });
 
 type RouteParamProp = {
-  Login: {
-    ggId: string | null;
-    kkId: string | null;
-    fbId: string | null;
-    means: string;
-  };
-};
-
-type PhoneVerificationRouteProp = RouteProp<RouteParamProp, 'Login'>;
-
-type SignUpParamList = {
   SignUp: {
-    token: string;
-    userId: number;
     ggId: string | null;
     kkId: string | null;
     fbId: string | null;
     means: string;
+    nickName: string;
+    gender: string;
+    birth: string;
   };
 };
 
-type NavigationProp = StackNavigationProp<SignUpParamList, 'SignUp'>;
+type SignUpRouteProp = RouteProp<RouteParamProp, 'SignUp'>;
 
 interface IProp {
-  route: PhoneVerificationRouteProp;
-  navigation: NavigationProp;
+  route: SignUpRouteProp;
 }
 
 const FACEBOOK = 'FACEBOOK';
 const GOOGLE = 'GOOGLE';
 const KAKAO = 'KAKAO';
 
-const PhoneVerification: React.FunctionComponent<IProp> = ({
-  route,
-  navigation,
-}) => {
-  const {ggId, fbId, kkId, means} = route.params;
+const PhoneVerification: React.FunctionComponent<IProp> = ({route}) => {
+  const {ggId, fbId, kkId, means, nickName, gender, birth} = route.params;
   // const ggId = navigation.getParam('ggId');
   // const fbId = navigation.getParam('fbId');
   // const kkId = navigation.getParam('kkId');
@@ -131,20 +117,23 @@ const PhoneVerification: React.FunctionComponent<IProp> = ({
   });
 
   const [phoneMutation] = useMutation<
-    StartPhoneVerification,
-    StartPhoneVerificationVariables
-  >(REQUEST_PHONE_VERIFICATION);
+    SignUpStartPhoneVerification,
+    SignUpStartPhoneVerificationVariables
+  >(REQUEST_SIGNUP_PHONE_VERIFICATION);
 
   const [confirmMutation] = useMutation<
-    CompletePhoneVerification,
-    CompletePhoneVerificationVariables
-  >(CONFIRM_PHONE_VERIFICATION, {
+    SignUpCompletePhoneVerification,
+    SignUpCompletePhoneVerificationVariables
+  >(CONFIRM_SIGNUP_PHONE_VERIFICATION, {
     variables: {
       phoneNumber: dialPhoneNumber,
       key: secretCode.value,
       fbId,
       ggId,
       kkId,
+      nickName,
+      gender,
+      birth,
     },
     fetchPolicy: 'no-cache',
   });
@@ -187,13 +176,13 @@ const PhoneVerification: React.FunctionComponent<IProp> = ({
         console.log(data);
 
         if (data) {
-          if (data.StartPhoneVerification) {
-            if (data.StartPhoneVerification.ok) {
+          if (data.SignUpStartPhoneVerification) {
+            if (data.SignUpStartPhoneVerification.ok) {
               setSendSuccess(true);
             } else {
               setSendSuccess(false);
               toast(
-                data.StartPhoneVerification.error ||
+                data.SignUpStartPhoneVerification.error ||
                   '인증 번호를 전송하는데 실패하였습니다. 다시 시도하세요.',
               );
             }
@@ -227,73 +216,59 @@ const PhoneVerification: React.FunctionComponent<IProp> = ({
         const {data} = await confirmMutation();
 
         if (data) {
-          if (data.CompletePhoneVerification) {
-            if (data.CompletePhoneVerification.ok) {
-              const {token, userId} = data.CompletePhoneVerification;
+          console.log(data);
+          if (data.SignUpCompletePhoneVerification) {
+            if (data.SignUpCompletePhoneVerification.ok) {
+              const {token, userId} = data.SignUpCompletePhoneVerification;
 
               setToken(token);
               setUserId(userId);
 
-              if (data.CompletePhoneVerification.isNew) {
-                if (token && userId) {
-                  navigation.navigate('SignUp', {
-                    token,
-                    userId,
-                    fbId,
-                    ggId,
-                    kkId,
-                    means,
-                  });
-                } else {
-                  toast('올바르지 않은 접근입니다.');
-                }
-              } else {
-                if (means === FACEBOOK && fbId) {
-                  const fbData = await AccessToken.getCurrentAccessToken();
+              if (means === FACEBOOK && fbId) {
+                const fbData = await AccessToken.getCurrentAccessToken();
 
-                  if (fbData) {
-                    const facebookCredential = auth.FacebookAuthProvider.credential(
-                      fbData.accessToken,
-                    );
-                    //Firebase Login
-                    auth()
-                      .signInWithCredential(facebookCredential)
-                      .then(response => {
-                        console.log('res:', response);
-                        login(data.CompletePhoneVerification.token, userId);
-                      })
-                      .catch(error => {
-                        console.log(error);
-                        toast('페이스북 연결 실패.');
-                      });
-                  }
-                } else if (means === 'GOOGLE' && ggId) {
-                  const googleCredential = auth.GoogleAuthProvider.credential(
-                    ggId,
+                if (fbData) {
+                  const facebookCredential = auth.FacebookAuthProvider.credential(
+                    fbData.accessToken,
                   );
-
+                  //Firebase Login
                   auth()
-                    .signInWithCredential(googleCredential)
+                    .signInWithCredential(facebookCredential)
                     .then(response => {
                       console.log('res:', response);
-                      login(token, userId);
+                      login(data.SignUpCompletePhoneVerification.token, userId);
                     })
                     .catch(error => {
                       console.log(error);
-                      toast('구글 연결 실패.');
+                      toast('페이스북 연결 실패.');
                     });
-                } else if (means === KAKAO && kkId) {
-                  const customToken = await getCustomToken({
-                    variables: {means, socialId: kkId},
-                  });
-                  console.log(customToken);
                 }
+              } else if (means === GOOGLE && ggId) {
+                const googleCredential = auth.GoogleAuthProvider.credential(
+                  ggId,
+                );
+
+                auth()
+                  .signInWithCredential(googleCredential)
+                  .then(response => {
+                    console.log('res:', response);
+                    login(token, userId);
+                  })
+                  .catch(error => {
+                    console.log(error);
+                    toast('구글 연결 실패.');
+                  });
+              } else if (means === KAKAO && kkId) {
+                const customToken = await getCustomToken({
+                  variables: {means, socialId: kkId},
+                });
+                console.log(customToken);
               }
             } else {
               setVerifyError(true);
               vibration();
               toast(
-                data.CompletePhoneVerification.error ||
+                data.SignUpCompletePhoneVerification.error ||
                   '인증 번호가 올바르지 않아요.',
               );
             }

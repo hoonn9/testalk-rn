@@ -40,10 +40,11 @@ import {
 import {
   getChatLogs,
   addMessage,
-  addFriends,
+  addFriend,
   ChatLogRowProp,
   getUserInfoFromId,
   UserInfoProp,
+  removeChat,
 } from '../../dbTools';
 import {GET_USER_PROFILE} from '../../sharedQueries.queries';
 import ModalSelector from '../../components/ModalSelector';
@@ -339,7 +340,7 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
               parseInt(createdAt),
             );
             if (userInfo) {
-              addFriends({
+              addFriend({
                 userId,
                 chatId: sendedChatId,
                 nickName: userInfo.nick_name,
@@ -350,7 +351,7 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
               });
             } else {
               if (receiveUserInfo) {
-                addFriends({
+                addFriend({
                   userId,
                   chatId: sendedChatId,
                   nickName: receiveUserInfo.nickName,
@@ -382,20 +383,39 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
 
   useEffect(() => {
     console.log(getChatUserData, getChatUserLoading, getChatUserError);
-    if (getChatUserData && getChatUserData.GetChatUser) {
+    if (chatId && getChatUserData && getChatUserData.GetChatUser) {
       console.log(getChatUserData);
       if (getChatUserData.GetChatUser.ok) {
         if (getChatUserData.GetChatUser.user) {
+          const {
+            id,
+            nickName,
+            birth,
+            gender,
+            intro,
+            profilePhoto,
+          } = getChatUserData.GetChatUser.user;
           // TODO
           // 유저 정보 업데이트
+          addFriend({
+            userId: id,
+            chatId,
+            nickName,
+            birth: parseInt(birth),
+            gender,
+            intro,
+            profilePhoto: profilePhoto ? profilePhoto[0].url : null,
+          });
         } else {
           // 상대가 떠났을 때
+          removeChat(userId, chatId);
           setIsLeaveModalVisible(true);
-          // 로컬 DB에서 chat id 관련된 것 전부 제거
         }
       } else {
         // 에러 처리
         // 로컬 DB에서 제거
+        toast('잘못된 접근입니다.');
+        setIsLeaveModalVisible(true);
       }
     }
   }, [getChatUserData, getChatUserLoading, getChatUserError]);

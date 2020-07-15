@@ -29,13 +29,14 @@ export interface AddFriendProp {
     birth: number;
     gender: string;
     intro: string;
-    profilePhoto: string;
+    profilePhoto: string | null;
 }
 
 
 const db = SQLite.openDatabase({ name: "db.db", location: "default" }, () => { }, (error) => {
     console.log(error)
 });
+
 
 export const createTable = () => {
     db.transaction(tx => {
@@ -58,7 +59,6 @@ export const addMessage = (chatId: number, messageId: number, senderId: number, 
     }
     );
 }
-
 
 
 export const getChatRooms = async () => {
@@ -86,6 +86,8 @@ export const getChatRooms = async () => {
         );
     })
 }
+
+
 export interface ChatLogRowProp {
     _id: number,
     chat_id: number,
@@ -99,6 +101,7 @@ export interface ChatLogProp {
     array: Array<ChatLogRowProp>,
     length: number
 }
+
 
 export const getChatLogs = async (chatId: number, limit: number = 10, offset: number = 0) => {
     // db.transaction(tx => {
@@ -141,8 +144,32 @@ export const getChatRoomMessages = async (chat_id: number) => {
     })
 }
 
-export const addFriends = (friend: AddFriendProp) => {
-    console.log("add friends");
+
+export const removeChat = async (userId: number, chatId: number) => {
+    db.transaction(tx => {
+        tx.executeSql("DELETE FROM friends WHERE id = ?", [userId], (_: any, { rows }: any) => {
+        })
+    }, error => {
+        console.log(error)
+    });
+    db.transaction(tx => {
+        tx.executeSql("DELETE FROM chat_room WHERE chat_id = ?", [chatId], (_: any, { rows }: any) => {
+        })
+    }, error => {
+        console.log(error)
+    });
+    db.transaction(tx => {
+        tx.executeSql("DELETE FROM chat_logs WHERE chat_id = ?", [chatId], (_: any, { rows }: any) => {
+        })
+    }, error => {
+        console.log(error)
+    });
+
+}
+
+
+export const addFriend = (friend: AddFriendProp) => {
+    console.log("add friend");
     const { userId, chatId, nickName, birth, gender, intro, profilePhoto } = friend;
     db.transaction(tx => {
         tx.executeSql("insert or replace into friends(_id, id, chat_id, nick_name, birth, gender, intro, profile_photo) " +

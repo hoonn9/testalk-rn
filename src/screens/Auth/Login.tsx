@@ -12,6 +12,7 @@ import KakaoLogins from '@react-native-seoul/kakao-login';
 import AuthButton from '../../components/AuthButton';
 import {FIREBASE_WEB_ID} from '../../enviroments';
 import {toast} from '../../tools';
+import {useNavigation} from '@react-navigation/native';
 
 GoogleSignin.configure({
   webClientId: FIREBASE_WEB_ID,
@@ -26,21 +27,29 @@ const View = styled.View`
 
 const Text = styled.Text``;
 
-type FeedsTabParamList = {
-  PhoneVerification: {
+type SignUpParamList = {
+  SignUpNavigation: {
     ggId: string | null;
     kkId: string | null;
     fbId: string | null;
     means: string;
   };
 };
+type LoginParamList = {
+  LoginNavigation: {};
+};
 
-type NavigationProp = StackNavigationProp<
-  FeedsTabParamList,
-  'PhoneVerification'
+type SignUpNavigationProp = StackNavigationProp<
+  SignUpParamList,
+  'SignUpNavigation'
 >;
+type LoginNavigationProp = StackNavigationProp<
+  LoginParamList,
+  'LoginNavigation'
+>;
+
 interface IProp {
-  navigation: NavigationProp;
+  navigation: any;
 }
 
 const FACEBOOK = 'FACEBOOK';
@@ -58,7 +67,7 @@ const SignUp: React.FunctionComponent<IProp> = ({navigation}) => {
 
       console.log(result);
       toast(`${result.user.name}님 반가워요!`);
-      navigation.navigate('PhoneVerification', {
+      navigation.navigate('SignUpNavigation', {
         ggId: result.idToken,
         fbId: null,
         kkId: null,
@@ -96,7 +105,7 @@ const SignUp: React.FunctionComponent<IProp> = ({navigation}) => {
                   toast('페이스북 계정과 연결을 실패했습니다.');
                 } else {
                   toast(`${result.name}님 반가워요!`);
-                  navigation.navigate('PhoneVerification', {
+                  navigation.navigate('SignUpNavigation', {
                     ggId: null,
                     fbId: result.id,
                     kkId: null,
@@ -128,7 +137,7 @@ const SignUp: React.FunctionComponent<IProp> = ({navigation}) => {
           KakaoLogins.getProfile()
             .then(result => {
               if (result.id) {
-                navigation.navigate('PhoneVerification', {
+                navigation.navigate('SignUpNavigation', {
                   ggId: null,
                   fbId: null,
                   kkId: result.id,
@@ -154,24 +163,37 @@ const SignUp: React.FunctionComponent<IProp> = ({navigation}) => {
     }
   };
 
+  const Login = () => {
+    try {
+      console.log('login');
+      navigation.navigate('LoginNavigation', {});
+    } catch (error) {}
+  };
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View>
         <AuthButton
-          text="구글로 로그인"
+          text="구글로 시작하기"
           onClick={googleLogin}
           loading={loading}
           bgColor="#000000"
         />
         <AuthButton
-          text="페이스북으로 로그인"
+          text="페이스북으로 시작하기"
           onClick={facebookOnPress}
           loading={loading}
           bgColor="#000000"
         />
         <AuthButton
-          text="카카오로 로그인"
+          text="카카오로 시작하기"
           onClick={kakaoLogin}
+          loading={loading}
+          bgColor="#000000"
+        />
+        <AuthButton
+          text="기존 회원 로그인"
+          onClick={Login}
           loading={loading}
           bgColor="#000000"
         />

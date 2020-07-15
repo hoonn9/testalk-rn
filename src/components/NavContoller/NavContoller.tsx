@@ -9,6 +9,7 @@ import {
 } from '../../AuthContext';
 import MainNavigation from '../../navigations/MainNavigation';
 import PermitNavigation from '../../navigations/PermitNavigation';
+import {NavigationContainer} from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
 export default () => {
   const isLoggedIn = useIsLoggedIn();
@@ -16,12 +17,13 @@ export default () => {
   confirmPermit();
 
   const isPermit = useIsPermit();
+  console.log('isLoggin:', isLoggedIn);
   console.log('권한 : ', isPermit);
   // const logout = useLogOut();
   // logout();
   //console.log(isLoggedIn);
   return (
-    <View style={{flex: 1}}>
+    <NavigationContainer>
       {isLoggedIn ? (
         !isPermit ? (
           <PermitNavigation />
@@ -31,6 +33,6 @@ export default () => {
       ) : (
         <AuthNavigation />
       )}
-    </View>
+    </NavigationContainer>
   );
 };
