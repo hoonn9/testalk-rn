@@ -6,23 +6,17 @@ import {AppRegistry} from 'react-native';
 import messaging from '@react-native-firebase/messaging';
 import App from './App';
 import {name as appName} from './app.json';
-import {addMessage} from './src/dbTools';
+import {addMessage, addFriend} from './src/dbTools';
 import PushNotification from 'react-native-push-notification';
 
 messaging().setBackgroundMessageHandler(async notification => {
-  //console.log('Message handled in the background!', notification);
+  console.log('Message handled in the background!', notification);
   try {
     const {
-      data: {
-        nickName,
-        chatId,
-        messageId,
-        userId,
-        receiveUserId,
-        content,
-        createdAt,
-      },
+      data: {user, chatId, messageId, content, createdAt},
     } = notification;
+
+    const {userId, nickName, birth, gender, profilePhoto} = JSON.parse(user);
 
     PushNotification.localNotification({
       id: userId,
@@ -32,15 +26,18 @@ messaging().setBackgroundMessageHandler(async notification => {
       channelId: userId,
     });
 
+    addFriend({
+      userId,
+      chatId,
+      nickName,
+      birth: new Date(birth).getTime(),
+      gender,
+      intro: '',
+      profilePhoto,
+    });
+
     // 받은 메시지의 인수는 보낸 USER ID
-    addMessage(
-      parseInt(chatId),
-      parseInt(messageId),
-      parseInt(userId),
-      parseInt(userId),
-      content,
-      parseInt(createdAt),
-    );
+    addMessage(chatId, messageId, userId, userId, content, parseInt(createdAt));
   } catch (error) {
     console.log(error);
   }

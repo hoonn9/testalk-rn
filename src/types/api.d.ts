@@ -167,6 +167,7 @@ export interface MessageSubscription_MessageSubscription {
   userId: number | null;
   chatId: number | null;
   text: string;
+  target: string;
   createdAt: string;
 }
 

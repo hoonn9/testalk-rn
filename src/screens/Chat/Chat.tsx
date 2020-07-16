@@ -1,5 +1,5 @@
-import React, {useEffect, useState, useCallback} from 'react';
-import {ActivityIndicator, FlatList} from 'react-native';
+import React, {useEffect, useState, useCallback, useRef} from 'react';
+import {ActivityIndicator, FlatList, AppState} from 'react-native';
 import styled from 'styled-components/native';
 import ChatRoomRow from '../../components/ChatRoomRow';
 import {getChatRooms, ChatRoomProp} from '../../dbTools';
@@ -7,6 +7,7 @@ import {useQuery} from '@apollo/react-hooks';
 import {GetMyChat, GetMyChat_GetMyChat_chat} from '../../types/api';
 import {GET_MY_CHAT} from './Chat.queries';
 import {useNavigation} from '@react-navigation/native';
+import messaging from '@react-native-firebase/messaging';
 
 const View = styled.View`
   justify-content: center;
@@ -29,11 +30,16 @@ const Chat: React.FunctionComponent<IProp> = () => {
   const {data, loading, error} = useQuery<GetMyChat>(GET_MY_CHAT, {
     fetchPolicy: 'network-only',
   });
+  const appState = useRef(AppState.currentState);
+  const [appStateVisible, setAppStateVisible] = useState(appState.current);
   const getChatRoom = async () => {
-    const getRoom = await getChatRooms();
-    //console.log('getRooms:', getRoom);
-    if (getRoom) {
-      setChatRoom(getRoom.array);
+    const Rooms = await getChatRooms();
+    if (Rooms) {
+      const sortedRooms = Rooms.array.sort((a, b) =>
+        a.created_at > b.created_at ? -1 : a.created_at > b.created_at ? 1 : 0,
+      );
+      console.log(sortedRooms);
+      setChatRoom(sortedRooms);
     }
   };
 
@@ -64,14 +70,37 @@ const Chat: React.FunctionComponent<IProp> = () => {
     }
   };
 
-  const navigateChatRoom = useCallback((userId: number) => {
+  const navigateChatRoom = useCallback((userId: number, userInfo: any) => {
     navigation.navigate('MessageNavigation', {
       userId,
+      userInfo,
     });
   }, []);
 
   useEffect(() => {
     getChatRoom();
+
+    const unsubscribe = messaging().onMessage(getChatRoom);
+    return unsubscribe;
+  }, []);
+
+  useEffect(() => {
+    const handleAppStateChange = (nextAppState: any) => {
+      if (
+        appState.current.match(/inactive|background/) &&
+        nextAppState === 'active'
+      ) {
+        // onResume Foreground
+        getChatRoom();
+      }
+      appState.current = nextAppState;
+      setAppStateVisible(appState.current);
+    };
+
+    AppState.addEventListener('change', handleAppStateChange);
+    return () => {
+      AppState.removeEventListener('change', handleAppStateChange);
+    };
   }, []);
 
   useEffect(() => {
@@ -88,9 +117,9 @@ const Chat: React.FunctionComponent<IProp> = () => {
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
+      console.log('focus');
       getChatRoom();
     });
-
     return unsubscribe;
   }, [navigation]);
 

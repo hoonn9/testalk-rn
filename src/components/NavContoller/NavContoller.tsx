@@ -24,15 +24,17 @@ export default () => {
   //console.log(isLoggedIn);
   return (
     <NavigationContainer>
-      {isLoggedIn ? (
-        !isPermit ? (
-          <PermitNavigation />
+      <View style={{flex: 1}}>
+        {isLoggedIn ? (
+          !isPermit ? (
+            <PermitNavigation />
+          ) : (
+            <MainNavigation />
+          )
         ) : (
-          <MainNavigation />
-        )
-      ) : (
-        <AuthNavigation />
-      )}
+          <AuthNavigation />
+        )}
+      </View>
     </NavigationContainer>
   );
 };

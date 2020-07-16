@@ -6,6 +6,7 @@ import {dateMessageConverter} from '../../utils';
 const Container = styled.View`
   flex: 1;
   flex-direction: row;
+  height: 80px;
 `;
 const Touchable = styled.TouchableOpacity`
   width: 100%;
@@ -27,11 +28,18 @@ const ImageWrapper = styled.View`
   background-color: #ddd;
   padding: 0px 8px;
 `;
-const Text = styled.Text``;
+const DateText = styled.Text`
+  font-size: 14px;
+  color: ${(props: any) => props.theme.darkGreyColor};
+`;
 const NameText = styled.Text`
   font-weight: 700;
+  font-size: 15px;
 `;
-const ContentText = styled.Text``;
+const ContentText = styled.Text`
+  font-size: 14px;
+  color: ${(props: any) => props.theme.darkGreyColor};
+`;
 interface IProp {
   id: number;
   userId: number;
@@ -42,7 +50,16 @@ interface IProp {
   profilePhoto: string;
   gender: string;
   birth: number;
-  navigateCallback: (userId: number) => void | undefined;
+  navigateCallback: (
+    userId: number,
+    userInfo: {
+      nickName: string;
+      birth: number;
+      gender: string;
+      intro: string;
+      profilePhoto: string;
+    },
+  ) => void | undefined;
 }
 const styles = () =>
   StyleSheet.create({
@@ -68,16 +85,37 @@ const ChatRoomRow: React.FunctionComponent<IProp> = ({
   return (
     <Container>
       <ImageWrapper>
-        <Image source={{uri: profilePhoto}} style={styles().image} />
+        {profilePhoto ? (
+          <Image source={{uri: profilePhoto}} style={styles().image} />
+        ) : gender === 'male' ? (
+          <Image
+            source={require('../../../images/male.png')}
+            style={styles().image}
+          />
+        ) : (
+          <Image
+            source={require('../../../images/female.png')}
+            style={styles().image}
+          />
+        )}
       </ImageWrapper>
-      <Touchable onPress={() => navigateCallback(userId)}>
+      <Touchable
+        onPress={() =>
+          navigateCallback(userId, {
+            nickName,
+            birth,
+            gender,
+            intro: '',
+            profilePhoto,
+          })
+        }>
         <Wrapper>
           <ContentWrapper>
             <NameText>{nickName}</NameText>
             <ContentText>{content}</ContentText>
           </ContentWrapper>
           <DateWrapper>
-            <Text>{dateMessageConverter(parseInt(createdAt))}</Text>
+            <DateText>{dateMessageConverter(parseInt(createdAt))}</DateText>
           </DateWrapper>
         </Wrapper>
       </Touchable>

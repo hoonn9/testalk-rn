@@ -7,6 +7,7 @@ export const SUBSCRIBE_MESSAGE = gql`
             userId
             chatId
             text
+            target
             createdAt
         }
     }

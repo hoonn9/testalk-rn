@@ -20,7 +20,7 @@ import styles from './src/styles';
 import {vibration} from './src/tools';
 import gql from 'graphql-tag';
 import messaging from '@react-native-firebase/messaging';
-import {createTable, addMessage} from './src/dbTools';
+import {createTable, addMessage, addFriend} from './src/dbTools';
 import PushNotification from 'react-native-push-notification';
 import {OverflowMenuProvider} from 'react-navigation-header-buttons';
 
@@ -228,6 +228,8 @@ export default function App() {
         },
       });
 
+      const jwt = await AsyncStorage.getItem('jwt');
+      console.log(jwt);
       // 개발용 로그인 코드
       // await AsyncStorage.setItem(
       //   'jwt',
@@ -268,9 +270,19 @@ export default function App() {
     console.log(notification);
     vibration();
     const {
-      data: {chatId, messageId, userId, receiveUserId, content, createdAt},
+      data: {user, chatId, messageId, content, createdAt},
     } = notification;
+    const {userId, nickName, birth, gender, profilePhoto} = JSON.parse(user);
     // 받은 메시지의 인수는 보낸 USER ID
+    addFriend({
+      userId,
+      chatId,
+      nickName,
+      birth: new Date(birth).getTime(),
+      gender,
+      intro: '',
+      profilePhoto,
+    });
     addMessage(chatId, messageId, userId, userId, content, parseInt(createdAt));
   };
 

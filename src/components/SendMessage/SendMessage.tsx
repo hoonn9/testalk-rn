@@ -17,6 +17,7 @@ const TextInput = styled.TextInput`
   flex: 1;
   height: 50px;
   padding: 0px 12px;
+  font-size: 15px;
 `;
 const SendButton = styled.TouchableOpacity`
   justify-content: center;
@@ -34,7 +35,11 @@ const SendMessage: React.FunctionComponent<IProp> = ({
   return (
     <Container>
       <Wrapper>
-        <TextInput value={value} onChangeText={onChangeText} />
+        <TextInput
+          value={value}
+          onChangeText={onChangeText}
+          allowFontScaling={false}
+        />
         <SendButton onPress={onPress}>
           <MaterialCommunityIcons
             name="send"

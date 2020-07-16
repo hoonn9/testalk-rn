@@ -15,6 +15,11 @@ export const dateMessageConverter = (timestamp: number) => {
     }
 };
 
+export const dateSeparateConverter = (timestamp: number) => {
+    const convertDate = new Date(timestamp);
+    return `${convertDate.getFullYear()}년 ${convertDate.getMonth() + 1}월 ${convertDate.getDate()}일`
+}
+
 
 export const dateSimpleConverter = (timestamp: string) => {
     const now = new Date();

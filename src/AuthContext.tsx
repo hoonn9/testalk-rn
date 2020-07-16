@@ -48,7 +48,7 @@ export const AuthProvider: React.FunctionComponent<IProps> = ({
     setIsRoomIn(false);
   };
 
-  const permitUser = async () => {
+  const permitUser = () => {
     check(PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION)
       .then(result => {
         console.log(result);

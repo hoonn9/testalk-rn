@@ -8,7 +8,7 @@ import {
   useQuery,
 } from '@apollo/react-hooks';
 import {useNavigation, RouteProp} from '@react-navigation/native';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import AsyncStorage from '@react-native-community/async-storage';
 import {
   HeaderButtons,
@@ -49,6 +49,7 @@ import {
 import {GET_USER_PROFILE} from '../../sharedQueries.queries';
 import ModalSelector from '../../components/ModalSelector';
 import styles from '../../styles';
+import {dateSeparateConverter} from '../../utils';
 import {GET_MY_CHAT} from '../Chat/Chat.queries';
 import ModalAlert from '../../components/ModalAlert';
 
@@ -101,9 +102,10 @@ const MaterialHeaderButton = (props: any) => (
   <HeaderButton iconSize={23} color="blue" {...props} />
 );
 
+const LEAVE = 'LEAVE';
+
 const Message: React.FunctionComponent<IProp> = ({route}) => {
   const navigation = useNavigation();
-
   const [isModalVisible, setModalVisible] = useState(false);
   const [isLeaveModalVisible, setIsLeaveModalVisible] = useState(false);
 
@@ -117,6 +119,9 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
         });
         if (data && data.LeaveChat) {
           if (data.LeaveChat.ok) {
+            console.log('###Leave Chat###');
+            removeChat(userId, chatId);
+            navigation.goBack();
             setModalVisible(!isModalVisible);
           }
         }
@@ -134,6 +139,7 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
   // 헤더 버튼 생성
   useLayoutEffect(() => {
     navigation.setOptions({
+      title: route.params.userInfo.nickName,
       headerRight: () => <MessageHeaderButton />,
     });
   }, [navigation]);
@@ -142,9 +148,14 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
     return (
       <HeaderButtons HeaderButtonComponent={MaterialHeaderButton}>
         <OverflowMenu
-          OverflowIcon={<Icon name="chat-processing" size={23} color="blue" />}>
-          <HiddenItem title="hidden1" onPress={() => console.log(route)} />
-          <HiddenItem title="hidden2" onPress={() => setModalVisible(true)} />
+          OverflowIcon={
+            <Icon name="more-vert" size={23} color={styles.blackColor} />
+          }>
+          <HiddenItem
+            title="차단하기"
+            onPress={() => console.log('차단 TODO')}
+          />
+          <HiddenItem title="나가기" onPress={() => setModalVisible(true)} />
         </OverflowMenu>
       </HeaderButtons>
     );
@@ -201,20 +212,22 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
   >(SEND_MESSAGE);
 
   const genDateSeparater = (messages: Array<ChatLogRowProp>) => {
+    console.log(messages);
     let tempDate = compareDate;
     for (let i = 0; i < messages.length; i++) {
       const createdAt = new Date(messages[i].created_at);
       const date = `${createdAt.getFullYear()}-${createdAt.getMonth()}-${createdAt.getDate()}`;
-      //console.log(i, date);
+      console.log(i, date);
       if (date !== tempDate) {
-        //console.log('cp', tempDate, 'd', date);
-
-        setDateSeparater(
-          Object.assign({}, dateSeparater, {
-            [messages[i]._id]: tempDate,
-          }),
-        );
-        tempDate = date;
+        console.log('cp', tempDate, 'd', date);
+        if (tempDate) {
+          setDateSeparater(
+            Object.assign({}, dateSeparater, {
+              [messages[i]._id]: tempDate,
+            }),
+          );
+          tempDate = date;
+        }
       }
     }
     setCompareDate(tempDate);
@@ -277,6 +290,7 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
     initChat();
   }, []);
 
+  // Subscribe Chat
   useEffect(() => {
     if (subscribeData) {
       if (subscribeData.MessageSubscription) {
@@ -285,23 +299,33 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
           chatId,
           userId,
           text,
+          target,
           createdAt,
         } = subscribeData.MessageSubscription;
+
         if (chatId && userId) {
-          setMessageList([
-            {
-              _id: messageList.length,
-              id: id,
-              chat_id: chatId,
-              user_id: userId,
-              content: text,
-              created_at: parseInt(createdAt),
-            },
-            ...messageList,
-          ]);
-          // 수신 시 최하단으로 스크롤
-          if (flatRef && messageList.length > 0) {
-            flatRef.scrollToIndex({index: 0});
+          if (userId !== myId && target === LEAVE) {
+            // 상대가 떠났을 때
+            removeChat(userId, chatId);
+            setIsLeaveModalVisible(true);
+          } else {
+            if (text) {
+              setMessageList([
+                {
+                  _id: messageList.length,
+                  id: id,
+                  chat_id: chatId,
+                  user_id: userId,
+                  content: text,
+                  created_at: parseInt(createdAt),
+                },
+                ...messageList,
+              ]);
+              // 수신 시 최하단으로 스크롤
+              if (flatRef && messageList.length > 0) {
+                flatRef.scrollToIndex({index: 0});
+              }
+            }
           }
         } else {
           toast('데이터 수신 중 오류가 발생하였습니다.');
@@ -311,7 +335,16 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
   }, [subscribeData]);
 
   const senderOnSubmit = async () => {
-    if (messageContent.value && myId) {
+    console.log(messageContent.value.length);
+    if (!messageContent.value) {
+      return;
+    } else if (messageContent.value.length >= 500) {
+      console.log('초과');
+      toast('메시지는 500자 이내로 전송할 수 있습니다.');
+      return;
+    }
+
+    if (myId) {
       try {
         const {data} = await sendMessageMutation({
           variables: {
@@ -431,31 +464,43 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
         <Container>
           <Wrapper>
             <FlatList
+              inverted
               ref={ref => setFlatRef(ref)}
               onEndReached={onEndReached}
               onEndReachedThreshold={0.01}
               data={messageList}
               keyExtractor={(e, i) => i.toString()}
-              renderItem={data => {
-                if (data.item.id) {
+              ListFooterComponent={
+                messageList.length > 0 ? (
+                  <DateSeparaterWrapper>
+                    <DateSeparaterText>
+                      {dateSeparateConverter(
+                        messageList[messageList.length - 1].created_at,
+                      )}
+                    </DateSeparaterText>
+                  </DateSeparaterWrapper>
+                ) : null
+              }
+              renderItem={({item}) => {
+                if (item.id) {
                   return (
                     <>
                       {Object.keys(dateSeparater).includes(
-                        data.item._id.toString(),
+                        item._id.toString(),
                       ) ? (
                         <DateSeparaterWrapper>
                           <DateSeparaterText>
                             {separaterDateConverter(
-                              dateSeparater[data.item._id.toString()],
+                              dateSeparater[item._id.toString()],
                             )}
                           </DateSeparaterText>
                         </DateSeparaterWrapper>
                       ) : null}
                       <MessageRow
-                        id={data.item.id.toString()}
-                        message={data.item.content}
-                        createdAt={data.item.created_at}
-                        mine={data.item.user_id === myId ? true : false}
+                        id={item.id.toString()}
+                        message={item.content}
+                        createdAt={item.created_at}
+                        mine={item.user_id === myId ? true : false}
                       />
                     </>
                   );
@@ -463,7 +508,6 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
                   return null;
                 }
               }}
-              inverted
             />
           </Wrapper>
           <SenderWrapper>
