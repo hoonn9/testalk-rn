@@ -1,7 +1,7 @@
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {createStackNavigator} from '@react-navigation/stack';
 import {Image} from 'react-native';
-import Profile from '../screens/Tabs/Profile';
+import Profile from '../screens/Tabs/MyProfile';
 import {View} from 'react-native';
 import React from 'react';
 import {Platform} from 'react-native';
@@ -10,6 +10,7 @@ import NavIcon from '../components/NavIcon';
 import People from '../screens/Tabs/People';
 import ChatLink from '../components/ChatLink';
 import Chat from '../screens/Chat/Chat';
+import MyProfile from '../screens/Tabs/MyProfile';
 
 interface IProp {
   routeName: string;
@@ -51,11 +52,12 @@ const ChatTab = () => {
 const ProfileTab = () => {
   return (
     <Stack.Navigator
-      initialRouteName={'Profile'}
+      initialRouteName={'MyProfile'}
       headerMode="screen"
       screenOptions={{
         title: 'Profile',
       }}>
+      <Stack.Screen name="MyProfile" component={MyProfile} options={{}} />
       <Stack.Screen name="Profile" component={Profile} options={{}} />
     </Stack.Navigator>
   );
@@ -101,10 +103,10 @@ const BottomTab = () => {
         }}
       />
       <Tab.Screen
-        name="Profile"
+        name="MyProfile"
         component={ProfileTab}
         options={{
-          tabBarLabel: 'Profile',
+          tabBarLabel: 'MyProfile',
           tabBarIcon: ({color, size, focused}) => (
             <NavIcon
               focused={focused}

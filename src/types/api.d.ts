@@ -338,6 +338,41 @@ export interface SetUserNotifyVariables {
 // This file was automatically generated and should not be edited.
 
 // ====================================================
+// GraphQL query operation: GetMyProfile
+// ====================================================
+
+export interface GetMyProfile_GetMyProfile_user_profilePhoto {
+  __typename: "File";
+  id: number;
+  url: string;
+}
+
+export interface GetMyProfile_GetMyProfile_user {
+  __typename: "User";
+  id: number;
+  nickName: string;
+  gender: string;
+  birth: string;
+  profilePhoto: GetMyProfile_GetMyProfile_user_profilePhoto[] | null;
+}
+
+export interface GetMyProfile_GetMyProfile {
+  __typename: "GetMyProfileResponse";
+  ok: boolean;
+  error: string | null;
+  user: GetMyProfile_GetMyProfile_user | null;
+}
+
+export interface GetMyProfile {
+  GetMyProfile: GetMyProfile_GetMyProfile;
+}
+
+/* tslint:disable */
+/* eslint-disable */
+// @generated
+// This file was automatically generated and should not be edited.
+
+// ====================================================
 // GraphQL mutation operation: ReportMovement
 // ====================================================
 
@@ -393,34 +428,6 @@ export interface GetUserListVariables {
   means: string;
   skip: number;
   take: number;
-}
-
-/* tslint:disable */
-/* eslint-disable */
-// @generated
-// This file was automatically generated and should not be edited.
-
-// ====================================================
-// GraphQL query operation: GetMyProfile
-// ====================================================
-
-export interface GetMyProfile_GetMyProfile_user {
-  __typename: "User";
-  id: number;
-  nickName: string;
-  gender: string;
-  birth: string;
-}
-
-export interface GetMyProfile_GetMyProfile {
-  __typename: "GetMyProfileResponse";
-  ok: boolean;
-  error: string | null;
-  user: GetMyProfile_GetMyProfile_user | null;
-}
-
-export interface GetMyProfile {
-  GetMyProfile: GetMyProfile_GetMyProfile;
 }
 
 /* tslint:disable */

@@ -2,8 +2,8 @@ import React from 'react';
 import styled from 'styled-components/native';
 import {ScrollView} from 'react-native-gesture-handler';
 import {useQuery} from '@apollo/react-hooks';
-import {GET_MY_PROFILE} from './Profile.queries';
-import MyProfile from '../../components/MyProfile';
+import {GET_MY_PROFILE} from './MyProfile.queries';
+import ProfileComponent from '../../components/Profile';
 import {GetMyProfile, GetMyProfile_GetMyProfile} from '../../types/api';
 import withSuspense from '../../withSuspense';
 import {useNavigation} from '@react-navigation/native';
@@ -39,7 +39,7 @@ const Profile: React.FunctionComponent<IProp> = () => {
     return (
       <ScrollView>
         <View>
-          <MyProfile nickName={nickName} gender={gender} birth={birth} />
+          <ProfileComponent nickName={nickName} gender={gender} birth={birth} />
         </View>
       </ScrollView>
     );

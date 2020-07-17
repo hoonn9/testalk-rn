@@ -68,11 +68,7 @@ interface IProp extends TouchableOpacityProps {
   gender: string;
 }
 
-const MyProfile: React.FunctionComponent<IProp> = ({
-  nickName,
-  birth,
-  gender,
-}) => {
+const Profile: React.FunctionComponent<IProp> = ({nickName, birth, gender}) => {
   const maxNameLength = 16;
   const nick = nickName;
   return (
@@ -103,4 +99,4 @@ const MyProfile: React.FunctionComponent<IProp> = ({
   );
 };
 
-export default MyProfile;
+export default Profile;

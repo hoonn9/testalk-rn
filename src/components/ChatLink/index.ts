@@ -1,1 +1,1 @@
-export { default } from "./ChatLink";
+yexport { default } from "./ChatLink";

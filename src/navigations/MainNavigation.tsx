@@ -2,6 +2,7 @@ import React from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import TabNavigation from './TabNavigation';
 import MessageNavigation from './MessageNavigation';
+import EditProfileNavigation from './EditProfileNavigation';
 
 const Stack = createStackNavigator();
 
@@ -23,6 +24,11 @@ const MainNavigation = () => {
       <Stack.Screen
         name="MessageNavigation"
         component={MessageNavigation}
+        options={{}}
+      />
+      <Stack.Screen
+        name="EditProfileNavigation"
+        component={EditProfileNavigation}
         options={{}}
       />
     </Stack.Navigator>
