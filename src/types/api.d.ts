@@ -158,6 +158,31 @@ export interface GetMyChat {
 // This file was automatically generated and should not be edited.
 
 // ====================================================
+// GraphQL mutation operation: UpdateUserProfile
+// ====================================================
+
+export interface UpdateUserProfile_UpdateUserProfile {
+  __typename: "UpdateUserProfileResponse";
+  ok: boolean;
+  error: string | null;
+}
+
+export interface UpdateUserProfile {
+  UpdateUserProfile: UpdateUserProfile_UpdateUserProfile;
+}
+
+export interface UpdateUserProfileVariables {
+  nickName: string;
+  intro: string;
+  profilePhoto: PhotoObject[];
+}
+
+/* tslint:disable */
+/* eslint-disable */
+// @generated
+// This file was automatically generated and should not be edited.
+
+// ====================================================
 // GraphQL subscription operation: MessageSubscription
 // ====================================================
 
@@ -345,6 +370,7 @@ export interface GetMyProfile_GetMyProfile_user_profilePhoto {
   __typename: "File";
   id: number;
   url: string;
+  key: string;
 }
 
 export interface GetMyProfile_GetMyProfile_user {
@@ -353,6 +379,7 @@ export interface GetMyProfile_GetMyProfile_user {
   nickName: string;
   gender: string;
   birth: string;
+  intro: string;
   profilePhoto: GetMyProfile_GetMyProfile_user_profilePhoto[] | null;
 }
 
@@ -474,6 +501,17 @@ export interface GetUserProfileVariables {
 
 export enum CustomTokenMeansOptions {
   KAKAO = "KAKAO",
+}
+
+export enum PhotoTarget {
+  delete = "delete",
+  upload = "upload",
+}
+
+export interface PhotoObject {
+  url: string;
+  key: string;
+  target: PhotoTarget;
 }
 
 //==============================================================

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import styled from 'styled-components/native';
 import {ScrollView} from 'react-native-gesture-handler';
 import {useQuery} from '@apollo/react-hooks';
@@ -90,6 +90,14 @@ const Profile: React.FunctionComponent<IProp> = () => {
   >(GET_MY_PROFILE, {
     fetchPolicy: 'network-only',
   });
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      console.log('MyProfile onFocus');
+      refetch();
+    });
+    return unsubscribe;
+  }, []);
 
   const editOnPress = () => {
     if (

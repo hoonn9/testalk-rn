@@ -1,26 +1,28 @@
-import React, {useEffect, useState, useLayoutEffect, useCallback} from 'react';
+import React, {useEffect, useState, useLayoutEffect} from 'react';
 import styled from 'styled-components/native';
 import {ScrollView} from 'react-native-gesture-handler';
 import {useMutation} from '@apollo/react-hooks';
-import {GetMyProfile_GetMyProfile_user} from '../../types/api';
-import {useNavigation, RouteProp} from '@react-navigation/native';
 import {
-  StyleSheet,
-  Image,
-  Platform,
-  Button,
-  GestureResponderEvent,
-} from 'react-native';
+  GetMyProfile_GetMyProfile_user,
+  PhotoObject,
+  UpdateUserProfile,
+  UpdateUserProfileVariables,
+} from '../../types/api';
+import {useNavigation, RouteProp} from '@react-navigation/native';
+import {Platform, GestureResponderEvent} from 'react-native';
+import Modal from 'react-native-modal';
 import constants from '../../constants';
 import {getAge} from '../../utils';
 import Icon from 'react-native-vector-icons/AntDesign';
 import EditProfilePhoto from '../../components/EditProfilePhoto';
 import EditProfileAddPhoto from '../../components/EditProfileAddPhoto';
 import ImagePicker from 'react-native-image-picker';
-import {PERMISSIONS, check, RESULTS, request} from 'react-native-permissions';
 import {toast} from '../../tools';
 import axios from 'axios';
 import getEnvVars from '../../enviroments';
+import {UPDATE_USER_PROFILE} from './EditProfile.queries';
+import styles from '../../styles';
+import ModalSelector from '../../components/ModalSelector';
 
 const View = styled.View``;
 const Container = styled.View`
@@ -84,14 +86,6 @@ const GenderText = styled.Text`
   font-size: 24px;
 `;
 
-const styles = StyleSheet.create({
-  image: {
-    width: 125,
-    height: 125,
-    borderRadius: 125 / 2,
-  },
-});
-
 type RouteParamProp = {
   EditProfile: {
     user: GetMyProfile_GetMyProfile_user;
@@ -121,10 +115,17 @@ const pickerOptions = {
   },
 };
 
-interface PhotoListProp {
+export interface PhotoProp {
   id: number;
-  url: string;
+  uri: string;
+  key: string;
   isNew: boolean;
+  fileName: string;
+}
+
+enum PhotoTarget {
+  delete = 'delete',
+  upload = 'upload',
 }
 
 interface EditButtonProp {
@@ -135,13 +136,22 @@ const EditProfile: React.FunctionComponent<IProp> = ({route}) => {
   const maxNameLength = 16;
   const navigation = useNavigation();
 
-  const {id, nickName, gender, birth, profilePhoto} = route.params.user;
-  const [photoList, setPhotoList] = useState<Array<PhotoListProp>>([]);
+  const {id, nickName, gender, birth, profilePhoto, intro} = route.params.user;
+  const [photoList, setPhotoList] = useState<Array<PhotoProp>>([]);
+  const [isRemoveModal, setIsRemoveModal] = useState<boolean>(false);
+  const [isConfirmModal, setIsConfirmModal] = useState<boolean>(false);
+  const [removePhoto, setRemovePhoto] = useState<PhotoProp | {}>({});
+  const [editProfileMutation] = useMutation<
+    UpdateUserProfile,
+    UpdateUserProfileVariables
+  >(UPDATE_USER_PROFILE);
 
   // 헤더 버튼 생성
   useLayoutEffect(() => {
     navigation.setOptions({
-      headerRight: () => <EditConfirmButton onPress={editConfirmOnPress} />,
+      headerRight: () => (
+        <EditConfirmButton onPress={() => setIsConfirmModal(!isConfirmModal)} />
+      ),
     });
   }, [navigation, photoList]);
 
@@ -157,26 +167,26 @@ const EditProfile: React.FunctionComponent<IProp> = ({route}) => {
 
   useEffect(() => {
     if (profilePhoto && profilePhoto.length > 0) {
+      if (photoList) {
+        setPhotoList([]);
+      }
       for (let i = 0; i < profilePhoto.length; i++) {
-        setPhotoList([
-          ...photoList,
+        setPhotoList(prevPhotoList => [
+          ...prevPhotoList,
           {
             id: profilePhoto[i].id,
-            url: profilePhoto[i].url,
+            uri: profilePhoto[i].url,
+            key: profilePhoto[i].key,
             isNew: false,
+            fileName: '',
           },
         ]);
       }
     }
   }, []);
 
-  //console.log(route.params.user);
-  const formData = new FormData();
-  //console.log(formData);
   const addPhotoOnPress = () => {
     ImagePicker.showImagePicker(pickerOptions, response => {
-      console.log('Response = ', response);
-      response.type === '';
       if (response.didCancel) {
         console.log('User cancelled image picker');
       } else if (response.error) {
@@ -187,112 +197,224 @@ const EditProfile: React.FunctionComponent<IProp> = ({route}) => {
         const {uri, fileName} = response;
 
         if (fileName) {
-          console.log(photoList);
-          formData.append('file', {
-            name: fileName,
-            uri,
-            type:
-              Platform.OS === 'ios'
-                ? fileName.split('.')[1].toLowerCase()
-                : 'image/jpeg',
-          });
           setPhotoList(prevPhotoList => [
             ...prevPhotoList,
-            {id: -1, url: uri, isNew: true},
+            {id: -1, uri, key: '', isNew: true, fileName},
           ]);
-          console.log(photoList);
         }
-
-        // You can also display the image using data:
-        // const source = { uri: 'data:image/jpeg;base64,' + response.data };
-
-        //   this.setState({
-        //     avatarSource: source,
-        //   });
       }
     });
   };
+
   useEffect(() => {
     console.log(photoList);
   }, [photoList]);
 
-  const editConfirmOnPress = async () => {
-    console.log('check');
-    console.log(photoList);
+  const editConfirm = async () => {
+    const formData = new FormData();
     const newPhotos = photoList.filter(e => e.isNew);
-    console.log(newPhotos);
+    const profilePhotoArray: Array<PhotoObject> = [];
+
+    if (profilePhoto) {
+      const removedPhotos = profilePhoto.filter((element, index) => {
+        const temp = photoList.find((photo, i) => {
+          console.log(element.url, photo.uri);
+          if (photo.isNew || photo.uri !== element.url) {
+            return false;
+          } else {
+            return true;
+          }
+        });
+        console.log('temp', temp);
+        return !temp;
+      });
+
+      for (let i = 0; i < removedPhotos.length; i++) {
+        profilePhotoArray.push({
+          url: removedPhotos[i].url,
+          key: removedPhotos[i].key,
+          target: PhotoTarget.delete,
+        });
+      }
+
+      console.log('삭제 사진들', removedPhotos);
+      console.log('추가할 사진들', newPhotos);
+    }
+
     if (newPhotos) {
-      // try {
-      //   const {
-      //     data: {location},
-      //   } = await axios
-      //     .post(`${getEnvVars().apiUrl}api/upload`, formData, {
-      //       headers: {
-      //         'Content-type': 'multipart/form-data',
-      //       },
-      //     })
-      //     .then(e => {
-      //       console.log(e, 'success');
-      //     })
-      //     .catch(e => {
-      //       console.log(e, 'error');
-      //     });
-      //   console.log(location);
-      // } catch (error) {
-      //   console.log(error);
-      // }
+      try {
+        newPhotos.map((element, index) => {
+          formData.append('file', {
+            name: element.fileName,
+            uri: element.uri,
+            type:
+              Platform.OS === 'ios'
+                ? element.fileName.split('.')[1].toLowerCase()
+                : 'image/jpeg',
+          });
+        });
+
+        const {
+          data: {locationArray},
+        } = await axios
+          .post(`${getEnvVars().apiUrl}api/upload`, formData, {
+            headers: {
+              'Content-type': 'multipart/form-data',
+            },
+          })
+          .then((e: any) => {
+            console.log(e);
+            return e;
+          })
+          .catch(e => {
+            toast('이미지 업로드에 실패했어요. 다시 시도 해주세요.');
+            console.log(e, 'error');
+          });
+
+        for (let i = 0; i < locationArray.length; i++) {
+          profilePhotoArray.push({
+            url: locationArray[i].url,
+            key: locationArray[i].key,
+            target: PhotoTarget.upload,
+          });
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    try {
+      const {data} = await editProfileMutation({
+        variables: {
+          nickName: nickName,
+          intro: intro,
+          profilePhoto: profilePhotoArray,
+        },
+      });
+      if (data && data.UpdateUserProfile && data.UpdateUserProfile.ok) {
+        console.log(data);
+        toast('수정이 완료되었어요.');
+        navigation.goBack();
+      } else {
+        throw Error();
+      }
+    } catch (error) {
+      toast('프로필을 수정하는 도중 오류가 발생했어요.');
+      console.log(error);
     }
   };
 
+  const photoRemoveOnPress = (photo: PhotoProp) => {
+    console.log('삭제');
+    console.log(photo);
+    setIsRemoveModal(true);
+    setRemovePhoto(photo);
+  };
+
+  const removePhotoCallback = () => {
+    console.log('이미지 삭제');
+    setIsRemoveModal(false);
+    const removePhotoIndex = photoList.findIndex(
+      element => element === removePhoto,
+    );
+    console.log(removePhotoIndex);
+    photoList.splice(removePhotoIndex, 1);
+    console.log(photoList);
+  };
+
   return (
-    <ScrollView>
-      <Container>
-        <Wrapper>
-          <InfoContainer>
-            <ImageWrapper>
-              {photoList &&
-                photoList
-                  .filter((_, index) => index <= 2)
-                  .map((element, index) => {
-                    return <EditProfilePhoto key={index} url={element.url} />;
-                  })}
-              {photoList.length < 5 ? (
-                <EditProfileAddPhoto onPress={addPhotoOnPress} />
-              ) : null}
-            </ImageWrapper>
-            {photoList.length > 2 ? (
-              <ImageBottomWrapper>
+    <>
+      <ScrollView>
+        <Container>
+          <Wrapper>
+            <InfoContainer>
+              <ImageWrapper>
                 {photoList &&
                   photoList
-                    .filter((_, index) => index > 2)
-                    .map((element, index) => {
-                      console.log(element);
-                      return <EditProfilePhoto key={index} url={element.url} />;
+                    .filter((_, index) => index <= 2)
+                    .map((photo, index) => {
+                      return (
+                        <EditProfilePhoto
+                          key={index}
+                          photo={photo}
+                          removeOnPress={photoRemoveOnPress}
+                        />
+                      );
                     })}
                 {photoList.length < 5 ? (
                   <EditProfileAddPhoto onPress={addPhotoOnPress} />
                 ) : null}
-              </ImageBottomWrapper>
-            ) : null}
+              </ImageWrapper>
+              {photoList.length > 2 ? (
+                <ImageBottomWrapper>
+                  {photoList &&
+                    photoList
+                      .filter((_, index) => index > 2)
+                      .map((photo, index) => {
+                        console.log(photo);
+                        return (
+                          <EditProfilePhoto
+                            key={index}
+                            photo={photo}
+                            removeOnPress={photoRemoveOnPress}
+                          />
+                        );
+                      })}
+                  {photoList.length < 5 ? (
+                    <EditProfileAddPhoto onPress={addPhotoOnPress} />
+                  ) : null}
+                </ImageBottomWrapper>
+              ) : null}
 
-            <InfoWrapper>
-              <NameText numberOfLines={1}>
-                {nickName.length > maxNameLength
-                  ? nickName.substring(0, maxNameLength - 3) + '...'
-                  : nickName}
-              </NameText>
-              <AgeText>{getAge(birth)}</AgeText>
-              <GenderText>{gender === 'female' ? '♀' : '♂'}</GenderText>
-            </InfoWrapper>
-            <BottomWrapper>
-              <EditTouchable>
-                <Icon name="form" size={26} />
-              </EditTouchable>
-            </BottomWrapper>
-          </InfoContainer>
-        </Wrapper>
-      </Container>
-    </ScrollView>
+              <InfoWrapper>
+                <NameText numberOfLines={1}>
+                  {nickName.length > maxNameLength
+                    ? nickName.substring(0, maxNameLength - 3) + '...'
+                    : nickName}
+                </NameText>
+                <AgeText>{getAge(birth)}</AgeText>
+                <GenderText>{gender === 'female' ? '♀' : '♂'}</GenderText>
+              </InfoWrapper>
+              <BottomWrapper>
+                <EditTouchable>
+                  <Icon name="form" size={26} />
+                </EditTouchable>
+              </BottomWrapper>
+            </InfoContainer>
+          </Wrapper>
+        </Container>
+      </ScrollView>
+      <Modal
+        isVisible={isRemoveModal}
+        animationOut="fadeOutDown"
+        backdropColor={styles.modalBackDropColor}
+        backdropOpacity={0.3}
+        backdropTransitionOutTiming={0}
+        swipeDirection={['down']}
+        onSwipeComplete={() => setIsRemoveModal(!isRemoveModal)}>
+        <ModalSelector
+          description="사진을 지우실래요?"
+          confirmEvent={removePhotoCallback}
+          confirmTitle="확인"
+          cancelEvent={() => setIsRemoveModal(!isRemoveModal)}
+        />
+      </Modal>
+      <Modal
+        isVisible={isConfirmModal}
+        animationOut="fadeOutDown"
+        backdropColor={styles.modalBackDropColor}
+        backdropOpacity={0.3}
+        backdropTransitionOutTiming={0}
+        swipeDirection={['down']}
+        onSwipeComplete={() => setIsRemoveModal(!isRemoveModal)}>
+        <ModalSelector
+          description="이대로 수정하실래요?"
+          confirmEvent={editConfirm}
+          confirmTitle="확인"
+          cancelEvent={() => setIsRemoveModal(!isRemoveModal)}
+        />
+      </Modal>
+    </>
   );
 };
 

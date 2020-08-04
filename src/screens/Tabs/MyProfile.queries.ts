@@ -10,9 +10,11 @@ export const GET_MY_PROFILE = gql`
                 nickName
                 gender
                 birth
+                intro
                 profilePhoto {
                     id
                     url
+                    key
                 }
             }
         }
