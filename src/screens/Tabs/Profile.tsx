@@ -4,9 +4,10 @@ import {ScrollView} from 'react-native-gesture-handler';
 import {useQuery} from '@apollo/react-hooks';
 import {GET_MY_PROFILE} from './MyProfile.queries';
 import ProfileComponent from '../../components/Profile';
-import {GetMyProfile, GetMyProfile_GetMyProfile} from '../../types/api';
+import {GetUserProfile, GetUserProfileVariables} from '../../types/api';
 import withSuspense from '../../withSuspense';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, RouteProp} from '@react-navigation/native';
+import {GET_USER_PROFILE} from './Profile.queries';
 
 const View = styled.View`
   justify-content: center;
@@ -17,29 +18,59 @@ const View = styled.View`
 const Text = styled.Text``;
 const Touchable = styled.TouchableOpacity``;
 
-interface IProp {}
+type ProfileRouteProp = {
+  People: {
+    userId: number;
+  };
+};
 
-const Profile: React.FunctionComponent<IProp> = () => {
+type ProfileScreenRouteProp = RouteProp<ProfileRouteProp, 'People'>;
+
+interface IProp {
+  route: ProfileScreenRouteProp;
+}
+
+const Profile: React.FunctionComponent<IProp> = ({route}) => {
   const navigation = useNavigation();
   const {loading, error, refetch, data} = useQuery<
-    GetMyProfile,
-    GetMyProfile_GetMyProfile
-  >(GET_MY_PROFILE, {
+    GetUserProfile,
+    GetUserProfileVariables
+  >(GET_USER_PROFILE, {
     fetchPolicy: 'network-only',
+    variables: {
+      id: route.params.userId,
+    },
   });
 
   if (
     data &&
-    data.GetMyProfile &&
-    data.GetMyProfile.ok &&
-    data.GetMyProfile.user
+    data.GetUserProfile &&
+    data.GetUserProfile.ok &&
+    data.GetUserProfile.user
   ) {
-    const {id, nickName, gender, birth} = data.GetMyProfile.user;
+    const {
+      id,
+      nickName,
+      gender,
+      birth,
+      profilePhoto,
+    } = data.GetUserProfile.user;
     console.log('get profile');
+
+    const photoUrls: Array<string> = [];
+    if (profilePhoto) {
+      profilePhoto.map(e => photoUrls.push(e.url));
+    }
+
     return (
       <ScrollView>
         <View>
-          <ProfileComponent nickName={nickName} gender={gender} birth={birth} />
+          <ProfileComponent
+            nickName={nickName}
+            gender={gender}
+            birth={birth}
+            profilePhoto={photoUrls}
+          />
         </View>
       </ScrollView>
     );

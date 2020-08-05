@@ -1,10 +1,15 @@
-import React from "react";
-import styled from "styled-components/native";
-import { TextInputProps } from "react-native";
+import React from 'react';
+import styled from 'styled-components/native';
+import {TextInputProps} from 'react-native';
 
 const Container = styled.View``;
-const TextInput = styled.TextInput``;
-const Text = styled.Text``;
+const TextInput = styled.TextInput`
+  background-color: ${(props: any) => props.theme.lightGreyColor};
+`;
+const Text = styled.Text`
+  font-size: 18px;
+  font-weight: 700;
+`;
 
 interface IProp extends TextInputProps {
   title: string;
@@ -15,10 +20,10 @@ const TextInputRow: React.FunctionComponent<IProp> = ({
   title,
   placeholder,
   value,
-  keyboardType = "default",
-  autoCapitalize = "none",
+  keyboardType = 'default',
+  autoCapitalize = 'none',
   onChange = () => null,
-  returnKeyType = "done",
+  returnKeyType = 'done',
   onSubmitEditing = () => null,
   autoCorrect = true,
 }) => {

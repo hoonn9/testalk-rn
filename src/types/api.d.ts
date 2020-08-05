@@ -427,6 +427,11 @@ export interface ReportMovementVariables {
 // GraphQL query operation: GetUserList
 // ====================================================
 
+export interface GetUserList_GetUserList_users_profilePhoto {
+  __typename: "File";
+  url: string;
+}
+
 export interface GetUserList_GetUserList_users {
   __typename: "User";
   id: number;
@@ -435,6 +440,7 @@ export interface GetUserList_GetUserList_users {
   gender: string;
   intro: string;
   updatedAt: string | null;
+  profilePhoto: GetUserList_GetUserList_users_profilePhoto[] | null;
   lastLat: number | null;
   lastLng: number | null;
 }
@@ -466,13 +472,22 @@ export interface GetUserListVariables {
 // GraphQL query operation: GetUserProfile
 // ====================================================
 
+export interface GetUserProfile_GetUserProfile_user_profilePhoto {
+  __typename: "File";
+  url: string;
+}
+
 export interface GetUserProfile_GetUserProfile_user {
   __typename: "User";
   id: number;
   nickName: string;
-  gender: string;
   birth: string;
-  phoneNumber: string;
+  gender: string;
+  intro: string;
+  updatedAt: string | null;
+  profilePhoto: GetUserProfile_GetUserProfile_user_profilePhoto[] | null;
+  lastLat: number | null;
+  lastLng: number | null;
 }
 
 export interface GetUserProfile_GetUserProfile {

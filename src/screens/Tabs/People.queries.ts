@@ -21,6 +21,9 @@ export const GET_USER_LIST = gql`
                 gender
                 intro
                 updatedAt
+                profilePhoto {
+                    url
+                }
                 lastLat
                 lastLng
             }

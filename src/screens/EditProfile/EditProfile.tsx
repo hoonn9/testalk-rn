@@ -1,6 +1,5 @@
 import React, {useEffect, useState, useLayoutEffect} from 'react';
 import styled from 'styled-components/native';
-import {ScrollView} from 'react-native-gesture-handler';
 import {useMutation} from '@apollo/react-hooks';
 import {
   GetMyProfile_GetMyProfile_user,
@@ -12,8 +11,6 @@ import {useNavigation, RouteProp} from '@react-navigation/native';
 import {Platform, GestureResponderEvent} from 'react-native';
 import Modal from 'react-native-modal';
 import constants from '../../constants';
-import {getAge} from '../../utils';
-import Icon from 'react-native-vector-icons/AntDesign';
 import EditProfilePhoto from '../../components/EditProfilePhoto';
 import EditProfileAddPhoto from '../../components/EditProfileAddPhoto';
 import ImagePicker from 'react-native-image-picker';
@@ -23,6 +20,7 @@ import getEnvVars from '../../enviroments';
 import {UPDATE_USER_PROFILE} from './EditProfile.queries';
 import styles from '../../styles';
 import ModalSelector from '../../components/ModalSelector';
+import TextInputRow from '../../components/TextInputRow';
 
 const View = styled.View``;
 const Container = styled.View`
@@ -86,6 +84,13 @@ const GenderText = styled.Text`
   font-size: 24px;
 `;
 
+const InputWrapper = styled.View`
+  width: 100%;
+  margin: 8px 16px;
+`;
+
+const ScrollView = styled.ScrollView``;
+
 type RouteParamProp = {
   EditProfile: {
     user: GetMyProfile_GetMyProfile_user;
@@ -136,11 +141,22 @@ const EditProfile: React.FunctionComponent<IProp> = ({route}) => {
   const maxNameLength = 16;
   const navigation = useNavigation();
 
-  const {id, nickName, gender, birth, profilePhoto, intro} = route.params.user;
+  const {
+    id,
+    nickName: prevNickName,
+    gender,
+    birth: prevBirth,
+    profilePhoto,
+    intro: prevIntro,
+  } = route.params.user;
   const [photoList, setPhotoList] = useState<Array<PhotoProp>>([]);
   const [isRemoveModal, setIsRemoveModal] = useState<boolean>(false);
   const [isConfirmModal, setIsConfirmModal] = useState<boolean>(false);
   const [removePhoto, setRemovePhoto] = useState<PhotoProp | {}>({});
+  const [nickName, setNickName] = useState<string>(prevNickName);
+  const [birth, setBirth] = useState<string>(prevBirth);
+  const [intro, setIntro] = useState<string>(prevIntro);
+
   const [editProfileMutation] = useMutation<
     UpdateUserProfile,
     UpdateUserProfileVariables
@@ -211,11 +227,22 @@ const EditProfile: React.FunctionComponent<IProp> = ({route}) => {
   }, [photoList]);
 
   const editConfirm = async () => {
+    if (!nickName) {
+      toast('이름이 비었어요.');
+      return;
+    } else if (!intro) {
+      toast('소개가 비었어요.');
+      return;
+    } else if (!birth) {
+      toast('생일이 비었어요.');
+      return;
+    }
+
     const formData = new FormData();
     const newPhotos = photoList.filter(e => e.isNew);
     const profilePhotoArray: Array<PhotoObject> = [];
 
-    if (profilePhoto) {
+    if (profilePhoto && profilePhoto.length > 0) {
       const removedPhotos = profilePhoto.filter((element, index) => {
         const temp = photoList.find((photo, i) => {
           console.log(element.url, photo.uri);
@@ -225,7 +252,6 @@ const EditProfile: React.FunctionComponent<IProp> = ({route}) => {
             return true;
           }
         });
-        console.log('temp', temp);
         return !temp;
       });
 
@@ -236,12 +262,9 @@ const EditProfile: React.FunctionComponent<IProp> = ({route}) => {
           target: PhotoTarget.delete,
         });
       }
-
-      console.log('삭제 사진들', removedPhotos);
-      console.log('추가할 사진들', newPhotos);
     }
 
-    if (newPhotos) {
+    if (newPhotos.length > 0) {
       try {
         newPhotos.map((element, index) => {
           formData.append('file', {
@@ -365,20 +388,21 @@ const EditProfile: React.FunctionComponent<IProp> = ({route}) => {
                   ) : null}
                 </ImageBottomWrapper>
               ) : null}
-
-              <InfoWrapper>
-                <NameText numberOfLines={1}>
-                  {nickName.length > maxNameLength
-                    ? nickName.substring(0, maxNameLength - 3) + '...'
-                    : nickName}
-                </NameText>
-                <AgeText>{getAge(birth)}</AgeText>
-                <GenderText>{gender === 'female' ? '♀' : '♂'}</GenderText>
-              </InfoWrapper>
               <BottomWrapper>
-                <EditTouchable>
-                  <Icon name="form" size={26} />
-                </EditTouchable>
+                <InputWrapper>
+                  <TextInputRow
+                    title="닉네임"
+                    value={nickName}
+                    onChange={(text: string) => setNickName(text)}
+                  />
+                </InputWrapper>
+                <InputWrapper>
+                  <TextInputRow
+                    title="나의 소개"
+                    value={intro}
+                    onChange={(text: string) => setIntro(text)}
+                  />
+                </InputWrapper>
               </BottomWrapper>
             </InfoContainer>
           </Wrapper>
@@ -406,12 +430,12 @@ const EditProfile: React.FunctionComponent<IProp> = ({route}) => {
         backdropOpacity={0.3}
         backdropTransitionOutTiming={0}
         swipeDirection={['down']}
-        onSwipeComplete={() => setIsRemoveModal(!isRemoveModal)}>
+        onSwipeComplete={() => setIsConfirmModal(!isConfirmModal)}>
         <ModalSelector
           description="이대로 수정하실래요?"
           confirmEvent={editConfirm}
           confirmTitle="확인"
-          cancelEvent={() => setIsRemoveModal(!isRemoveModal)}
+          cancelEvent={() => setIsConfirmModal(!isConfirmModal)}
         />
       </Modal>
     </>

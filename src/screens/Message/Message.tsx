@@ -46,11 +46,9 @@ import {
   UserInfoProp,
   removeChat,
 } from '../../dbTools';
-import {GET_USER_PROFILE} from '../../sharedQueries.queries';
 import ModalSelector from '../../components/ModalSelector';
 import styles from '../../styles';
 import {dateSeparateConverter} from '../../utils';
-import {GET_MY_CHAT} from '../Chat/Chat.queries';
 import ModalAlert from '../../components/ModalAlert';
 
 const Container = styled.View`

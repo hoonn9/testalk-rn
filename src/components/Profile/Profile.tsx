@@ -66,9 +66,15 @@ interface IProp extends TouchableOpacityProps {
   nickName: string;
   birth: string;
   gender: string;
+  profilePhoto: Array<string>;
 }
 
-const Profile: React.FunctionComponent<IProp> = ({nickName, birth, gender}) => {
+const Profile: React.FunctionComponent<IProp> = ({
+  nickName,
+  birth,
+  gender,
+  profilePhoto,
+}) => {
   const maxNameLength = 16;
   const nick = nickName;
   return (
@@ -76,12 +82,13 @@ const Profile: React.FunctionComponent<IProp> = ({nickName, birth, gender}) => {
       <Wrapper>
         <InfoContainer>
           <ImageWrapper>
-            <Touchable>
-              <Image
-                source={{uri: 'https://i.stack.imgur.com/l60Hf.png'}}
-                style={styles.image}
-              />
-            </Touchable>
+            {profilePhoto.map((element, index) => {
+              return (
+                <Touchable>
+                  <Image source={{uri: element}} style={styles.image} />
+                </Touchable>
+              );
+            })}
           </ImageWrapper>
           <InfoWrapper>
             <NameText numberOfLines={1}>

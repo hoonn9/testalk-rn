@@ -118,7 +118,7 @@ const Profile: React.FunctionComponent<IProp> = () => {
     data.GetMyProfile.ok &&
     data.GetMyProfile.user
   ) {
-    const {id, nickName, gender, birth} = data.GetMyProfile.user;
+    const {id, nickName, gender, birth, profilePhoto} = data.GetMyProfile.user;
     console.log(data.GetMyProfile.user);
     return (
       <ScrollView>
@@ -128,7 +128,12 @@ const Profile: React.FunctionComponent<IProp> = () => {
               <ImageWrapper>
                 <ImageTouchable>
                   <Image
-                    source={{uri: 'https://i.stack.imgur.com/l60Hf.png'}}
+                    source={{
+                      uri:
+                        profilePhoto && profilePhoto.length > 0
+                          ? profilePhoto[0].url
+                          : 'https://i.stack.imgur.com/l60Hf.png',
+                    }}
                     style={styles.image}
                   />
                 </ImageTouchable>

@@ -17,7 +17,7 @@ const Wrapper = styled.View`
   background-color: #ddd;
   padding: 1px 0px;
 `;
-const ImageWrapper = styled.View`
+const ImageTouchable = styled.TouchableOpacity`
   justify-content: center;
   background-color: #ddd;
   padding: 0px 8px;
@@ -62,6 +62,7 @@ interface IProp {
   lastLng: number | undefined | null;
   getDistance: Function;
   onSelected: Function;
+  imageOnPress: Function;
 }
 
 const PeopleRowItem: React.FunctionComponent<IProp> = ({
@@ -76,15 +77,16 @@ const PeopleRowItem: React.FunctionComponent<IProp> = ({
   lastLng,
   getDistance,
   onSelected = () => null,
+  imageOnPress = () => null,
 }) => {
   return (
     <Container>
-      <ImageWrapper>
+      <ImageTouchable onPress={() => imageOnPress(id)}>
         <Image
           source={{uri: profilePhoto}}
           style={gender ? styles(gender).image : styles().image}
         />
-      </ImageWrapper>
+      </ImageTouchable>
       <Touchable
         onPress={() =>
           onSelected(id, {

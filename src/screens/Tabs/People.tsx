@@ -60,6 +60,9 @@ type FeedsTabParamList = {
       profilePhoto: string;
     };
   };
+  Profile: {
+    userId: number;
+  }
 };
 
 type NavigationProp = StackNavigationProp<FeedsTabParamList, "MessageNavigation">
@@ -197,6 +200,10 @@ const People: React.FunctionComponent<IProp> = ({ navigation }) => {
     navigation.navigate("MessageNavigation", { userId, userInfo });
   }, []);
 
+  const imageOnPress = (id: number) => {
+    navigation.navigate("Profile", {userId: id});
+  }
+
   useEffect(() => {
     const getUserId = async () => {
       const userId = await AsyncStorage.getItem("userId");
@@ -231,6 +238,7 @@ const People: React.FunctionComponent<IProp> = ({ navigation }) => {
                 windowSize={5}
                 data={listData}
                 renderItem={(data) => {
+                  console.log(data)
                   return data.item?.id !== userId ? (
                     <PeopleRow
                       id={data.item?.id}
@@ -238,12 +246,13 @@ const People: React.FunctionComponent<IProp> = ({ navigation }) => {
                       gender={data.item?.gender}
                       birth={data.item?.birth}
                       intro={data.item?.intro}
-                      profilePhoto={"https://i.stack.imgur.com/l60Hf.png"}
+                      profilePhoto={data.item?.profilePhoto && data.item?.profilePhoto.length > 0 ?data.item?.profilePhoto[0].url : "https://i.stack.imgur.com/l60Hf.png"}
                       updatedAt={data.item?.updatedAt}
                       lastLat={data.item?.lastLat}
                       lastLng={data.item?.lastLng}
                       getDistance={getDistance}
                       onSelected={infoOnPress}
+                      imageOnPress={imageOnPress}
                     />
                   ) : null;
                 }}
