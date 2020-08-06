@@ -429,6 +429,7 @@ export interface ReportMovementVariables {
 
 export interface GetUserList_GetUserList_users_profilePhoto {
   __typename: "File";
+  id: number;
   url: string;
 }
 

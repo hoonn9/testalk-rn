@@ -106,9 +106,18 @@ export const distance = (lat1: number, lng1: number, lat2: number, lng2: number,
         dist = Math.acos(dist);
         dist = dist * 180 / Math.PI;
         dist = dist * 60 * 1.1515;
-        if (unit == "K") { dist = dist * 1.609344 }
+
+        if (unit == "K") {
+            dist = dist * 1.609344;
+            console.log(dist);
+            if (dist < 0.1) {
+                return "100 m 이내"
+            } else if (dist < 1) {
+                return `${(dist * 1000).toFixed(0)} m`;
+            }
+        }
         if (unit == "N") { dist = dist * 0.8684 }
-        return dist.toFixed(1);
+        return `${dist.toFixed(2)} km`;
     }
 }
 

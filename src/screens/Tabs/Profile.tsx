@@ -1,22 +1,42 @@
-import React from 'react';
+import React, {useLayoutEffect, useState} from 'react';
 import styled from 'styled-components/native';
 import {ScrollView} from 'react-native-gesture-handler';
 import {useQuery} from '@apollo/react-hooks';
+import Modal from 'react-native-modal';
 import {GET_MY_PROFILE} from './MyProfile.queries';
 import ProfileComponent from '../../components/Profile';
 import {GetUserProfile, GetUserProfileVariables} from '../../types/api';
-import withSuspense from '../../withSuspense';
 import {useNavigation, RouteProp} from '@react-navigation/native';
 import {GET_USER_PROFILE} from './Profile.queries';
-
+import FastImage from 'react-native-fast-image';
+import styles from '../../styles';
+import {StyleSheet} from 'react-native';
+import Icon from 'react-native-vector-icons/FontAwesome';
 const View = styled.View`
-  justify-content: center;
-  align-items: center;
   flex: 1;
+  width: 100%;
+  height: 100%;
 `;
 
 const Text = styled.Text``;
 const Touchable = styled.TouchableOpacity``;
+const ModalBackButton = styled.TouchableOpacity`
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  justify-content: center;
+  align-items: flex-end;
+  right: 0;
+  top: 0;
+`;
+const styleSheets = StyleSheet.create({
+  image: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+  },
+});
 
 type ProfileRouteProp = {
   People: {
@@ -32,15 +52,33 @@ interface IProp {
 
 const Profile: React.FunctionComponent<IProp> = ({route}) => {
   const navigation = useNavigation();
+  const {userId} = route.params;
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: '',
+      headerTransparent: true,
+      headerRight: () => null,
+    });
+  }, [navigation]);
+
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const [modalImage, setModalImage] = useState<string>('');
+
   const {loading, error, refetch, data} = useQuery<
     GetUserProfile,
     GetUserProfileVariables
   >(GET_USER_PROFILE, {
     fetchPolicy: 'network-only',
     variables: {
-      id: route.params.userId,
+      id: userId,
     },
   });
+
+  const ImageOnPress = (url: string) => {
+    setIsModalVisible(true);
+    setModalImage(url);
+  };
 
   if (
     data &&
@@ -48,14 +86,7 @@ const Profile: React.FunctionComponent<IProp> = ({route}) => {
     data.GetUserProfile.ok &&
     data.GetUserProfile.user
   ) {
-    const {
-      id,
-      nickName,
-      gender,
-      birth,
-      profilePhoto,
-    } = data.GetUserProfile.user;
-    console.log('get profile');
+    const {nickName, gender, birth, profilePhoto} = data.GetUserProfile.user;
 
     const photoUrls: Array<string> = [];
     if (profilePhoto) {
@@ -63,16 +94,39 @@ const Profile: React.FunctionComponent<IProp> = ({route}) => {
     }
 
     return (
-      <ScrollView>
-        <View>
-          <ProfileComponent
-            nickName={nickName}
-            gender={gender}
-            birth={birth}
-            profilePhoto={photoUrls}
-          />
-        </View>
-      </ScrollView>
+      <>
+        <ScrollView>
+          <View>
+            <ProfileComponent
+              nickName={nickName}
+              gender={gender}
+              birth={birth}
+              profilePhoto={photoUrls}
+              ImageOnPress={ImageOnPress}
+            />
+          </View>
+        </ScrollView>
+        <Modal
+          isVisible={isModalVisible}
+          animationOut="fadeOutDown"
+          backdropColor={styles.blackColor}
+          backdropOpacity={0.8}
+          backdropTransitionOutTiming={0}
+          swipeDirection={['down']}
+          onSwipeComplete={() => setIsModalVisible(!isModalVisible)}
+          onBackButtonPress={() => setIsModalVisible(false)}>
+          <View>
+            <FastImage
+              style={styleSheets.image}
+              source={{uri: modalImage}}
+              resizeMode={FastImage.resizeMode.contain}
+            />
+            <ModalBackButton onPress={() => setIsModalVisible(false)}>
+              <Icon name="remove" size={21} color={styles.whiteColor} />
+            </ModalBackButton>
+          </View>
+        </Modal>
+      </>
     );
   } else {
     return (
@@ -85,4 +139,4 @@ const Profile: React.FunctionComponent<IProp> = ({route}) => {
   }
 };
 
-export default withSuspense(Profile);
+export default Profile;

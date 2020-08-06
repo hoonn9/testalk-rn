@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useCallback, useRef} from 'react';
-import {ActivityIndicator, FlatList, AppState} from 'react-native';
+import {ActivityIndicator, FlatList, AppState, BackHandler} from 'react-native';
 import styled from 'styled-components/native';
 import ChatRoomRow from '../../components/ChatRoomRow';
 import {getChatRooms, ChatRoomProp} from '../../dbTools';
@@ -8,6 +8,7 @@ import {GetMyChat, GetMyChat_GetMyChat_chat} from '../../types/api';
 import {GET_MY_CHAT} from './Chat.queries';
 import {useNavigation} from '@react-navigation/native';
 import messaging from '@react-native-firebase/messaging';
+import {toast} from '../../tools';
 
 const View = styled.View`
   justify-content: center;
@@ -122,6 +123,34 @@ const Chat: React.FunctionComponent<IProp> = () => {
     });
     return unsubscribe;
   }, [navigation]);
+
+  //Exit event
+
+  // let exitState = false;
+  // let timeout: NodeJS.Timeout;
+
+  // useEffect(() => {
+  //   const backAction = () => {
+  //     if (!exitState) {
+  //       toast('한번 더 누르시면 종료됩니다.');
+  //       exitState = true;
+  //       timeout = setTimeout(() => {
+  //         exitState = false;
+  //       }, 2000);
+  //     } else {
+  //       clearTimeout(timeout);
+  //       BackHandler.exitApp();
+  //     }
+  //     return true;
+  //   };
+
+  //   const backHandler = BackHandler.addEventListener(
+  //     'hardwareBackPress',
+  //     backAction,
+  //   );
+
+  //   return () => backHandler.remove();
+  // }, []);
 
   return (
     <>

@@ -6,10 +6,11 @@ import {GET_MY_PROFILE} from './MyProfile.queries';
 import {GetMyProfile, GetMyProfile_GetMyProfile} from '../../types/api';
 import withSuspense from '../../withSuspense';
 import {useNavigation} from '@react-navigation/native';
-import {StyleSheet, Image} from 'react-native';
+import {StyleSheet, Image, BackHandler} from 'react-native';
 import constants from '../../constants';
 import {getAge} from '../../utils';
 import Icon from 'react-native-vector-icons/AntDesign';
+import {toast} from '../../tools';
 
 const View = styled.View``;
 const Container = styled.View`
@@ -98,6 +99,34 @@ const Profile: React.FunctionComponent<IProp> = () => {
     });
     return unsubscribe;
   }, []);
+
+  //Exit event
+
+  // let exitState = false;
+  // let timeout: NodeJS.Timeout;
+
+  // useEffect(() => {
+  //   const backAction = () => {
+  //     if (!exitState) {
+  //       toast('한번 더 누르시면 종료됩니다.');
+  //       exitState = true;
+  //       timeout = setTimeout(() => {
+  //         exitState = false;
+  //       }, 2000);
+  //     } else {
+  //       clearTimeout(timeout);
+  //       BackHandler.exitApp();
+  //     }
+  //     return true;
+  //   };
+
+  //   const backHandler = BackHandler.addEventListener(
+  //     'hardwareBackPress',
+  //     backAction,
+  //   );
+
+  //   return () => backHandler.remove();
+  // }, []);
 
   const editOnPress = () => {
     if (

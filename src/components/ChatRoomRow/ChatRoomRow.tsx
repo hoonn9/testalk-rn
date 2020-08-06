@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components/native';
-import {Image, StyleSheet} from 'react-native';
 import {dateMessageConverter} from '../../utils';
+import PeoplePhoto from '../PeoplePhoto';
 
 const Container = styled.View`
   flex: 1;
@@ -61,15 +61,7 @@ interface IProp {
     },
   ) => void | undefined;
 }
-const styles = () =>
-  StyleSheet.create({
-    image: {
-      width: 65,
-      height: 65,
-      borderRadius: 50 / 2,
-      borderWidth: 1,
-    },
-  });
+
 const ChatRoomRow: React.FunctionComponent<IProp> = ({
   id,
   userId,
@@ -85,19 +77,7 @@ const ChatRoomRow: React.FunctionComponent<IProp> = ({
   return (
     <Container>
       <ImageWrapper>
-        {profilePhoto ? (
-          <Image source={{uri: profilePhoto}} style={styles().image} />
-        ) : gender === 'male' ? (
-          <Image
-            source={require('../../../images/male.png')}
-            style={styles().image}
-          />
-        ) : (
-          <Image
-            source={require('../../../images/female.png')}
-            style={styles().image}
-          />
-        )}
+        <PeoplePhoto uri={profilePhoto} gender={gender} />
       </ImageWrapper>
       <Touchable
         onPress={() =>

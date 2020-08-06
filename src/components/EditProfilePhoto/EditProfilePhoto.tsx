@@ -1,10 +1,11 @@
 import React from 'react';
 import styled from 'styled-components/native';
-import {Image, StyleSheet, GestureResponderEvent} from 'react-native';
+import {StyleSheet} from 'react-native';
 import constants from '../../constants';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import styles from '../../styles';
 import {PhotoProp} from '../../screens/EditProfile/EditProfile';
+import FastImage from 'react-native-fast-image';
 
 const Container = styled.View`
   width: ${`${constants.width / 3}px`};
@@ -47,7 +48,7 @@ const EditProfilePhoto: React.FunctionComponent<IProp> = ({
   return (
     <Container>
       <Touchable>
-        <Image source={{uri: photo.uri}} style={styleSheets.image} />
+        <FastImage source={{uri: photo.uri}} style={styleSheets.image} />
         <RemoveTouchable onPress={() => removeOnPress(photo)}>
           <Icon name="remove" size={21} color={styles.blackColor} />
         </RemoveTouchable>

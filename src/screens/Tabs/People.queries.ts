@@ -22,6 +22,7 @@ export const GET_USER_LIST = gql`
                 intro
                 updatedAt
                 profilePhoto {
+                    id
                     url
                 }
                 lastLat

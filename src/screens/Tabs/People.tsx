@@ -1,33 +1,30 @@
-import React, {
-  useState,
-  useEffect,
-  createRef,
-  useCallback,
-} from "react";
+import React, {useState, useEffect, useCallback} from 'react';
 import {
   Alert,
   ActivityIndicator,
   RefreshControl,
   FlatList,
-} from "react-native";
-import styled from "styled-components/native";
-import { useLazyQuery, useMutation } from "@apollo/react-hooks";
-import AsyncStorage from "@react-native-community/async-storage";
+  BackHandler,
+} from 'react-native';
+import styled from 'styled-components/native';
+import {useLazyQuery, useMutation} from '@apollo/react-hooks';
+import AsyncStorage from '@react-native-community/async-storage';
 import Geolocation from '@react-native-community/geolocation';
+import {StackNavigationProp} from '@react-navigation/stack';
 import {
   ReportMovement,
   ReportMovementVariables,
   GetUserList,
   GetUserListVariables,
-  GetUserList_GetUserList_users,
-} from "../../types/api";
-import { UPDATE_LOCATION, GET_USER_LIST } from "./People.queries";
-import RequestPermission from "../../components/RequestPermission";
-import PeopleRow from "../../components/PeopleRow";
-import RowSeparator from "../../components/RowSeparator";
-import { distance } from "../../utils";
-import { toast } from "../../tools";
-import { StackNavigationProp } from "@react-navigation/stack";
+  GetUserList_GetUserList_users_profilePhoto,
+} from '../../types/api';
+import {UPDATE_LOCATION, GET_USER_LIST} from './People.queries';
+import RequestPermission from '../../components/RequestPermission';
+import PeopleRow from '../../components/PeopleRow';
+import RowSeparator from '../../components/RowSeparator';
+import {distance} from '../../utils';
+import {toast} from '../../tools';
+import {useRoute, StackActions} from '@react-navigation/native';
 
 const View = styled.View`
   justify-content: center;
@@ -62,10 +59,13 @@ type FeedsTabParamList = {
   };
   Profile: {
     userId: number;
-  }
+  };
 };
 
-type NavigationProp = StackNavigationProp<FeedsTabParamList, "MessageNavigation">
+type NavigationProp = StackNavigationProp<
+  FeedsTabParamList,
+  'MessageNavigation'
+>;
 interface IProp {
   navigation: NavigationProp;
 }
@@ -79,10 +79,10 @@ interface LocationProp {
 
 Geolocation.setRNConfiguration({
   skipPermissionRequests: false,
-  authorizationLevel: "auto"
+  authorizationLevel: 'auto',
 });
 
-const People: React.FunctionComponent<IProp> = ({ navigation }) => {
+const People: React.FunctionComponent<IProp> = ({navigation}) => {
   const PEOPLE_LIMIT = 10;
 
   const [location, setLocation] = useState<LocationProp>({
@@ -98,82 +98,81 @@ const People: React.FunctionComponent<IProp> = ({ navigation }) => {
   const [listData, setListData] = useState<Array<any>>([]);
   const [updateTime, setUpdateTime] = useState<string>(Date.now().toString());
   const [skip, setSkip] = useState<number>(0);
-  const [take, setTake] = useState<number>(PEOPLE_LIMIT);
-  const [flatRef, setFlatRef] = useState<
-  | FlatList<GetUserList_GetUserList_users | null>
-  | null
-  | React.RefObject<unknown>
-  >(() => createRef());
 
   const [updateLocationMutation] = useMutation<
     ReportMovement,
     ReportMovementVariables
   >(UPDATE_LOCATION);
 
-  const [getUserList] = useLazyQuery<
-    GetUserList,
-    GetUserListVariables
-  >(GET_USER_LIST, {
-    variables: {
-      means: "",
-      requestTime: updateTime,
-      skip,
-      take,
-    },
-    onCompleted: (data) => {
-      if (data) {
-        setIsRefreshing(false);
+  const [getUserList] = useLazyQuery<GetUserList, GetUserListVariables>(
+    GET_USER_LIST,
+    {
+      variables: {
+        means: '',
+        requestTime: updateTime,
+        skip,
+        take: PEOPLE_LIMIT,
+      },
+      onCompleted: data => {
+        console.log(data);
+        if (data) {
+          setIsRefreshing(false);
 
-        if (data.GetUserList.users) {
-          setListData([...listData, ...data.GetUserList.users]);
+          if (data.GetUserList.users) {
+            setListData([...listData, ...data.GetUserList.users]);
+            data.GetUserList.users.forEach(element => {
+              if (element) console.log(element.profilePhoto);
+            });
+          }
         }
-      }
+      },
+      onError: () => {
+        setIsRefreshing(false);
+        toast('유저 리스트를 불러올 수 없어요!');
+      },
     },
-    onError: () => {
-      setIsRefreshing(false);
-      toast("유저 리스트를 불러올 수 없어요!");
-    },
-  });
+  );
 
   const getPosition = () => {
     return new Promise((resolve, reject) => {
-      Geolocation.getCurrentPosition((success) => {
-        resolve(success);
-        setIsRequested(true);
-        setIsGranted(true);
-      }, (error) => {
-        reject(error);
-        setIsRequested(true);
-        setIsGranted(false);
-      })
+      Geolocation.getCurrentPosition(
+        success => {
+          resolve(success);
+          setIsRequested(true);
+          setIsGranted(true);
+        },
+        error => {
+          reject(error);
+          setIsRequested(true);
+          setIsGranted(false);
+        },
+      );
     }).catch(error => {
       console.log(error);
     });
   };
 
   const getLocation = async () => {
-      const position: any = await getPosition();
-      console.log(position);
-      const { data } = await updateLocationMutation({
-        variables: {
-          lastLat: position.coords.latitude,
-          lastLng: position.coords.longitude,
-        },
-        fetchPolicy: "no-cache",
-      });
-      if (!data?.ReportMovement.ok) {
-        Alert.alert("위치 갱신 실패");
-      }
-      setLocation({
-        coords: {
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude
-        }
-      })
-      setIsRefreshing(true);
-      getUserList();
-        
-      
+    const position: any = await getPosition();
+    console.log(position);
+    const {data} = await updateLocationMutation({
+      variables: {
+        lastLat: position.coords.latitude,
+        lastLng: position.coords.longitude,
+      },
+      fetchPolicy: 'no-cache',
+    });
+    if (data && !data.ReportMovement.ok) {
+      Alert.alert('위치 갱신 실패');
+    }
+    setLocation({
+      coords: {
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+      },
+    });
+    setIsRefreshing(true);
+    getUserList();
   };
 
   const getDistance = (lat: number, lng: number) => {
@@ -182,7 +181,7 @@ const People: React.FunctionComponent<IProp> = ({ navigation }) => {
       location.coords.longitude,
       lat,
       lng,
-      "K"
+      'K',
     );
   };
 
@@ -197,17 +196,17 @@ const People: React.FunctionComponent<IProp> = ({ navigation }) => {
   };
 
   const infoOnPress = useCallback((userId, userInfo) => {
-    navigation.navigate("MessageNavigation", { userId, userInfo });
+    navigation.navigate('MessageNavigation', {userId, userInfo});
   }, []);
 
   const imageOnPress = (id: number) => {
-    navigation.navigate("Profile", {userId: id});
-  }
+    navigation.navigate('Profile', {userId: id});
+  };
 
   useEffect(() => {
     const getUserId = async () => {
-      const userId = await AsyncStorage.getItem("userId");
-      const token = await AsyncStorage.getItem("jwt");
+      const userId = await AsyncStorage.getItem('userId');
+      const token = await AsyncStorage.getItem('jwt');
       if (userId) {
         setUserId(parseInt(userId));
       } else {
@@ -219,7 +218,47 @@ const People: React.FunctionComponent<IProp> = ({ navigation }) => {
     getLocation();
   }, []);
 
-  //console.log(listData);
+  const sortProfilePhoto = (
+    photos: Array<GetUserList_GetUserList_users_profilePhoto>,
+  ) => {
+    let photo = photos[0];
+    for (let i = 1; i < photos.length; i++) {
+      if (photo.id > photos[i].id) {
+        photo = photos[i];
+      }
+    }
+    return photo;
+  };
+  //Exit event
+
+  // let exitState = false;
+  // let timeout: NodeJS.Timeout;
+  // useEffect(() => {
+  //   const backAction = () => {
+  //     if (navigation.isFocused()) {
+  //       if (!exitState) {
+  //         toast('한번 더 누르시면 종료됩니다.');
+  //         exitState = true;
+  //         timeout = setTimeout(() => {
+  //           exitState = false;
+  //         }, 2000);
+  //       } else {
+  //         clearTimeout(timeout);
+  //         BackHandler.exitApp();
+  //       }
+  //     }
+
+  //     return true;
+  //   };
+
+  //   const backHandler = BackHandler.addEventListener(
+  //     'hardwareBackPress',
+  //     backAction,
+  //   );
+
+  //   return () => backHandler.remove();
+  // }, []);
+
   return (
     <>
       {isRequested ? (
@@ -227,7 +266,6 @@ const People: React.FunctionComponent<IProp> = ({ navigation }) => {
           listData ? (
             <SafeAreaView>
               <FlatList
-                ref={(list) => setFlatRef(list)}
                 refreshControl={
                   <RefreshControl
                     refreshing={isRefreshing}
@@ -237,24 +275,32 @@ const People: React.FunctionComponent<IProp> = ({ navigation }) => {
                 keyExtractor={(e, i) => i.toString()}
                 windowSize={5}
                 data={listData}
-                renderItem={(data) => {
-                  console.log(data)
-                  return data.item?.id !== userId ? (
-                    <PeopleRow
-                      id={data.item?.id}
-                      nickName={data.item?.nickName}
-                      gender={data.item?.gender}
-                      birth={data.item?.birth}
-                      intro={data.item?.intro}
-                      profilePhoto={data.item?.profilePhoto && data.item?.profilePhoto.length > 0 ?data.item?.profilePhoto[0].url : "https://i.stack.imgur.com/l60Hf.png"}
-                      updatedAt={data.item?.updatedAt}
-                      lastLat={data.item?.lastLat}
-                      lastLng={data.item?.lastLng}
-                      getDistance={getDistance}
-                      onSelected={infoOnPress}
-                      imageOnPress={imageOnPress}
-                    />
-                  ) : null;
+                renderItem={data => {
+                  if (data.item) {
+                    return data.item.id !== userId ? (
+                      <PeopleRow
+                        id={data.item.id}
+                        nickName={data.item.nickName}
+                        gender={data.item.gender}
+                        birth={data.item.birth}
+                        intro={data.item.intro}
+                        profilePhoto={
+                          data.item.profilePhoto &&
+                          data.item.profilePhoto.length > 0
+                            ? sortProfilePhoto(data.item.profilePhoto).url
+                            : 'https://i.stack.imgur.com/l60Hf.png'
+                        }
+                        updatedAt={data.item.updatedAt}
+                        lastLat={data.item.lastLat}
+                        lastLng={data.item.lastLng}
+                        getDistance={getDistance}
+                        onSelected={infoOnPress}
+                        imageOnPress={imageOnPress}
+                      />
+                    ) : null;
+                  } else {
+                    return null;
+                  }
                 }}
                 ItemSeparatorComponent={() => <RowSeparator />}
                 onEndReached={onEndReached}

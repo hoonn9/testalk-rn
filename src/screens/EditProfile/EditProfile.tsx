@@ -8,7 +8,7 @@ import {
   UpdateUserProfileVariables,
 } from '../../types/api';
 import {useNavigation, RouteProp} from '@react-navigation/native';
-import {Platform, GestureResponderEvent} from 'react-native';
+import {Platform, GestureResponderEvent, ActivityIndicator} from 'react-native';
 import Modal from 'react-native-modal';
 import constants from '../../constants';
 import EditProfilePhoto from '../../components/EditProfilePhoto';
@@ -21,6 +21,7 @@ import {UPDATE_USER_PROFILE} from './EditProfile.queries';
 import styles from '../../styles';
 import ModalSelector from '../../components/ModalSelector';
 import TextInputRow from '../../components/TextInputRow';
+import Indicator from '../../components/Indicator';
 
 const View = styled.View``;
 const Container = styled.View`
@@ -156,7 +157,7 @@ const EditProfile: React.FunctionComponent<IProp> = ({route}) => {
   const [nickName, setNickName] = useState<string>(prevNickName);
   const [birth, setBirth] = useState<string>(prevBirth);
   const [intro, setIntro] = useState<string>(prevIntro);
-
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [editProfileMutation] = useMutation<
     UpdateUserProfile,
     UpdateUserProfileVariables
@@ -227,6 +228,11 @@ const EditProfile: React.FunctionComponent<IProp> = ({route}) => {
   }, [photoList]);
 
   const editConfirm = async () => {
+    if (isLoading) {
+      return;
+    }
+    setIsLoading(true);
+    console.log('펑션');
     if (!nickName) {
       toast('이름이 비었어요.');
       return;
@@ -303,6 +309,9 @@ const EditProfile: React.FunctionComponent<IProp> = ({route}) => {
         }
       } catch (error) {
         console.log(error);
+        toast('이미지 업로드에 실패했어요. 다시 시도 해주세요.');
+        setIsLoading(false);
+        return;
       }
     }
 
@@ -316,12 +325,14 @@ const EditProfile: React.FunctionComponent<IProp> = ({route}) => {
       });
       if (data && data.UpdateUserProfile && data.UpdateUserProfile.ok) {
         console.log(data);
+        setIsConfirmModal(false);
         toast('수정이 완료되었어요.');
         navigation.goBack();
       } else {
         throw Error();
       }
     } catch (error) {
+      setIsLoading(false);
       toast('프로필을 수정하는 도중 오류가 발생했어요.');
       console.log(error);
     }
@@ -431,9 +442,10 @@ const EditProfile: React.FunctionComponent<IProp> = ({route}) => {
         backdropTransitionOutTiming={0}
         swipeDirection={['down']}
         onSwipeComplete={() => setIsConfirmModal(!isConfirmModal)}>
+        <Indicator showing={isLoading} />
         <ModalSelector
           description="이대로 수정하실래요?"
-          confirmEvent={editConfirm}
+          confirmEvent={isLoading ? () => null : editConfirm}
           confirmTitle="확인"
           cancelEvent={() => setIsConfirmModal(!isConfirmModal)}
         />

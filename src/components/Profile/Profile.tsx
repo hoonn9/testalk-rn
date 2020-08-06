@@ -1,18 +1,19 @@
 import React from 'react';
 import styled from 'styled-components/native';
-import {Image, StyleSheet} from 'react-native';
-import {TouchableOpacityProps} from 'react-native';
+import {StyleSheet, TouchableOpacityProps} from 'react-native';
+import Swiper from 'react-native-swiper';
+import FastImage from 'react-native-fast-image';
 import constants from '../../constants';
 import {getAge} from '../../utils';
-
+import styles from '../../styles';
+const View = styled.View``;
 const Container = styled.View`
-  width: ${`${constants.width / 1.05}px`};
+  flex: 1;
   background-color: #ddd;
 `;
 const Wrapper = styled.View``;
 const Touchable = styled.TouchableOpacity`
-  width: 125px;
-  height: 125px;
+  flex: 1;
 `;
 const Text = styled.Text``;
 
@@ -26,6 +27,7 @@ const InfoContainer = styled.View`
 const ImageWrapper = styled.View`
   justify-content: center;
   align-items: center;
+  height: 300px;
 `;
 
 const InfoWrapper = styled.View`
@@ -54,11 +56,13 @@ const GenderText = styled.Text`
   font-size: 24px;
 `;
 
-const styles = StyleSheet.create({
+const styleSheets = StyleSheet.create({
   image: {
-    width: 125,
-    height: 125,
-    borderRadius: 125 / 2,
+    flex: 1,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#92BBD9',
   },
 });
 
@@ -67,13 +71,49 @@ interface IProp extends TouchableOpacityProps {
   birth: string;
   gender: string;
   profilePhoto: Array<string>;
+  ImageOnPress: (url: string) => void;
 }
+
+const Dot: React.FunctionComponent = () => {
+  return (
+    <View
+      style={{
+        backgroundColor: styles.greyColor,
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        marginLeft: 7,
+        marginRight: 7,
+        marginTop: 3,
+        marginBottom: 3,
+      }}
+    />
+  );
+};
+
+const ActiveDot: React.FunctionComponent = () => {
+  return (
+    <View
+      style={{
+        backgroundColor: styles.darkBlueColor,
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        marginLeft: 7,
+        marginRight: 7,
+        marginTop: 3,
+        marginBottom: 3,
+      }}
+    />
+  );
+};
 
 const Profile: React.FunctionComponent<IProp> = ({
   nickName,
   birth,
   gender,
   profilePhoto,
+  ImageOnPress,
 }) => {
   const maxNameLength = 16;
   const nick = nickName;
@@ -81,15 +121,21 @@ const Profile: React.FunctionComponent<IProp> = ({
     <Container>
       <Wrapper>
         <InfoContainer>
-          <ImageWrapper>
-            {profilePhoto.map((element, index) => {
-              return (
-                <Touchable>
-                  <Image source={{uri: element}} style={styles.image} />
-                </Touchable>
-              );
-            })}
-          </ImageWrapper>
+          <Swiper
+            style={{height: constants.height / 2.75}}
+            dot={<Dot />}
+            activeDot={<ActiveDot />}>
+            {profilePhoto.map((e, i) => (
+              <Touchable onPress={() => ImageOnPress(e)}>
+                <FastImage
+                  style={styleSheets.image}
+                  key={i}
+                  source={{uri: e}}
+                  resizeMode={FastImage.resizeMode.cover}
+                />
+              </Touchable>
+            ))}
+          </Swiper>
           <InfoWrapper>
             <NameText numberOfLines={1}>
               {nick.length > maxNameLength

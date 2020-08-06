@@ -49,6 +49,7 @@
     "react": "16.11.0",
     "react-dom": "16.11.0",
     "react-native": "0.62.2",
+    "react-native-fast-image": "^8.3.2",
     "react-native-fbsdk": "^2.0.0",
     "react-native-gesture-handler": "~1.6.0",
     "react-native-image-picker": "^2.3.3",

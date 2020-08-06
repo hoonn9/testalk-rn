@@ -8,6 +8,7 @@ import {
   GestureResponderEvent,
 } from 'react-native';
 import {getAge, dateSimpleConverter} from '../../utils';
+import PeoplePhoto from '../PeoplePhoto';
 
 const Container = styled.View`
   flex-direction: row;
@@ -51,12 +52,12 @@ const styles = (gender?: string) =>
   });
 
 interface IProp {
-  id: number | undefined;
-  nickName: string | undefined;
-  birth: string | undefined;
-  gender: string | undefined;
-  intro: string | undefined;
-  profilePhoto: string | undefined;
+  id: number;
+  nickName: string;
+  birth: string;
+  gender: string;
+  intro: string;
+  profilePhoto: string;
   updatedAt: string | undefined | null;
   lastLat: number | undefined | null;
   lastLng: number | undefined | null;
@@ -82,10 +83,7 @@ const PeopleRowItem: React.FunctionComponent<IProp> = ({
   return (
     <Container>
       <ImageTouchable onPress={() => imageOnPress(id)}>
-        <Image
-          source={{uri: profilePhoto}}
-          style={gender ? styles(gender).image : styles().image}
-        />
+        <PeoplePhoto uri={profilePhoto} gender={gender} />
       </ImageTouchable>
       <Touchable
         onPress={() =>
@@ -108,7 +106,7 @@ const PeopleRowItem: React.FunctionComponent<IProp> = ({
           </Wrapper>
           <Wrapper>
             <ThirdText>
-              {`${getDistance(lastLat, lastLng)} km `}
+              {`${getDistance(lastLat, lastLng)}, `}
               {updatedAt ? dateSimpleConverter(updatedAt) : '??'}
             </ThirdText>
           </Wrapper>

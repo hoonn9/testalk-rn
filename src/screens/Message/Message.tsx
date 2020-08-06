@@ -413,9 +413,7 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
   };
 
   useEffect(() => {
-    console.log(getChatUserData, getChatUserLoading, getChatUserError);
     if (chatId && getChatUserData && getChatUserData.GetChatUser) {
-      console.log(getChatUserData);
       if (getChatUserData.GetChatUser.ok) {
         if (getChatUserData.GetChatUser.user) {
           const {
@@ -435,7 +433,10 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
             birth: parseInt(birth),
             gender,
             intro,
-            profilePhoto: profilePhoto ? profilePhoto[0].url : null,
+            profilePhoto:
+              profilePhoto && profilePhoto.length > 0
+                ? profilePhoto[0].url
+                : null,
           });
         } else {
           // 상대가 떠났을 때
