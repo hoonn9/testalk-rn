@@ -18,6 +18,7 @@ export const GET_USER_PROFILE = gql`
                 lastLat
                 lastLng
             }
+            likeCount
         }
     }
 `;

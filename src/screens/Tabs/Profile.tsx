@@ -86,7 +86,10 @@ const Profile: React.FunctionComponent<IProp> = ({route}) => {
     data.GetUserProfile.ok &&
     data.GetUserProfile.user
   ) {
-    const {nickName, gender, birth, profilePhoto} = data.GetUserProfile.user;
+    const {
+      user: {nickName, gender, birth, profilePhoto},
+      likeCount,
+    } = data.GetUserProfile;
 
     const photoUrls: Array<string> = [];
     if (profilePhoto) {
@@ -102,6 +105,7 @@ const Profile: React.FunctionComponent<IProp> = ({route}) => {
               gender={gender}
               birth={birth}
               profilePhoto={photoUrls}
+              likeCount={likeCount}
               ImageOnPress={ImageOnPress}
             />
           </View>

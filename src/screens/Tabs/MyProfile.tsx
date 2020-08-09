@@ -147,7 +147,10 @@ const Profile: React.FunctionComponent<IProp> = () => {
     data.GetMyProfile.ok &&
     data.GetMyProfile.user
   ) {
-    const {id, nickName, gender, birth, profilePhoto} = data.GetMyProfile.user;
+    const {
+      user: {id, nickName, gender, birth, profilePhoto},
+      likeCount,
+    } = data.GetMyProfile;
     console.log(data.GetMyProfile.user);
     return (
       <ScrollView>
@@ -180,6 +183,7 @@ const Profile: React.FunctionComponent<IProp> = () => {
                 <EditTouchable onPress={editOnPress}>
                   <Icon name="form" size={26} />
                 </EditTouchable>
+                <Text>{likeCount}</Text>
               </BottomWrapper>
             </InfoContainer>
           </Wrapper>

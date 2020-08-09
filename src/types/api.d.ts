@@ -133,31 +133,6 @@ export interface LoginCompletePhoneVerificationVariables {
 // This file was automatically generated and should not be edited.
 
 // ====================================================
-// GraphQL query operation: GetMyChat
-// ====================================================
-
-export interface GetMyChat_GetMyChat_chat {
-  __typename: "Chat";
-  id: number;
-}
-
-export interface GetMyChat_GetMyChat {
-  __typename: "GetMyChatResponse";
-  ok: boolean;
-  error: string | null;
-  chat: (GetMyChat_GetMyChat_chat | null)[] | null;
-}
-
-export interface GetMyChat {
-  GetMyChat: GetMyChat_GetMyChat;
-}
-
-/* tslint:disable */
-/* eslint-disable */
-// @generated
-// This file was automatically generated and should not be edited.
-
-// ====================================================
 // GraphQL mutation operation: UpdateUserProfile
 // ====================================================
 
@@ -363,6 +338,31 @@ export interface SetUserNotifyVariables {
 // This file was automatically generated and should not be edited.
 
 // ====================================================
+// GraphQL query operation: GetMyChat
+// ====================================================
+
+export interface GetMyChat_GetMyChat_chat {
+  __typename: "Chat";
+  id: number;
+}
+
+export interface GetMyChat_GetMyChat {
+  __typename: "GetMyChatResponse";
+  ok: boolean;
+  error: string | null;
+  chat: (GetMyChat_GetMyChat_chat | null)[] | null;
+}
+
+export interface GetMyChat {
+  GetMyChat: GetMyChat_GetMyChat;
+}
+
+/* tslint:disable */
+/* eslint-disable */
+// @generated
+// This file was automatically generated and should not be edited.
+
+// ====================================================
 // GraphQL query operation: GetMyProfile
 // ====================================================
 
@@ -388,6 +388,7 @@ export interface GetMyProfile_GetMyProfile {
   ok: boolean;
   error: string | null;
   user: GetMyProfile_GetMyProfile_user | null;
+  likeCount: number | null;
 }
 
 export interface GetMyProfile {
@@ -496,6 +497,7 @@ export interface GetUserProfile_GetUserProfile {
   ok: boolean;
   error: string | null;
   user: GetUserProfile_GetUserProfile_user | null;
+  likeCount: number | null;
 }
 
 export interface GetUserProfile {

@@ -72,6 +72,7 @@ interface IProp extends TouchableOpacityProps {
   gender: string;
   profilePhoto: Array<string>;
   ImageOnPress: (url: string) => void;
+  likeCount: number;
 }
 
 const Dot: React.FunctionComponent = () => {
@@ -114,6 +115,7 @@ const Profile: React.FunctionComponent<IProp> = ({
   gender,
   profilePhoto,
   ImageOnPress,
+  likeCount,
 }) => {
   const maxNameLength = 16;
   const nick = nickName;
@@ -126,10 +128,9 @@ const Profile: React.FunctionComponent<IProp> = ({
             dot={<Dot />}
             activeDot={<ActiveDot />}>
             {profilePhoto.map((e, i) => (
-              <Touchable onPress={() => ImageOnPress(e)}>
+              <Touchable key={i} onPress={() => ImageOnPress(e)}>
                 <FastImage
                   style={styleSheets.image}
-                  key={i}
                   source={{uri: e}}
                   resizeMode={FastImage.resizeMode.cover}
                 />
@@ -144,6 +145,9 @@ const Profile: React.FunctionComponent<IProp> = ({
             </NameText>
             <AgeText>{getAge(birth)}</AgeText>
             <GenderText>{gender === 'female' ? '♀' : '♂'}</GenderText>
+          </InfoWrapper>
+          <InfoWrapper>
+            <Text>{likeCount}</Text>
           </InfoWrapper>
           <GenderWrapper />
         </InfoContainer>
