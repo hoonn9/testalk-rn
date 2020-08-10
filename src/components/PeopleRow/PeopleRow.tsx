@@ -1,12 +1,6 @@
 import React from 'react';
 import styled from 'styled-components/native';
-import {
-  View,
-  Text,
-  Image,
-  StyleSheet,
-  GestureResponderEvent,
-} from 'react-native';
+import {StyleSheet} from 'react-native';
 import {getAge, dateSimpleConverter} from '../../utils';
 import PeoplePhoto from '../PeoplePhoto';
 
@@ -40,17 +34,6 @@ const ThirdText = styled.Text`
   font-size: 13px;
 `;
 
-const styles = (gender?: string) =>
-  StyleSheet.create({
-    image: {
-      width: 50,
-      height: 50,
-      borderRadius: 50 / 2,
-      borderColor: gender === 'male' ? '#3897f0' : '#ED4956',
-      borderWidth: 1,
-    },
-  });
-
 interface IProp {
   id: number;
   nickName: string;
@@ -82,10 +65,11 @@ const PeopleRowItem: React.FunctionComponent<IProp> = ({
 }) => {
   return (
     <Container>
-      <ImageTouchable onPress={() => imageOnPress(id)}>
+      <ImageTouchable activeOpacity={1} onPress={() => imageOnPress(id)}>
         <PeoplePhoto uri={profilePhoto} gender={gender} />
       </ImageTouchable>
       <Touchable
+        activeOpacity={1}
         onPress={() =>
           onSelected(id, {
             nickName,

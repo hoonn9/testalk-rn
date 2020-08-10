@@ -109,7 +109,6 @@ export const distance = (lat1: number, lng1: number, lat2: number, lng2: number,
 
         if (unit == "K") {
             dist = dist * 1.609344;
-            console.log(dist);
             if (dist < 0.1) {
                 return "100 m 이내"
             } else if (dist < 1) {
@@ -121,8 +120,11 @@ export const distance = (lat1: number, lng1: number, lat2: number, lng2: number,
     }
 }
 
-export const getTimeFromBefore = (day: number = 2) => {
-    const nowDate = new Date();
-    nowDate.setDate(nowDate.getDate() - day);
-    return nowDate.getTime();
+export const initTimestamp = (timestamp: number) => {
+    const date = new Date(timestamp);
+    date.setHours(0);
+    date.setMinutes(0);
+    date.setSeconds(0);
+    date.setMilliseconds(0);
+    return date.getTime();
 }

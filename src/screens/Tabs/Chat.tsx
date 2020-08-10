@@ -124,6 +124,10 @@ const Chat: React.FunctionComponent<IProp> = () => {
     return unsubscribe;
   }, [navigation]);
 
+  const imageOnPress = (id: number) => {
+    navigation.navigate('Profile', {userId: id});
+  };
+
   //Exit event
 
   // let exitState = false;
@@ -172,6 +176,7 @@ const Chat: React.FunctionComponent<IProp> = () => {
                   gender={data.item.gender}
                   birth={data.item.birth}
                   navigateCallback={navigateChatRoom}
+                  imageOnPress={imageOnPress}
                 />
               );
             }}

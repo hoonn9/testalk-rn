@@ -1,11 +1,8 @@
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {createStackNavigator} from '@react-navigation/stack';
-import {Image, BackHandler} from 'react-native';
 import Profile from '../screens/Tabs/Profile';
-import {View} from 'react-native';
 import React from 'react';
 import {Platform} from 'react-native';
-import styles from '../styles';
 import NavIcon from '../components/NavIcon';
 import People from '../screens/Tabs/People';
 import ChatLink from '../components/ChatLink';

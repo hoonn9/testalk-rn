@@ -84,11 +84,13 @@ const Profile: React.FunctionComponent<IProp> = ({route}) => {
     data &&
     data.GetUserProfile &&
     data.GetUserProfile.ok &&
-    data.GetUserProfile.user
+    data.GetUserProfile.user &&
+    data.GetUserProfile.isLiked !== null
   ) {
     const {
       user: {nickName, gender, birth, profilePhoto},
       likeCount,
+      isLiked,
     } = data.GetUserProfile;
 
     const photoUrls: Array<string> = [];
@@ -101,11 +103,13 @@ const Profile: React.FunctionComponent<IProp> = ({route}) => {
         <ScrollView>
           <View>
             <ProfileComponent
+              id={userId}
               nickName={nickName}
               gender={gender}
               birth={birth}
               profilePhoto={photoUrls}
-              likeCount={likeCount}
+              likeCount={likeCount ? likeCount : 0}
+              isLiked={isLiked}
               ImageOnPress={ImageOnPress}
             />
           </View>

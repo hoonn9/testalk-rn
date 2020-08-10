@@ -48,7 +48,7 @@ import {
 } from '../../dbTools';
 import ModalSelector from '../../components/ModalSelector';
 import styles from '../../styles';
-import {dateSeparateConverter} from '../../utils';
+import {dateSeparateConverter, initTimestamp} from '../../utils';
 import ModalAlert from '../../components/ModalAlert';
 
 const Container = styled.View`
@@ -93,6 +93,10 @@ type ProfileScreenRouteProp = RouteProp<MessageNaviProp, 'Message'>;
 
 interface IProp {
   route: ProfileScreenRouteProp;
+}
+
+interface DateMesseageListProp {
+  [key: string]: Array<ChatLogRowProp>;
 }
 
 // define IconComponent, color, sizes and OverflowIcon in one place
@@ -168,10 +172,6 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
   const MESSAGES_LIMIT: number = 10;
   const [offset, setOffset] = useState<number>(10);
   const [selectCount, setSelectCount] = useState<number>(0);
-  const [compareDate, setCompareDate] = useState<string>('');
-  const [dateSeparater, setDateSeparater] = useState<{[key: string]: string}>(
-    {},
-  );
   const [userInfo, setUserInfo] = useState<UserInfoProp>();
 
   const [
@@ -209,37 +209,6 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
     SendChatMessageVariables
   >(SEND_MESSAGE);
 
-  const genDateSeparater = (messages: Array<ChatLogRowProp>) => {
-    console.log(messages);
-    let tempDate = compareDate;
-    for (let i = 0; i < messages.length; i++) {
-      const createdAt = new Date(messages[i].created_at);
-      const date = `${createdAt.getFullYear()}-${createdAt.getMonth()}-${createdAt.getDate()}`;
-      console.log(i, date);
-      if (date !== tempDate) {
-        console.log('cp', tempDate, 'd', date);
-        if (tempDate) {
-          setDateSeparater(
-            Object.assign({}, dateSeparater, {
-              [messages[i]._id]: tempDate,
-            }),
-          );
-          tempDate = date;
-        }
-      }
-    }
-    setCompareDate(tempDate);
-  };
-  useEffect(() => {
-    //console.log(messageList.length);
-    if (messageList.length > 0) {
-      genDateSeparater(
-        messageList.slice(selectCount * MESSAGES_LIMIT, undefined),
-      );
-    }
-    //console.log(dateSeparater);
-  }, [messageList]);
-
   useEffect(() => {
     const initChat = async () => {
       const getMyId = await AsyncStorage.getItem('userId');
@@ -269,12 +238,6 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
           const chatLogs = await getChatLogs(chatId, MESSAGES_LIMIT);
           if (chatLogs) {
             if (chatLogs.array.length > 0) {
-              // 비교할 날짜
-              const initDate = new Date(chatLogs.array[0].created_at);
-              setCompareDate(
-                `${initDate.getFullYear()}-${initDate.getMonth()}-${initDate.getDate()}`,
-              );
-
               const messages = [...chatLogs.array];
               setMessageList(messages);
               return messages;
@@ -308,6 +271,9 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
             setIsLeaveModalVisible(true);
           } else {
             if (text) {
+              const existSeparate = messageList.find(
+                e => e.created_at >= initTimestamp(parseInt(createdAt)),
+              );
               setMessageList([
                 {
                   _id: messageList.length,
@@ -316,6 +282,7 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
                   user_id: userId,
                   content: text,
                   created_at: parseInt(createdAt),
+                  separate: existSeparate ? 0 : 1,
                 },
                 ...messageList,
               ]);
@@ -452,11 +419,6 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
     }
   }, [getChatUserData, getChatUserLoading, getChatUserError]);
 
-  const separaterDateConverter = (date: string) => {
-    const temp = date.split('-');
-    return `${temp[0]}년 ${parseInt(temp[1]) + 1}월 ${temp[2]}일`;
-  };
-
   return (
     <>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -469,43 +431,16 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
               onEndReachedThreshold={0.01}
               data={messageList}
               keyExtractor={(e, i) => i.toString()}
-              ListFooterComponent={
-                messageList.length > 0 ? (
-                  <DateSeparaterWrapper>
-                    <DateSeparaterText>
-                      {dateSeparateConverter(
-                        messageList[messageList.length - 1].created_at,
-                      )}
-                    </DateSeparaterText>
-                  </DateSeparaterWrapper>
-                ) : null
-              }
               renderItem={({item}) => {
-                if (item.id) {
-                  return (
-                    <>
-                      {Object.keys(dateSeparater).includes(
-                        item._id.toString(),
-                      ) ? (
-                        <DateSeparaterWrapper>
-                          <DateSeparaterText>
-                            {separaterDateConverter(
-                              dateSeparater[item._id.toString()],
-                            )}
-                          </DateSeparaterText>
-                        </DateSeparaterWrapper>
-                      ) : null}
-                      <MessageRow
-                        id={item.id.toString()}
-                        message={item.content}
-                        createdAt={item.created_at}
-                        mine={item.user_id === myId ? true : false}
-                      />
-                    </>
-                  );
-                } else {
-                  return null;
-                }
+                return (
+                  <MessageRow
+                    id={item.id.toString()}
+                    message={item.content}
+                    createdAt={item.created_at}
+                    isDateSeparator={item.separate}
+                    mine={item.user_id === myId ? true : false}
+                  />
+                );
               }}
             />
           </Wrapper>

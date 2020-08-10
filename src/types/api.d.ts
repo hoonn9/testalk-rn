@@ -498,6 +498,7 @@ export interface GetUserProfile_GetUserProfile {
   error: string | null;
   user: GetUserProfile_GetUserProfile_user | null;
   likeCount: number | null;
+  isLiked: boolean | null;
 }
 
 export interface GetUserProfile {
@@ -505,6 +506,29 @@ export interface GetUserProfile {
 }
 
 export interface GetUserProfileVariables {
+  id: number;
+}
+
+/* tslint:disable */
+/* eslint-disable */
+// @generated
+// This file was automatically generated and should not be edited.
+
+// ====================================================
+// GraphQL mutation operation: ToggleUserLike
+// ====================================================
+
+export interface ToggleUserLike_ToggleUserLike {
+  __typename: "ToggleUserLikeResponse";
+  ok: boolean;
+  error: string | null;
+}
+
+export interface ToggleUserLike {
+  ToggleUserLike: ToggleUserLike_ToggleUserLike;
+}
+
+export interface ToggleUserLikeVariables {
   id: number;
 }
 

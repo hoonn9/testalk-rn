@@ -1,12 +1,13 @@
 import React from 'react';
 import styled from 'styled-components/native';
 import {dateMessageConverter} from '../../utils';
+import DateSeparator from '../DateSeparator';
 
 interface WrapperProp {
   mine: boolean;
 }
 
-const Container = styled.TouchableOpacity``;
+const Container = styled.View``;
 const ChatWrapper = styled.View<WrapperProp>`
   flex-direction: row;
   align-self: ${(props: any) => (props.mine ? 'flex-end' : 'flex-start')};
@@ -34,6 +35,7 @@ interface IProp {
   message: string;
   createdAt: number;
   mine: boolean;
+  isDateSeparator: number;
 }
 
 const MessageRow: React.FunctionComponent<IProp> = ({
@@ -41,9 +43,11 @@ const MessageRow: React.FunctionComponent<IProp> = ({
   message,
   mine,
   createdAt,
+  isDateSeparator,
 }) => {
   return (
     <Container>
+      {isDateSeparator ? <DateSeparator timestamp={createdAt} /> : null}
       {mine ? (
         <>
           <ChatWrapper mine={mine}>

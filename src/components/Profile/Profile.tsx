@@ -6,6 +6,7 @@ import FastImage from 'react-native-fast-image';
 import constants from '../../constants';
 import {getAge} from '../../utils';
 import styles from '../../styles';
+import UserLikeButton from '../UserLikeButton';
 const View = styled.View``;
 const Container = styled.View`
   flex: 1;
@@ -67,12 +68,14 @@ const styleSheets = StyleSheet.create({
 });
 
 interface IProp extends TouchableOpacityProps {
+  id: number;
   nickName: string;
   birth: string;
   gender: string;
   profilePhoto: Array<string>;
   ImageOnPress: (url: string) => void;
   likeCount: number;
+  isLiked: boolean;
 }
 
 const Dot: React.FunctionComponent = () => {
@@ -110,12 +113,14 @@ const ActiveDot: React.FunctionComponent = () => {
 };
 
 const Profile: React.FunctionComponent<IProp> = ({
+  id,
   nickName,
   birth,
   gender,
   profilePhoto,
   ImageOnPress,
   likeCount,
+  isLiked,
 }) => {
   const maxNameLength = 16;
   const nick = nickName;
@@ -147,7 +152,7 @@ const Profile: React.FunctionComponent<IProp> = ({
             <GenderText>{gender === 'female' ? '♀' : '♂'}</GenderText>
           </InfoWrapper>
           <InfoWrapper>
-            <Text>{likeCount}</Text>
+            <UserLikeButton id={id} isLiked={isLiked} likeCount={likeCount} />
           </InfoWrapper>
           <GenderWrapper />
         </InfoContainer>

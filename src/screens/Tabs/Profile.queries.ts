@@ -19,6 +19,17 @@ export const GET_USER_PROFILE = gql`
                 lastLng
             }
             likeCount
+            isLiked
         }
     }
+`;
+
+export const TOGGLE_USER_LIKE = gql`
+    mutation ToggleUserLike($id: Int!) {
+        ToggleUserLike(id: $id) {
+            ok
+            error
+        }
+    }
+
 `;

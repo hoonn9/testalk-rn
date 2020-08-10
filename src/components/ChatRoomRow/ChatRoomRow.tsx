@@ -23,7 +23,7 @@ const DateWrapper = styled.View`
 const ContentWrapper = styled.View`
   flex: 5;
 `;
-const ImageWrapper = styled.View`
+const ImageTouchable = styled.TouchableOpacity`
   justify-content: center;
   background-color: #ddd;
   padding: 0px 8px;
@@ -60,6 +60,7 @@ interface IProp {
       profilePhoto: string;
     },
   ) => void | undefined;
+  imageOnPress: Function;
 }
 
 const ChatRoomRow: React.FunctionComponent<IProp> = ({
@@ -73,13 +74,15 @@ const ChatRoomRow: React.FunctionComponent<IProp> = ({
   gender,
   birth,
   navigateCallback = () => null,
+  imageOnPress = () => null,
 }) => {
   return (
     <Container>
-      <ImageWrapper>
+      <ImageTouchable onPress={() => imageOnPress(userId)}>
         <PeoplePhoto uri={profilePhoto} gender={gender} />
-      </ImageWrapper>
+      </ImageTouchable>
       <Touchable
+        activeOpacity={1}
         onPress={() =>
           navigateCallback(userId, {
             nickName,

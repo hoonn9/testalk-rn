@@ -6,11 +6,11 @@ import {GET_MY_PROFILE} from './MyProfile.queries';
 import {GetMyProfile, GetMyProfile_GetMyProfile} from '../../types/api';
 import withSuspense from '../../withSuspense';
 import {useNavigation} from '@react-navigation/native';
-import {StyleSheet, Image, BackHandler} from 'react-native';
+import {StyleSheet} from 'react-native';
 import constants from '../../constants';
 import {getAge} from '../../utils';
 import Icon from 'react-native-vector-icons/AntDesign';
-import {toast} from '../../tools';
+import FastImage from 'react-native-fast-image';
 
 const View = styled.View``;
 const Container = styled.View`
@@ -100,33 +100,9 @@ const Profile: React.FunctionComponent<IProp> = () => {
     return unsubscribe;
   }, []);
 
-  //Exit event
-
-  // let exitState = false;
-  // let timeout: NodeJS.Timeout;
-
-  // useEffect(() => {
-  //   const backAction = () => {
-  //     if (!exitState) {
-  //       toast('한번 더 누르시면 종료됩니다.');
-  //       exitState = true;
-  //       timeout = setTimeout(() => {
-  //         exitState = false;
-  //       }, 2000);
-  //     } else {
-  //       clearTimeout(timeout);
-  //       BackHandler.exitApp();
-  //     }
-  //     return true;
-  //   };
-
-  //   const backHandler = BackHandler.addEventListener(
-  //     'hardwareBackPress',
-  //     backAction,
-  //   );
-
-  //   return () => backHandler.remove();
-  // }, []);
+  const ImageOnPress = (id: number) => {
+    navigation.navigate('Profile', {userId: id});
+  };
 
   const editOnPress = () => {
     if (
@@ -158,8 +134,10 @@ const Profile: React.FunctionComponent<IProp> = () => {
           <Wrapper>
             <InfoContainer>
               <ImageWrapper>
-                <ImageTouchable>
-                  <Image
+                <ImageTouchable
+                  activeOpacity={0.8}
+                  onPress={() => ImageOnPress(id)}>
+                  <FastImage
                     source={{
                       uri:
                         profilePhoto && profilePhoto.length > 0
@@ -180,7 +158,7 @@ const Profile: React.FunctionComponent<IProp> = () => {
                 <GenderText>{gender === 'female' ? '♀' : '♂'}</GenderText>
               </InfoWrapper>
               <BottomWrapper>
-                <EditTouchable onPress={editOnPress}>
+                <EditTouchable activeOpacity={0.8} onPress={editOnPress}>
                   <Icon name="form" size={26} />
                 </EditTouchable>
                 <Text>{likeCount}</Text>
