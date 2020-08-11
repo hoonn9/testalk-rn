@@ -338,31 +338,6 @@ export interface SetUserNotifyVariables {
 // This file was automatically generated and should not be edited.
 
 // ====================================================
-// GraphQL query operation: GetMyChat
-// ====================================================
-
-export interface GetMyChat_GetMyChat_chat {
-  __typename: "Chat";
-  id: number;
-}
-
-export interface GetMyChat_GetMyChat {
-  __typename: "GetMyChatResponse";
-  ok: boolean;
-  error: string | null;
-  chat: (GetMyChat_GetMyChat_chat | null)[] | null;
-}
-
-export interface GetMyChat {
-  GetMyChat: GetMyChat_GetMyChat;
-}
-
-/* tslint:disable */
-/* eslint-disable */
-// @generated
-// This file was automatically generated and should not be edited.
-
-// ====================================================
 // GraphQL query operation: GetMyProfile
 // ====================================================
 
@@ -381,6 +356,7 @@ export interface GetMyProfile_GetMyProfile_user {
   birth: string;
   intro: string;
   profilePhoto: GetMyProfile_GetMyProfile_user_profilePhoto[] | null;
+  cash: number;
 }
 
 export interface GetMyProfile_GetMyProfile {

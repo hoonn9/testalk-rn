@@ -7,7 +7,7 @@ const Container = styled.View`
   width: 100%;
   justify-content: center;
   align-items: center;
-  padding: 8px;
+  margin: 8px;
 `;
 const Text = styled.Text`
   font-size: 15px;

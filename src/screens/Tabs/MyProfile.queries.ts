@@ -16,6 +16,7 @@ export const GET_MY_PROFILE = gql`
                     url
                     key
                 }
+                cash
             }
             likeCount
         }

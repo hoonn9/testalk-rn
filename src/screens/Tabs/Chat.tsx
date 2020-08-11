@@ -1,14 +1,12 @@
 import React, {useEffect, useState, useCallback, useRef} from 'react';
-import {ActivityIndicator, FlatList, AppState, BackHandler} from 'react-native';
+import {ActivityIndicator, FlatList, AppState} from 'react-native';
 import styled from 'styled-components/native';
 import ChatRoomRow from '../../components/ChatRoomRow';
 import {getChatRooms, ChatRoomProp} from '../../dbTools';
-import {useQuery} from '@apollo/react-hooks';
-import {GetMyChat, GetMyChat_GetMyChat_chat} from '../../types/api';
-import {GET_MY_CHAT} from './Chat.queries';
 import {useNavigation} from '@react-navigation/native';
 import messaging from '@react-native-firebase/messaging';
 import {toast} from '../../tools';
+import EmptyScreen from '../../components/EmptyScreen';
 
 const View = styled.View`
   justify-content: center;
@@ -28,46 +26,16 @@ interface IProp {}
 const Chat: React.FunctionComponent<IProp> = () => {
   const navigation = useNavigation();
   const [chatRoom, setChatRoom] = useState<Array<ChatRoomProp> | null>(null);
-  const {data, loading, error} = useQuery<GetMyChat>(GET_MY_CHAT, {
-    fetchPolicy: 'network-only',
-  });
   const appState = useRef(AppState.currentState);
   const [appStateVisible, setAppStateVisible] = useState(appState.current);
+
   const getChatRoom = async () => {
     const Rooms = await getChatRooms();
     if (Rooms) {
       const sortedRooms = Rooms.array.sort((a, b) =>
         a.created_at > b.created_at ? -1 : a.created_at > b.created_at ? 1 : 0,
       );
-      console.log(sortedRooms);
       setChatRoom(sortedRooms);
-    }
-  };
-
-  const setDifference = (a: Array<number>, b: Array<number | undefined>) => {
-    console.log(a, b);
-    const result = new Set(a);
-    b.forEach((x: number | undefined) => {
-      if (x) result.delete(x);
-    });
-    return result;
-  };
-
-  const checkValidateChat = (chats: Array<GetMyChat_GetMyChat_chat>) => {
-    console.log(chats[0]);
-    // 상대가 나간 채팅
-    let leaveChat = [];
-    let dbChats = [];
-    let serverChats = [];
-    if (chatRoom) {
-      for (let i in chats) {
-        if (chats[i].id) serverChats.push(chats[i].id);
-      }
-
-      for (let i in chatRoom) {
-        dbChats.push(chatRoom[i].chat_id);
-      }
-      console.log(setDifference(dbChats, serverChats));
     }
   };
 
@@ -105,18 +73,6 @@ const Chat: React.FunctionComponent<IProp> = () => {
   }, []);
 
   useEffect(() => {
-    if (data && data.GetMyChat && data.GetMyChat.ok) {
-      if (data.GetMyChat.chat && data.GetMyChat.chat.length > 0) {
-        const notNullData = [];
-        for (let chat of data.GetMyChat.chat) {
-          if (chat) notNullData.push(chat);
-        }
-        checkValidateChat(notNullData);
-      }
-    }
-  }, [data]);
-
-  useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
       console.log('focus');
       getChatRoom();
@@ -128,38 +84,10 @@ const Chat: React.FunctionComponent<IProp> = () => {
     navigation.navigate('Profile', {userId: id});
   };
 
-  //Exit event
-
-  // let exitState = false;
-  // let timeout: NodeJS.Timeout;
-
-  // useEffect(() => {
-  //   const backAction = () => {
-  //     if (!exitState) {
-  //       toast('한번 더 누르시면 종료됩니다.');
-  //       exitState = true;
-  //       timeout = setTimeout(() => {
-  //         exitState = false;
-  //       }, 2000);
-  //     } else {
-  //       clearTimeout(timeout);
-  //       BackHandler.exitApp();
-  //     }
-  //     return true;
-  //   };
-
-  //   const backHandler = BackHandler.addEventListener(
-  //     'hardwareBackPress',
-  //     backAction,
-  //   );
-
-  //   return () => backHandler.remove();
-  // }, []);
-
   return (
     <>
       <SafeAreaView>
-        {chatRoom ? (
+        {chatRoom && chatRoom.length > 0 ? (
           <FlatList
             data={chatRoom}
             keyExtractor={(e, i) => i.toString()}
@@ -182,7 +110,7 @@ const Chat: React.FunctionComponent<IProp> = () => {
             }}
           />
         ) : (
-          <ActivityIndicator />
+          <EmptyScreen text="아직 친구가 없어요. 사람들에게 메시지를 보내보세요!" />
         )}
       </SafeAreaView>
     </>

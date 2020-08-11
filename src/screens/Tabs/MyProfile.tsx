@@ -124,7 +124,7 @@ const Profile: React.FunctionComponent<IProp> = () => {
     data.GetMyProfile.user
   ) {
     const {
-      user: {id, nickName, gender, birth, profilePhoto},
+      user: {id, nickName, gender, birth, profilePhoto, cash},
       likeCount,
     } = data.GetMyProfile;
     console.log(data.GetMyProfile.user);
@@ -162,6 +162,7 @@ const Profile: React.FunctionComponent<IProp> = () => {
                   <Icon name="form" size={26} />
                 </EditTouchable>
                 <Text>{likeCount}</Text>
+                <Text>{cash}</Text>
               </BottomWrapper>
             </InfoContainer>
           </Wrapper>

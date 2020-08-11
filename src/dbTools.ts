@@ -10,6 +10,7 @@ export interface UserInfoProp {
     gender: string;
     intro: string;
     profile_photo: string;
+    blocked: number;
 }
 
 export interface ChatRoomProp extends UserInfoProp {
@@ -45,7 +46,7 @@ export const createTable = () => {
         tx.executeSql("create table if not exists chat_logs (_id INTEGER PRIMARY KEY NOT NULL, id INTEGER, " +
             "chat_id INTEGER, user_id INTEGER, content TEXT, created_at INTEGER, separate INTEGER DEFAULT 0, FOREIGN KEY (chat_id) REFERENCES chat_room (id))");
         tx.executeSql("create table if not exists friends (_id INTEGER PRIMARY KEY NOT NULL, id INTEGER, " +
-            "chat_id INTEGER, nick_name TEXT, birth INTEGER, gender TEXT, intro TEXT, profile_photo TEXT, FOREIGN KEY (chat_id) REFERENCES chat_room (id))");
+            "chat_id INTEGER, nick_name TEXT, birth INTEGER, gender TEXT, intro TEXT, blocked INTEGER DEFAULT 0, profile_photo TEXT, FOREIGN KEY (chat_id) REFERENCES chat_room (id))");
     });
 }
 
@@ -73,7 +74,7 @@ export const addMessage = (chatId: number, messageId: number, senderId: number, 
 
 export const getChatRooms = async () => {
     // db.transaction(tx => {
-    //     tx.executeSql("drop table chat_logs");
+    //     tx.executeSql("drop table friends");
     // }, error => console.log(error))
 
     return new Promise<GetChatRoomProp>((resolve, reject) => {
@@ -116,11 +117,11 @@ export interface ChatLogProp {
 
 export const getChatLogs = async (chatId: number, limit: number = 10, offset: number = 0) => {
     // db.transaction(tx => {
-    //     tx.executeSql("drop table chat_logs");
+    //     tx.executeSql("drop table friends");
     // }, error => console.log(error))
     return new Promise<ChatLogProp>((resolve, reject) => {
         db.transaction(tx => {
-            tx.executeSql("SELECT * FROM chat_logs WHERE chat_id = ? ORDER BY _id DESC, created_at DESC LIMIT ? OFFSET ?", [chatId, limit, offset], (_: any, { rows }: any) => {
+            tx.executeSql("SELECT * FROM chat_logs WHERE chat_id = ? ORDER BY created_at DESC, _id DESC LIMIT ? OFFSET ?", [chatId, limit, offset], (_: any, { rows }: any) => {
                 let messages = []
 
                 for (let i = 0; i < rows.length; i++) {
@@ -185,6 +186,30 @@ export const addFriend = (friend: AddFriendProp) => {
     db.transaction(tx => {
         tx.executeSql("insert or replace into friends(_id, id, chat_id, nick_name, birth, gender, intro, profile_photo) " +
             "values ((select _id from friends where id = ? ), ?, ?, ?, ? ,? ,? ,?)", [userId, userId, chatId, nickName, birth, gender, intro, profilePhoto], (_, { insertId }) => {
+                //TODO
+            });
+    }, (error) => {
+        console.log(error);
+    }
+    );
+}
+
+export const blockFriend = (userId: number) => {
+    db.transaction(tx => {
+        tx.executeSql("insert or replace into friends(_id, id, blocked) " +
+            "values ((select _id from friends where id = ? ), ?, ?)", [userId, userId, 1], (_, { insertId }) => {
+                //TODO
+            });
+    }, (error) => {
+        console.log(error);
+    }
+    );
+}
+
+export const unblockFriend = (userId: number) => {
+    db.transaction(tx => {
+        tx.executeSql("insert or replace into friends(_id, id, blocked) " +
+            "values ((select _id from friends where id = ? ), ?, ?)", [userId, userId, 0], (_, { insertId }) => {
                 //TODO
             });
     }, (error) => {

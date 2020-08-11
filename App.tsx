@@ -20,7 +20,12 @@ import styles from './src/styles';
 import {vibration} from './src/tools';
 import gql from 'graphql-tag';
 import messaging from '@react-native-firebase/messaging';
-import {createTable, addMessage, addFriend} from './src/dbTools';
+import {
+  createTable,
+  addMessage,
+  addFriend,
+  getUserInfoFromId,
+} from './src/dbTools';
 import PushNotification from 'react-native-push-notification';
 import {OverflowMenuProvider} from 'react-navigation-header-buttons';
 
@@ -266,24 +271,38 @@ export default function App() {
     }
   };
 
-  const handleNotification = (notification: any) => {
+  const handleNotification = async (notification: any) => {
     console.log(notification);
-    vibration();
+
     const {
       data: {user, chatId, messageId, content, createdAt},
     } = notification;
     const {userId, nickName, birth, gender, profilePhoto} = JSON.parse(user);
-    // 받은 메시지의 인수는 보낸 USER ID
-    addFriend({
-      userId,
-      chatId,
-      nickName,
-      birth: new Date(birth).getTime(),
-      gender,
-      intro: '',
-      profilePhoto,
-    });
-    addMessage(chatId, messageId, userId, userId, content, parseInt(createdAt));
+    const clientUser = await getUserInfoFromId(userId);
+
+    if (clientUser.blocked) {
+      return;
+    } else {
+      vibration();
+      // 받은 메시지의 인수는 보낸 USER ID
+      addFriend({
+        userId,
+        chatId,
+        nickName,
+        birth: new Date(birth).getTime(),
+        gender,
+        intro: '',
+        profilePhoto,
+      });
+      addMessage(
+        chatId,
+        messageId,
+        userId,
+        userId,
+        content,
+        parseInt(createdAt),
+      );
+    }
   };
 
   useEffect(() => {

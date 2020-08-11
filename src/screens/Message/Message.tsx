@@ -1,12 +1,7 @@
 import React, {useEffect, useState, createRef, useLayoutEffect} from 'react';
 import {TouchableWithoutFeedback, Keyboard, FlatList} from 'react-native';
 import styled from 'styled-components/native';
-import {
-  useMutation,
-  useSubscription,
-  useLazyQuery,
-  useQuery,
-} from '@apollo/react-hooks';
+import {useMutation, useSubscription, useLazyQuery} from '@apollo/react-hooks';
 import {useNavigation, RouteProp} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import AsyncStorage from '@react-native-community/async-storage';
@@ -15,7 +10,6 @@ import {
   HeaderButton,
   HiddenItem,
   OverflowMenu,
-  Item,
 } from 'react-navigation-header-buttons';
 import Modal from 'react-native-modal';
 import SendMessage from '../../components/SendMessage';
@@ -45,11 +39,16 @@ import {
   getUserInfoFromId,
   UserInfoProp,
   removeChat,
+  blockFriend,
+  unblockFriend,
 } from '../../dbTools';
 import ModalSelector from '../../components/ModalSelector';
 import styles from '../../styles';
-import {dateSeparateConverter, initTimestamp} from '../../utils';
+import {initTimestamp} from '../../utils';
 import ModalAlert from '../../components/ModalAlert';
+import EmptyScreen from '../../components/EmptyScreen';
+import FastImage from 'react-native-fast-image';
+import PeoplePhoto from '../../components/PeoplePhoto';
 
 const Container = styled.View`
   flex: 1;
@@ -63,18 +62,6 @@ const SenderWrapper = styled.View`
   position: absolute;
   bottom: 0;
 `;
-const View = styled.View`
-  flex: 1;
-`;
-const Text = styled.Text``;
-const DateSeparaterWrapper = styled.View`
-  justify-content: center;
-  align-items: center;
-`;
-const DateSeparaterText = styled.Text`
-  font-size: 15px;
-`;
-const Button = styled.Button``;
 
 type MessageNaviProp = {
   Message: {
@@ -95,11 +82,6 @@ interface IProp {
   route: ProfileScreenRouteProp;
 }
 
-interface DateMesseageListProp {
-  [key: string]: Array<ChatLogRowProp>;
-}
-
-// define IconComponent, color, sizes and OverflowIcon in one place
 const MaterialHeaderButton = (props: any) => (
   <HeaderButton iconSize={23} color="blue" {...props} />
 );
@@ -108,8 +90,17 @@ const LEAVE = 'LEAVE';
 
 const Message: React.FunctionComponent<IProp> = ({route}) => {
   const navigation = useNavigation();
-  const [isModalVisible, setModalVisible] = useState(false);
-  const [isLeaveModalVisible, setIsLeaveModalVisible] = useState(false);
+  const {userId, userInfo: receiveUserInfo} = route.params;
+
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const [isLeaveModalVisible, setIsLeaveModalVisible] = useState<boolean>(
+    false,
+  );
+  const [isBlockModalVisible, setIsBlockModalVisible] = useState<boolean>(
+    false,
+  );
+  const [isBlocked, setIsBlocked] = useState<boolean>(false);
+  const [isCashVisible, setIsCashVisible] = useState<boolean>(false);
 
   const modalConfirmEvent = async () => {
     try {
@@ -121,16 +112,35 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
         });
         if (data && data.LeaveChat) {
           if (data.LeaveChat.ok) {
-            console.log('###Leave Chat###');
             removeChat(userId, chatId);
             navigation.goBack();
-            setModalVisible(!isModalVisible);
+            setIsModalVisible(false);
           }
         }
-        console.log(data);
+      } else {
+        setIsModalVisible(false);
       }
     } catch (error) {
       console.log(error);
+    }
+  };
+
+  const blockConfirmEvent = async () => {
+    try {
+      if (isBlocked) {
+        unblockFriend(userId);
+        setIsBlocked(false);
+        toast('차단이 해제 되었어요.');
+      } else {
+        blockFriend(userId);
+        setIsBlocked(true);
+        toast('차단 완료 되었어요.');
+      }
+    } catch (error) {
+      toast('차단 등록/해제 중 실패했어요.');
+      console.log(error);
+    } finally {
+      setIsBlockModalVisible(false);
     }
   };
 
@@ -138,13 +148,23 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
     navigation.navigate('TabNavigation');
   };
 
+  const HeaderImageButton = () => {
+    return (
+      <PeoplePhoto
+        uri={receiveUserInfo.profilePhoto}
+        gender={receiveUserInfo.gender}
+      />
+    );
+  };
+
   // 헤더 버튼 생성
   useLayoutEffect(() => {
     navigation.setOptions({
       title: route.params.userInfo.nickName,
+      headerTitle: (props: any) => <HeaderImageButton {...props} />,
       headerRight: () => <MessageHeaderButton />,
     });
-  }, [navigation]);
+  }, [navigation, isBlocked]);
 
   const MessageHeaderButton = () => {
     return (
@@ -154,16 +174,15 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
             <Icon name="more-vert" size={23} color={styles.blackColor} />
           }>
           <HiddenItem
-            title="차단하기"
-            onPress={() => console.log('차단 TODO')}
+            title={isBlocked ? '차단 해제' : '차단하기'}
+            onPress={() => setIsBlockModalVisible(true)}
           />
-          <HiddenItem title="나가기" onPress={() => setModalVisible(true)} />
+          <HiddenItem title="나가기" onPress={() => setIsModalVisible(true)} />
         </OverflowMenu>
       </HeaderButtons>
     );
   };
 
-  const {userId, userInfo: receiveUserInfo} = route.params;
   const [myId, setMyId] = useState<number | null>(null);
   const [chatId, setChatId] = useState<number | null>(null);
   const messageContent = useInput('');
@@ -185,13 +204,18 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
     fetchPolicy: 'network-only',
   });
 
-  const {data: subscribeData, loading: subscribeLoading} = useSubscription<
-    MessageSubscription
-  >(SUBSCRIBE_MESSAGE);
+  const [sendMessageMutation] = useMutation<
+    SendChatMessage,
+    SendChatMessageVariables
+  >(SEND_MESSAGE);
 
   const [leaveChatMutation] = useMutation<LeaveChat, LeaveChatVariables>(
     LEAVE_CHAT,
   );
+
+  const {data: subscribeData, loading: subscribeLoading} = useSubscription<
+    MessageSubscription
+  >(SUBSCRIBE_MESSAGE);
 
   const onEndReached = async () => {
     if (chatId) {
@@ -204,14 +228,12 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
     }
   };
 
-  const [sendMessageMutation] = useMutation<
-    SendChatMessage,
-    SendChatMessageVariables
-  >(SEND_MESSAGE);
+  //Info intialize
 
   useEffect(() => {
     const initChat = async () => {
       const getMyId = await AsyncStorage.getItem('userId');
+      const getUserInfo = await getUserInfoFromId(userId);
 
       if (getMyId) {
         setMyId(parseInt(getMyId));
@@ -219,14 +241,15 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
         setMyId(null);
         toast('잘못된 접근 입니다.');
       }
-      console.log('userId :', userId);
-      const getUserInfo = await getUserInfoFromId(userId);
-      console.log('userInfo', getUserInfo);
+
       // 유저 정보 DB에 있을 경우
       if (getUserInfo) {
         const chatId = getUserInfo.chat_id;
+
         setChatId(chatId);
         setUserInfo(getUserInfo);
+        setIsBlocked(getUserInfo.blocked ? true : false);
+
         if (chatId) {
           await getChatUser({
             variables: {
@@ -234,7 +257,6 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
             },
           });
 
-          // Date separater
           const chatLogs = await getChatLogs(chatId, MESSAGES_LIMIT);
           if (chatLogs) {
             if (chatLogs.array.length > 0) {
@@ -300,14 +322,7 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
   }, [subscribeData]);
 
   const senderOnSubmit = async () => {
-    console.log(messageContent.value.length);
-    if (!messageContent.value) {
-      return;
-    } else if (messageContent.value.length >= 500) {
-      console.log('초과');
-      toast('메시지는 500자 이내로 전송할 수 있습니다.');
-      return;
-    }
+    setIsCashVisible(false);
 
     if (myId) {
       try {
@@ -320,54 +335,55 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
         });
         console.log(data);
 
-        if (data && data.SendChatMessage.ok && data.SendChatMessage.message) {
-          const {
-            id,
-            chatId: sendedChatId,
-            userId: sendedUserId,
-            text: content,
-            createdAt,
-          } = data.SendChatMessage.message;
-          if (sendedChatId) {
-            addMessage(
-              sendedChatId,
+        if (data && data.SendChatMessage.ok) {
+          if (data.SendChatMessage.message) {
+            const {
               id,
-              sendedUserId || myId,
-              userId,
-              content,
-              parseInt(createdAt),
-            );
-            if (userInfo) {
-              addFriend({
+              chatId: sendedChatId,
+              userId: sendedUserId,
+              text: content,
+              createdAt,
+            } = data.SendChatMessage.message;
+            if (sendedChatId) {
+              addMessage(
+                sendedChatId,
+                id,
+                sendedUserId || myId,
                 userId,
-                chatId: sendedChatId,
-                nickName: userInfo.nick_name,
-                birth: userInfo.birth,
-                gender: userInfo.gender,
-                intro: userInfo.intro,
-                profilePhoto: userInfo.profile_photo,
-              });
-            } else {
-              if (receiveUserInfo) {
+                content,
+                parseInt(createdAt),
+              );
+              if (userInfo) {
                 addFriend({
                   userId,
                   chatId: sendedChatId,
-                  nickName: receiveUserInfo.nickName,
-                  birth: receiveUserInfo.birth,
-                  gender: receiveUserInfo.gender,
-                  intro: receiveUserInfo.intro,
-                  profilePhoto: receiveUserInfo.profilePhoto,
+                  nickName: userInfo.nick_name,
+                  birth: userInfo.birth,
+                  gender: userInfo.gender,
+                  intro: userInfo.intro,
+                  profilePhoto: userInfo.profile_photo,
                 });
               } else {
-                toast('상대를 저장하는데 실패했어요.');
+                if (receiveUserInfo) {
+                  addFriend({
+                    userId,
+                    chatId: sendedChatId,
+                    nickName: receiveUserInfo.nickName,
+                    birth: receiveUserInfo.birth,
+                    gender: receiveUserInfo.gender,
+                    intro: receiveUserInfo.intro,
+                    profilePhoto: receiveUserInfo.profilePhoto,
+                  });
+                } else {
+                  toast('상대를 저장하는데 실패했어요.');
+                }
               }
+              // 채팅방 처음 생성 되었을 때
+              setChatId(sendedChatId);
+              messageContent.setValue('');
             }
-            // 채팅방 처음 생성 되었을 때
-            if (!chatId) {
-              //await setInitMessages({ variables: { id: sendedChatId } });
-            }
-            setChatId(sendedChatId);
-            messageContent.setValue('');
+          } else {
+            toast('캐시가 부족해요.');
           }
         } else {
           toast('문제가 생겨 메시지를 보낼 수 없어요.');
@@ -407,52 +423,86 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
           });
         } else {
           // 상대가 떠났을 때
+          // 로컬 DB에서 제거
           removeChat(userId, chatId);
           setIsLeaveModalVisible(true);
         }
       } else {
         // 에러 처리
-        // 로컬 DB에서 제거
         toast('잘못된 접근입니다.');
         setIsLeaveModalVisible(true);
       }
     }
   }, [getChatUserData, getChatUserLoading, getChatUserError]);
+  console.log(chatId);
+  const sendMessageOnPress = () => {
+    if (!messageContent.value) {
+      return;
+    } else if (messageContent.value.length >= 500) {
+      toast('메시지는 500자 이내로 전송할 수 있습니다.');
+      return;
+    }
 
+    if (chatId) {
+      senderOnSubmit();
+    } else {
+      setIsCashVisible(true);
+    }
+  };
   return (
     <>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <Container>
           <Wrapper>
-            <FlatList
-              inverted
-              ref={ref => setFlatRef(ref)}
-              onEndReached={onEndReached}
-              onEndReachedThreshold={0.01}
-              data={messageList}
-              keyExtractor={(e, i) => i.toString()}
-              renderItem={({item}) => {
-                return (
-                  <MessageRow
-                    id={item.id.toString()}
-                    message={item.content}
-                    createdAt={item.created_at}
-                    isDateSeparator={item.separate}
-                    mine={item.user_id === myId ? true : false}
-                  />
-                );
-              }}
-            />
+            {chatId ? (
+              <FlatList
+                inverted
+                ref={ref => setFlatRef(ref)}
+                onEndReached={onEndReached}
+                onEndReachedThreshold={0.01}
+                data={messageList}
+                keyExtractor={(e, i) => i.toString()}
+                renderItem={({item}) => {
+                  return (
+                    <MessageRow
+                      id={item.id.toString()}
+                      message={item.content}
+                      createdAt={item.created_at}
+                      isDateSeparator={item.separate}
+                      mine={item.user_id === myId ? true : false}
+                    />
+                  );
+                }}
+              />
+            ) : (
+              <EmptyScreen text="상대방에게 메시지를 기다리고 있어요!" />
+            )}
           </Wrapper>
           <SenderWrapper>
             <SendMessage
               value={messageContent.value}
               onChangeText={messageContent.onChange}
-              onPress={senderOnSubmit}
+              onPress={sendMessageOnPress}
             />
           </SenderWrapper>
         </Container>
       </TouchableWithoutFeedback>
+      <Modal
+        isVisible={isCashVisible}
+        animationOut="fadeOutDown"
+        backdropColor={styles.modalBackDropColor}
+        backdropOpacity={0.3}
+        backdropTransitionOutTiming={0}
+        swipeDirection={['down']}
+        onSwipeComplete={() => setIsCashVisible(false)}>
+        <ModalSelector
+          description="상대방과 대화를 시작하는데 30캐시가 필요해요. 메시지를 보내시겠어요?"
+          confirmEvent={senderOnSubmit}
+          confirmTitle="네"
+          cancelEvent={() => setIsCashVisible(false)}
+          position="center"
+        />
+      </Modal>
       <Modal
         isVisible={isModalVisible}
         animationOut="fadeOutDown"
@@ -460,12 +510,29 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
         backdropOpacity={0.3}
         backdropTransitionOutTiming={0}
         swipeDirection={['down']}
-        onSwipeComplete={() => setModalVisible(!isModalVisible)}>
+        onSwipeComplete={() => setIsModalVisible(false)}>
         <ModalSelector
           description="대화를 끝내시겠습니까?"
           confirmEvent={modalConfirmEvent}
           confirmTitle="나가기"
-          cancelEvent={() => setModalVisible(!isModalVisible)}
+          cancelEvent={() => setIsModalVisible(false)}
+        />
+      </Modal>
+      <Modal
+        isVisible={isBlockModalVisible}
+        animationOut="fadeOutDown"
+        backdropColor={styles.modalBackDropColor}
+        backdropOpacity={0.3}
+        backdropTransitionOutTiming={0}
+        swipeDirection={['down']}
+        onSwipeComplete={() => setIsBlockModalVisible(false)}>
+        <ModalSelector
+          description={
+            isBlocked ? '차단을 해제하시겠어요?' : '상대를 차단하시겠어요?'
+          }
+          confirmEvent={blockConfirmEvent}
+          confirmTitle="네"
+          cancelEvent={() => setIsBlockModalVisible(false)}
         />
       </Modal>
       <Modal
@@ -475,7 +542,7 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
         backdropOpacity={0.3}
         backdropTransitionOutTiming={0}>
         <ModalAlert
-          description="상대방이 대화를 종료했습니다."
+          description="상대방이 대화를 종료했어요."
           confirmEvent={leaveModalConfirmEvent}
           confirmTitle="확인"
         />

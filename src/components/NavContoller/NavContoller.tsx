@@ -1,5 +1,5 @@
-import React, {useEffect} from 'react';
-import {View} from 'react-native';
+import React from 'react';
+import styled from 'styled-components/native';
 import AuthNavigation from '../../navigations/AuthNavigation';
 import {
   useIsLoggedIn,
@@ -10,7 +10,13 @@ import {
 import MainNavigation from '../../navigations/MainNavigation';
 import PermitNavigation from '../../navigations/PermitNavigation';
 import {NavigationContainer} from '@react-navigation/native';
-import auth from '@react-native-firebase/auth';
+
+const SafeAreaView = styled.SafeAreaView`
+  flex: 1;
+  height: 100%;
+  width: 100%;
+`;
+
 export default () => {
   const isLoggedIn = useIsLoggedIn();
   const confirmPermit = usePermit();
@@ -24,7 +30,7 @@ export default () => {
   //console.log(isLoggedIn);
   return (
     <NavigationContainer>
-      <View style={{flex: 1}}>
+      <SafeAreaView>
         {isLoggedIn ? (
           !isPermit ? (
             <PermitNavigation />
@@ -34,7 +40,7 @@ export default () => {
         ) : (
           <AuthNavigation />
         )}
-      </View>
+      </SafeAreaView>
     </NavigationContainer>
   );
 };

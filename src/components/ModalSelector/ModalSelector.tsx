@@ -2,9 +2,13 @@ import React from 'react';
 import styled from 'styled-components/native';
 import {NativeSyntheticEvent, NativeTouchEvent, StyleSheet} from 'react-native';
 
-const Container = styled.TouchableOpacity`
+interface ContainerProp {
+  position: PositionType;
+}
+const Container = styled.TouchableOpacity<ContainerProp>`
   flex: 1;
-  justify-content: flex-end;
+  justify-content: ${(props: any) =>
+    props.position === 'bottom' ? 'flex-end' : 'center'};
 `;
 const View = styled.View`
   width: 100%;
@@ -42,11 +46,14 @@ const styles = StyleSheet.create({
   },
 });
 
+type PositionType = 'center' | 'bottom';
+
 interface ModalProp {
   description: string;
   cancelEvent: (ev: NativeSyntheticEvent<NativeTouchEvent>) => void;
   confirmTitle: string;
   confirmEvent: (ev: NativeSyntheticEvent<NativeTouchEvent>) => void;
+  position?: PositionType;
 }
 
 const ModalSelector: React.FunctionComponent<ModalProp> = ({
@@ -54,9 +61,10 @@ const ModalSelector: React.FunctionComponent<ModalProp> = ({
   cancelEvent,
   confirmTitle,
   confirmEvent,
+  position = 'bottom',
 }) => {
   return (
-    <Container onPress={cancelEvent}>
+    <Container onPress={cancelEvent} position={position}>
       <View>
         <DescriptionText>{description}</DescriptionText>
         <ButtonWrapper>
