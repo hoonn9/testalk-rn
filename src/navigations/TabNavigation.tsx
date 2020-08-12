@@ -8,6 +8,8 @@ import People from '../screens/Tabs/People';
 import ChatLink from '../components/ChatLink';
 import Chat from '../screens/Tabs/Chat';
 import MyProfile from '../screens/Tabs/MyProfile';
+import Purchase from '../screens/Purchase/Purchase';
+import HeaderTab from '../components/HeaderTab';
 
 interface IProp {
   routeName: string;
@@ -24,7 +26,6 @@ const PeopleTab = () => {
       headerMode="screen"
       screenOptions={{
         title: 'People',
-        headerRight: () => <ChatLink />,
       }}>
       <Stack.Screen name="People" component={People} options={{}} />
       <Stack.Screen name="Profile" component={Profile} options={{}} />
@@ -56,6 +57,7 @@ const ProfileTab = () => {
       }}>
       <Stack.Screen name="MyProfile" component={MyProfile} options={{}} />
       <Stack.Screen name="Profile" component={Profile} options={{}} />
+      <Stack.Screen name="Purchase" component={Purchase} options={{}} />
     </Stack.Navigator>
   );
 };

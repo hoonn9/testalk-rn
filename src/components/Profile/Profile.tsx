@@ -63,7 +63,7 @@ const styleSheets = StyleSheet.create({
     borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#92BBD9',
+    backgroundColor: '#000',
   },
 });
 
@@ -124,16 +124,20 @@ const Profile: React.FunctionComponent<IProp> = ({
 }) => {
   const maxNameLength = 16;
   const nick = nickName;
+
   return (
     <Container>
       <Wrapper>
         <InfoContainer>
           <Swiper
-            style={{height: constants.height / 2.75}}
+            style={{height: constants.height / 2.75, backgroundColor: '#000'}}
             dot={<Dot />}
             activeDot={<ActiveDot />}>
             {profilePhoto.map((e, i) => (
-              <Touchable key={i} onPress={() => ImageOnPress(e)}>
+              <Touchable
+                activeOpacity={1}
+                key={i}
+                onPress={() => ImageOnPress(e)}>
                 <FastImage
                   style={styleSheets.image}
                   source={{uri: e}}

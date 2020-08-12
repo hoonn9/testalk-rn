@@ -49,6 +49,8 @@ import ModalAlert from '../../components/ModalAlert';
 import EmptyScreen from '../../components/EmptyScreen';
 import FastImage from 'react-native-fast-image';
 import PeoplePhoto from '../../components/PeoplePhoto';
+import HeaderImageButton from '../../components/HeaderPhotoButton';
+import {useHeaderHeight} from '@react-navigation/stack';
 
 const Container = styled.View`
   flex: 1;
@@ -147,21 +149,22 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
   const leaveModalConfirmEvent = () => {
     navigation.navigate('TabNavigation');
   };
-
-  const HeaderImageButton = () => {
-    return (
-      <PeoplePhoto
-        uri={receiveUserInfo.profilePhoto}
-        gender={receiveUserInfo.gender}
-      />
-    );
-  };
-
+  const headerHeight = useHeaderHeight();
+  const imageOnPress = () => navigation.navigate('Profile', {userId: userId});
   // 헤더 버튼 생성
   useLayoutEffect(() => {
     navigation.setOptions({
-      title: route.params.userInfo.nickName,
-      headerTitle: (props: any) => <HeaderImageButton {...props} />,
+      title: receiveUserInfo.nickName,
+      headerTitle: (props: any) => (
+        <HeaderImageButton
+          {...props}
+          uri={receiveUserInfo.profilePhoto}
+          gender={receiveUserInfo.gender}
+          headerHeight={headerHeight}
+          nickName={receiveUserInfo.nickName}
+          imageOnPress={imageOnPress}
+        />
+      ),
       headerRight: () => <MessageHeaderButton />,
     });
   }, [navigation, isBlocked]);
@@ -434,7 +437,7 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
       }
     }
   }, [getChatUserData, getChatUserLoading, getChatUserError]);
-  console.log(chatId);
+
   const sendMessageOnPress = () => {
     if (!messageContent.value) {
       return;
@@ -475,7 +478,7 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
                 }}
               />
             ) : (
-              <EmptyScreen text="상대방에게 메시지를 기다리고 있어요!" />
+              <EmptyScreen text="상대방이 메시지를 기다리고 있어요!" />
             )}
           </Wrapper>
           <SenderWrapper>

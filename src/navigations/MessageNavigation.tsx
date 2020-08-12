@@ -2,6 +2,7 @@ import React, {FunctionComponent} from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import Message from '../screens/Message/Message';
 import {RouteProp} from '@react-navigation/native';
+import Profile from '../screens/Tabs/Profile';
 
 type RouteParamProp = {
   MessageNavigation: {
@@ -41,6 +42,7 @@ const MessageNavigation: FunctionComponent<IProp> = ({route}) => {
         options={{}}
         initialParams={route.params}
       />
+      <Stack.Screen name="Profile" component={Profile} options={{}} />
     </Stack.Navigator>
   );
 };

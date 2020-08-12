@@ -10,6 +10,7 @@ import {
 import MainNavigation from '../../navigations/MainNavigation';
 import PermitNavigation from '../../navigations/PermitNavigation';
 import {NavigationContainer} from '@react-navigation/native';
+import Indicator from '../Indicator';
 
 const SafeAreaView = styled.SafeAreaView`
   flex: 1;
@@ -32,7 +33,9 @@ export default () => {
     <NavigationContainer>
       <SafeAreaView>
         {isLoggedIn ? (
-          !isPermit ? (
+          isPermit === null ? (
+            <Indicator showing={true} />
+          ) : isPermit === false ? (
             <PermitNavigation />
           ) : (
             <MainNavigation />

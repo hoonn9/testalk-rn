@@ -1,16 +1,10 @@
-import React, {useState, useEffect, useCallback} from 'react';
-import {
-  Alert,
-  ActivityIndicator,
-  RefreshControl,
-  FlatList,
-  BackHandler,
-} from 'react-native';
+import React, {useState, useEffect, useCallback, useLayoutEffect} from 'react';
+import {Alert, ActivityIndicator, RefreshControl, FlatList} from 'react-native';
 import styled from 'styled-components/native';
 import {useLazyQuery, useMutation} from '@apollo/react-hooks';
 import AsyncStorage from '@react-native-community/async-storage';
 import Geolocation from '@react-native-community/geolocation';
-import {StackNavigationProp} from '@react-navigation/stack';
+import {StackNavigationProp, useHeaderHeight} from '@react-navigation/stack';
 import {
   ReportMovement,
   ReportMovementVariables,
@@ -24,7 +18,8 @@ import PeopleRow from '../../components/PeopleRow';
 import RowSeparator from '../../components/RowSeparator';
 import {distance} from '../../utils';
 import {toast} from '../../tools';
-import {useRoute, StackActions} from '@react-navigation/native';
+import HeaderTab from '../../components/HeaderTab';
+import {TabProp} from '../../components/HeaderTab/HeaderTab';
 
 const View = styled.View`
   justify-content: center;
@@ -45,6 +40,8 @@ const IndicatorView = styled.View`
   align-items: center;
   justify-content: center;
 `;
+
+const Text = styled.Text``;
 
 type FeedsTabParamList = {
   MessageNavigation: {
@@ -83,6 +80,20 @@ Geolocation.setRNConfiguration({
 });
 
 const People: React.FunctionComponent<IProp> = ({navigation}) => {
+  const [currentTab, setCurrentTab] = useState<TabProp>('people');
+  const headerHeight = useHeaderHeight();
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerTitle: () => (
+        <HeaderTab
+          currentTab={currentTab}
+          setCurrentTab={setCurrentTab}
+          headerHeight={headerHeight}
+        />
+      ),
+    });
+  }, [navigation]);
+
   const PEOPLE_LIMIT = 10;
 
   const [location, setLocation] = useState<LocationProp>({
@@ -229,35 +240,6 @@ const People: React.FunctionComponent<IProp> = ({navigation}) => {
     }
     return photo;
   };
-  //Exit event
-
-  // let exitState = false;
-  // let timeout: NodeJS.Timeout;
-  // useEffect(() => {
-  //   const backAction = () => {
-  //     if (navigation.isFocused()) {
-  //       if (!exitState) {
-  //         toast('한번 더 누르시면 종료됩니다.');
-  //         exitState = true;
-  //         timeout = setTimeout(() => {
-  //           exitState = false;
-  //         }, 2000);
-  //       } else {
-  //         clearTimeout(timeout);
-  //         BackHandler.exitApp();
-  //       }
-  //     }
-
-  //     return true;
-  //   };
-
-  //   const backHandler = BackHandler.addEventListener(
-  //     'hardwareBackPress',
-  //     backAction,
-  //   );
-
-  //   return () => backHandler.remove();
-  // }, []);
 
   return (
     <>
@@ -265,47 +247,53 @@ const People: React.FunctionComponent<IProp> = ({navigation}) => {
         isGranted ? (
           listData ? (
             <SafeAreaView>
-              <FlatList
-                refreshControl={
-                  <RefreshControl
-                    refreshing={isRefreshing}
-                    onRefresh={onRefresh}
-                  />
-                }
-                keyExtractor={(e, i) => i.toString()}
-                windowSize={5}
-                data={listData}
-                renderItem={data => {
-                  if (data.item) {
-                    return data.item.id !== userId ? (
-                      <PeopleRow
-                        id={data.item.id}
-                        nickName={data.item.nickName}
-                        gender={data.item.gender}
-                        birth={data.item.birth}
-                        intro={data.item.intro}
-                        profilePhoto={
-                          data.item.profilePhoto &&
-                          data.item.profilePhoto.length > 0
-                            ? sortProfilePhoto(data.item.profilePhoto).url
-                            : 'https://i.stack.imgur.com/l60Hf.png'
-                        }
-                        updatedAt={data.item.updatedAt}
-                        lastLat={data.item.lastLat}
-                        lastLng={data.item.lastLng}
-                        getDistance={getDistance}
-                        onSelected={infoOnPress}
-                        imageOnPress={imageOnPress}
-                      />
-                    ) : null;
-                  } else {
-                    return null;
+              {currentTab === 'people' ? (
+                <FlatList
+                  refreshControl={
+                    <RefreshControl
+                      refreshing={isRefreshing}
+                      onRefresh={onRefresh}
+                    />
                   }
-                }}
-                ItemSeparatorComponent={() => <RowSeparator />}
-                onEndReached={onEndReached}
-                onEndReachedThreshold={0.01}
-              />
+                  keyExtractor={(e, i) => i.toString()}
+                  windowSize={5}
+                  data={listData}
+                  renderItem={data => {
+                    if (data.item) {
+                      return data.item.id !== userId ? (
+                        <PeopleRow
+                          id={data.item.id}
+                          nickName={data.item.nickName}
+                          gender={data.item.gender}
+                          birth={data.item.birth}
+                          intro={data.item.intro}
+                          profilePhoto={
+                            data.item.profilePhoto &&
+                            data.item.profilePhoto.length > 0
+                              ? sortProfilePhoto(data.item.profilePhoto).url
+                              : 'https://i.stack.imgur.com/l60Hf.png'
+                          }
+                          updatedAt={data.item.updatedAt}
+                          lastLat={data.item.lastLat}
+                          lastLng={data.item.lastLng}
+                          getDistance={getDistance}
+                          onSelected={infoOnPress}
+                          imageOnPress={imageOnPress}
+                        />
+                      ) : null;
+                    } else {
+                      return null;
+                    }
+                  }}
+                  ItemSeparatorComponent={() => <RowSeparator />}
+                  onEndReached={onEndReached}
+                  onEndReachedThreshold={0.01}
+                />
+              ) : (
+                <View>
+                  <Text>dd</Text>
+                </View>
+              )}
             </SafeAreaView>
           ) : (
             <IndicatorView>

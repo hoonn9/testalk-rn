@@ -1,4 +1,4 @@
-import React, {useLayoutEffect, useState} from 'react';
+import React, {useLayoutEffect, useState, useEffect} from 'react';
 import styled from 'styled-components/native';
 import {ScrollView} from 'react-native-gesture-handler';
 import {useQuery} from '@apollo/react-hooks';
@@ -12,6 +12,16 @@ import FastImage from 'react-native-fast-image';
 import styles from '../../styles';
 import {StyleSheet} from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import {
+  HeaderButtons,
+  OverflowMenu,
+  HiddenItem,
+  HeaderButton,
+} from 'react-navigation-header-buttons';
+import {getUserInfoFromId, unblockFriend, blockFriend} from '../../dbTools';
+import {toast} from '../../tools';
+import ModalSelector from '../../components/ModalSelector';
 const View = styled.View`
   flex: 1;
   width: 100%;
@@ -53,14 +63,38 @@ interface IProp {
 const Profile: React.FunctionComponent<IProp> = ({route}) => {
   const navigation = useNavigation();
   const {userId} = route.params;
+  const [isBlocked, setIsBlocked] = useState<boolean>(false);
+  const [isBlockModalVisible, setIsBlockModalVisible] = useState<boolean>(
+    false,
+  );
+
+  const MessageHeaderButton = () => {
+    return (
+      <HeaderButtons>
+        <OverflowMenu
+          OverflowIcon={
+            <MaterialIcons
+              name="more-vert"
+              size={23}
+              color={styles.whiteColor}
+            />
+          }>
+          <HiddenItem
+            title={isBlocked ? '차단 해제' : '차단하기'}
+            onPress={() => setIsBlockModalVisible(true)}
+          />
+        </OverflowMenu>
+      </HeaderButtons>
+    );
+  };
 
   useLayoutEffect(() => {
     navigation.setOptions({
       title: '',
       headerTransparent: true,
-      headerRight: () => null,
+      headerRight: () => <MessageHeaderButton />,
     });
-  }, [navigation]);
+  }, [navigation, isBlocked]);
 
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [modalImage, setModalImage] = useState<string>('');
@@ -79,6 +113,35 @@ const Profile: React.FunctionComponent<IProp> = ({route}) => {
     setIsModalVisible(true);
     setModalImage(url);
   };
+
+  const blockConfirmEvent = async () => {
+    try {
+      if (isBlocked) {
+        unblockFriend(userId);
+        setIsBlocked(false);
+        toast('차단이 해제 되었어요.');
+      } else {
+        blockFriend(userId);
+        setIsBlocked(true);
+        toast('차단 완료 되었어요.');
+      }
+    } catch (error) {
+      toast('차단 등록/해제 중 실패했어요.');
+      console.log(error);
+    } finally {
+      setIsBlockModalVisible(false);
+    }
+  };
+
+  useEffect(() => {
+    const getUser = async () => {
+      const getUserInfo = await getUserInfoFromId(userId);
+      if (getUserInfo) {
+        setIsBlocked(getUserInfo.blocked ? true : false);
+      }
+    };
+    getUser();
+  }, []);
 
   if (
     data &&
@@ -133,6 +196,23 @@ const Profile: React.FunctionComponent<IProp> = ({route}) => {
               <Icon name="remove" size={21} color={styles.whiteColor} />
             </ModalBackButton>
           </View>
+        </Modal>
+        <Modal
+          isVisible={isBlockModalVisible}
+          animationOut="fadeOutDown"
+          backdropColor={styles.modalBackDropColor}
+          backdropOpacity={0.3}
+          backdropTransitionOutTiming={0}
+          swipeDirection={['down']}
+          onSwipeComplete={() => setIsBlockModalVisible(false)}>
+          <ModalSelector
+            description={
+              isBlocked ? '차단을 해제하시겠어요?' : '상대를 차단하시겠어요?'
+            }
+            confirmEvent={blockConfirmEvent}
+            confirmTitle="네"
+            cancelEvent={() => setIsBlockModalVisible(false)}
+          />
         </Modal>
       </>
     );

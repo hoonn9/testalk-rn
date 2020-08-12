@@ -11,6 +11,8 @@ import constants from '../../constants';
 import {getAge} from '../../utils';
 import Icon from 'react-native-vector-icons/AntDesign';
 import FastImage from 'react-native-fast-image';
+import Indicator from '../../components/Indicator';
+import EmptyScreen from '../../components/EmptyScreen';
 
 const View = styled.View``;
 const Container = styled.View`
@@ -33,6 +35,7 @@ const EditTouchable = styled.TouchableOpacity`
   width: 35px;
   height: 35px;
 `;
+const Touchable = styled.TouchableOpacity``;
 const Text = styled.Text``;
 
 const InfoContainer = styled.View`
@@ -163,6 +166,9 @@ const Profile: React.FunctionComponent<IProp> = () => {
                 </EditTouchable>
                 <Text>{likeCount}</Text>
                 <Text>{cash}</Text>
+                <Touchable onPress={() => navigation.navigate('Purchase')}>
+                  <Text>캐시 구매하기</Text>
+                </Touchable>
               </BottomWrapper>
             </InfoContainer>
           </Wrapper>
@@ -170,13 +176,7 @@ const Profile: React.FunctionComponent<IProp> = () => {
       </ScrollView>
     );
   } else {
-    return (
-      <ScrollView>
-        <View>
-          <Text>오류</Text>
-        </View>
-      </ScrollView>
-    );
+    return <EmptyScreen text={'네트워크 연결이 필요해요.'} />;
   }
 };
 

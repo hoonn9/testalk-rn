@@ -15,8 +15,8 @@ export const AuthProvider: React.FunctionComponent<IProps> = ({
   setIsRoomIn,
   children,
 }) => {
-  const [isLoggedIn, setIsLoggedIn] = useState(isLoggedInProp);
-  const [isPermit, setIsPermit] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(isLoggedInProp);
+  const [isPermit, setIsPermit] = useState<boolean | null>(null);
   const logUserIn = async (token: string, userId: number) => {
     //console.log(token);
     try {
