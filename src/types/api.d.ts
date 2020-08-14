@@ -338,6 +338,89 @@ export interface SetUserNotifyVariables {
 // This file was automatically generated and should not be edited.
 
 // ====================================================
+// GraphQL mutation operation: UploadPost
+// ====================================================
+
+export interface UploadPost_UploadPost {
+  __typename: "UploadPostResponse";
+  ok: boolean;
+  error: string | null;
+}
+
+export interface UploadPost {
+  UploadPost: UploadPost_UploadPost | null;
+}
+
+export interface UploadPostVariables {
+  title: string;
+  content: string;
+  postPhotos?: PhotoObject[] | null;
+}
+
+/* tslint:disable */
+/* eslint-disable */
+// @generated
+// This file was automatically generated and should not be edited.
+
+// ====================================================
+// GraphQL query operation: GetPostList
+// ====================================================
+
+export interface GetPostList_GetPostList_posts_user_profilePhoto {
+  __typename: "File";
+  id: number;
+  url: string;
+}
+
+export interface GetPostList_GetPostList_posts_user {
+  __typename: "User";
+  id: number;
+  nickName: string;
+  birth: string;
+  gender: string;
+  profilePhoto: GetPostList_GetPostList_posts_user_profilePhoto[] | null;
+}
+
+export interface GetPostList_GetPostList_posts_files {
+  __typename: "File";
+  id: number;
+  url: string;
+}
+
+export interface GetPostList_GetPostList_posts {
+  __typename: "Post";
+  id: number;
+  title: string;
+  content: string;
+  user: GetPostList_GetPostList_posts_user;
+  files: GetPostList_GetPostList_posts_files[] | null;
+  updatedAt: string | null;
+}
+
+export interface GetPostList_GetPostList {
+  __typename: "GetPostListResponse";
+  ok: boolean;
+  error: string | null;
+  posts: (GetPostList_GetPostList_posts | null)[] | null;
+}
+
+export interface GetPostList {
+  GetPostList: GetPostList_GetPostList;
+}
+
+export interface GetPostListVariables {
+  requestTime: string;
+  means: string;
+  skip: number;
+  take: number;
+}
+
+/* tslint:disable */
+/* eslint-disable */
+// @generated
+// This file was automatically generated and should not be edited.
+
+// ====================================================
 // GraphQL query operation: GetMyProfile
 // ====================================================
 

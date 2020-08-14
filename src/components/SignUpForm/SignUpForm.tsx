@@ -1,18 +1,15 @@
-import React, { useState } from "react";
-import styled from "styled-components/native";
-import constants from "../../constants";
+import React, {useState} from 'react';
+import styled from 'styled-components/native';
+import constants from '../../constants';
 import {
-  ActivityIndicator,
   TouchableOpacityProps,
   Platform,
   GestureResponderEvent,
-} from "react-native";
-import DateTimePicker from "@react-native-community/datetimepicker";
-import TextInputRow from "../TextInputRow";
-import ToogleInput from "../RadioButton";
-import AuthButton from "../AuthButton";
-import { NavigationProp } from "react-navigation";
-import { NavigationStackScreenProps } from "react-navigation-stack";
+} from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import TextInputRow from '../TextInputRow';
+import ToogleInput from '../RadioButton';
+import AuthButton from '../AuthButton';
 const Touchable = styled.TouchableOpacity``;
 
 interface IContainer {
@@ -52,7 +49,7 @@ interface IProp extends TouchableOpacityProps {
   onNext: (event: GestureResponderEvent) => void;
 }
 
-type DateModeProp = "time" | "date" | "datetime" | "countdown" | undefined;
+type DateModeProp = 'time' | 'date' | 'datetime' | 'countdown' | undefined;
 
 const SignUpForm: React.FunctionComponent<IProp> = ({
   nickName,
@@ -60,16 +57,16 @@ const SignUpForm: React.FunctionComponent<IProp> = ({
   birth: birthState,
   onNext,
 }) => {
-  const { gender, setGender } = genderState;
-  const { birth, setBirth } = birthState;
+  const {gender, setGender} = genderState;
+  const {birth, setBirth} = birthState;
 
-  const [mode, setMode] = useState<DateModeProp>("date");
+  const [mode, setMode] = useState<DateModeProp>('date');
   const [show, setShow] = useState<boolean | undefined>(false);
   const [loading, setLoading] = useState<boolean>(false);
 
   const onChangeDatePicker = (event: any, selectedDate: any) => {
     const currentDate = selectedDate || birth;
-    setShow(Platform.OS === "ios");
+    setShow(Platform.OS === 'ios');
     setBirth(currentDate);
   };
 
@@ -77,19 +74,19 @@ const SignUpForm: React.FunctionComponent<IProp> = ({
     <Container>
       <Text>Form</Text>
       <TextInputRow
-        title={"닉네임"}
-        placeholder={""}
+        title={'닉네임'}
+        placeholder={''}
         value={nickName.value}
         onChange={nickName.onChange}
-        keyboardType={"default"}
+        keyboardType={'default'}
       />
       <ToogleInput
-        title={"성별"}
-        buttons={["male", "female"]}
+        title={'성별'}
+        buttons={['male', 'female']}
         value={gender}
         setValue={setGender}
       />
-      <RowText>{"생년월일"}</RowText>
+      <RowText>{'생년월일'}</RowText>
       <Touchable onPress={() => setShow(!show)}>
         <TextInput editable={false} value={birth.toISOString()} />
       </Touchable>

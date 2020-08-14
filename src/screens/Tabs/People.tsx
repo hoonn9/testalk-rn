@@ -20,6 +20,7 @@ import {distance} from '../../utils';
 import {toast} from '../../tools';
 import HeaderTab from '../../components/HeaderTab';
 import {TabProp} from '../../components/HeaderTab/HeaderTab';
+import Post from '../Post/Post';
 
 const View = styled.View`
   justify-content: center;
@@ -290,9 +291,7 @@ const People: React.FunctionComponent<IProp> = ({navigation}) => {
                   onEndReachedThreshold={0.01}
                 />
               ) : (
-                <View>
-                  <Text>dd</Text>
-                </View>
+                <Post />
               )}
             </SafeAreaView>
           ) : (

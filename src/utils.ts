@@ -128,3 +128,13 @@ export const initTimestamp = (timestamp: number) => {
     date.setMilliseconds(0);
     return date.getTime();
 }
+
+export const FirstElementFromId = (array: Array<any>) => {
+    let temp = array[0];
+    for (let i = 1; i < array.length; i++) {
+        if (temp.id > array[i].id) {
+            temp = array[i];
+        }
+    }
+    return temp;
+}

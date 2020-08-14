@@ -3,6 +3,7 @@ import {createStackNavigator} from '@react-navigation/stack';
 import TabNavigation from './TabNavigation';
 import MessageNavigation from './MessageNavigation';
 import EditProfileNavigation from './EditProfileNavigation';
+import UploadPostNavigation from './UploadPostNavigation';
 
 const Stack = createStackNavigator();
 
@@ -29,6 +30,11 @@ const MainNavigation = () => {
       <Stack.Screen
         name="EditProfileNavigation"
         component={EditProfileNavigation}
+        options={{}}
+      />
+      <Stack.Screen
+        name="UploadPostNavigation"
+        component={UploadPostNavigation}
         options={{}}
       />
     </Stack.Navigator>
