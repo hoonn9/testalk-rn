@@ -363,6 +363,80 @@ export interface UploadPostVariables {
 // This file was automatically generated and should not be edited.
 
 // ====================================================
+// GraphQL query operation: GetPost
+// ====================================================
+
+export interface GetPost_GetPost_post_user_profilePhoto {
+  __typename: "File";
+  id: number;
+  url: string;
+}
+
+export interface GetPost_GetPost_post_user {
+  __typename: "User";
+  id: number;
+  nickName: string;
+  birth: string;
+  gender: string;
+  profilePhoto: GetPost_GetPost_post_user_profilePhoto[] | null;
+}
+
+export interface GetPost_GetPost_post_files {
+  __typename: "File";
+  id: number;
+  url: string;
+}
+
+export interface GetPost_GetPost_post_comments_user {
+  __typename: "User";
+  id: number;
+  gender: string;
+}
+
+export interface GetPost_GetPost_post_comments {
+  __typename: "Comment";
+  id: number;
+  parentId: number | null;
+  content: string;
+  depth: number;
+  user: GetPost_GetPost_post_comments_user;
+  createdAt: string;
+  updatedAt: string | null;
+}
+
+export interface GetPost_GetPost_post {
+  __typename: "Post";
+  id: number;
+  title: string;
+  content: string;
+  user: GetPost_GetPost_post_user;
+  files: GetPost_GetPost_post_files[] | null;
+  comments: GetPost_GetPost_post_comments[] | null;
+  createdAt: string;
+  updatedAt: string | null;
+}
+
+export interface GetPost_GetPost {
+  __typename: "GetPostResponse";
+  ok: boolean;
+  error: string | null;
+  post: GetPost_GetPost_post | null;
+}
+
+export interface GetPost {
+  GetPost: GetPost_GetPost;
+}
+
+export interface GetPostVariables {
+  id: number;
+}
+
+/* tslint:disable */
+/* eslint-disable */
+// @generated
+// This file was automatically generated and should not be edited.
+
+// ====================================================
 // GraphQL query operation: GetPostList
 // ====================================================
 
@@ -413,6 +487,31 @@ export interface GetPostListVariables {
   means: string;
   skip: number;
   take: number;
+}
+
+/* tslint:disable */
+/* eslint-disable */
+// @generated
+// This file was automatically generated and should not be edited.
+
+// ====================================================
+// GraphQL mutation operation: AddComment
+// ====================================================
+
+export interface AddComment_AddComment {
+  __typename: "AddCommentResponse";
+  ok: boolean;
+  error: string | null;
+}
+
+export interface AddComment {
+  AddComment: AddComment_AddComment;
+}
+
+export interface AddCommentVariables {
+  postId: number;
+  parentId?: number | null;
+  content: string;
 }
 
 /* tslint:disable */

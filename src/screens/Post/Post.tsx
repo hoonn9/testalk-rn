@@ -81,6 +81,14 @@ const Post: React.FunctionComponent<IProp> = ({}) => {
     setSkip(skip + POST_LIMIT);
   };
 
+  const onSelected = (post: GetPostList_GetPostList_posts) => {
+    navigation.navigate('ReadPostNavigation', {post});
+  };
+
+  const imageOnPress = (id: number) => {
+    navigation.navigate('Profile', {userId: id});
+  };
+
   useEffect(() => {
     getPostList();
   }, []);
@@ -97,11 +105,18 @@ const Post: React.FunctionComponent<IProp> = ({}) => {
             windowSize={5}
             data={postList}
             renderItem={({item}) => {
-              const {nickName, gender, birth, profilePhoto} = item.user;
+              const {
+                id: userId,
+                nickName,
+                gender,
+                birth,
+                profilePhoto,
+              } = item.user;
               return (
                 <PostRow
                   id={item.id}
                   title={item.title}
+                  userId={userId}
                   nickName={nickName}
                   gender={gender}
                   birth={birth}
@@ -111,6 +126,8 @@ const Post: React.FunctionComponent<IProp> = ({}) => {
                       : 'https://i.stack.imgur.com/l60Hf.png'
                   }
                   updatedAt={item.updatedAt}
+                  onSelected={() => onSelected(item)}
+                  imageOnPress={() => imageOnPress(userId)}
                 />
               );
             }}

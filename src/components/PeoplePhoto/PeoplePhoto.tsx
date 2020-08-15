@@ -6,34 +6,43 @@ import FastImage from 'react-native-fast-image';
 const Wrapper = styled.View``;
 
 interface IProp {
-  uri: string | undefined;
+  uri?: string | undefined;
+  size?: number;
   gender: string;
 }
 
-const styles = () =>
+interface StyleProp {
+  size: number;
+}
+
+const styles = (props: StyleProp) =>
   StyleSheet.create({
     image: {
-      width: 65,
-      height: 65,
+      width: props.size,
+      height: props.size,
       borderRadius: 50 / 2,
       borderWidth: 1,
     },
   });
 
-const PeoplePhoto: React.FunctionComponent<IProp> = ({uri, gender}) => {
+const PeoplePhoto: React.FunctionComponent<IProp> = ({
+  uri,
+  gender,
+  size = 65,
+}) => {
   return (
     <Wrapper>
       {uri ? (
-        <FastImage source={{uri}} style={styles().image} />
+        <FastImage source={{uri}} style={styles({size}).image} />
       ) : gender === 'male' ? (
         <FastImage
           source={require('../../../images/male.png')}
-          style={styles().image}
+          style={styles({size}).image}
         />
       ) : (
         <FastImage
           source={require('../../../images/female.png')}
-          style={styles().image}
+          style={styles({size}).image}
         />
       )}
     </Wrapper>

@@ -10,7 +10,8 @@ const Container = styled.View`
 const Wrapper = styled.View`
   justify-content: center;
   background-color: #ddd;
-  padding: 1px 0px;
+  padding: 4px 8px;
+  background-color: ${(props: any) => props.theme.whiteColor};
 `;
 const ImageTouchable = styled.TouchableOpacity`
   justify-content: center;
@@ -23,60 +24,48 @@ const Touchable = styled.TouchableOpacity`
   justify-content: center;
   background-color: #ddd;
 `;
-const FirstText = styled.Text`
-  font-size: 16px;
+interface TextProp {
+  gender: string;
+}
+const FirstText = styled.Text<TextProp>`
+  font-size: 14px;
+  color: ${(props: any) => (props.gender === 'male' ? 'blue' : 'red')};
 `;
 const SecondText = styled.Text`
   font-size: 15px;
-  color: ${(props: any) => props.theme.darkGreyColor};
 `;
 const ThirdText = styled.Text`
   font-size: 13px;
+  color: ${(props: any) => props.theme.darkGreyColor};
 `;
 
 interface IProp {
   id: number;
   userId: number;
-  title: string;
-  nickName: string;
-  birth: string;
   gender: string;
-  profilePhoto: string;
-  updatedAt: string | undefined | null;
-  onSelected: ((event: GestureResponderEvent) => void) | undefined;
-  imageOnPress: ((event: GestureResponderEvent) => void) | undefined;
+  content: string;
+  updatedAt: string;
 }
 
-const PostRow: React.FunctionComponent<IProp> = ({
+const CommentRow: React.FunctionComponent<IProp> = ({
   id,
-  title,
-  nickName,
-  birth,
+  userId,
   gender,
-  profilePhoto,
+  content,
   updatedAt,
-  onSelected = () => null,
-  imageOnPress = () => null,
 }) => {
   return (
     <Container>
-      <ImageTouchable activeOpacity={1} onPress={imageOnPress}>
-        <PeoplePhoto uri={profilePhoto} gender={gender} />
-      </ImageTouchable>
-      <Touchable activeOpacity={1} onPress={onSelected}>
+      <Touchable activeOpacity={1}>
         <InfoWrapper>
           <Wrapper>
-            <FirstText>{title}</FirstText>
+            <FirstText gender={gender}>댓쓴이</FirstText>
           </Wrapper>
           <Wrapper>
-            <SecondText>
-              {nickName} {birth ? getAge(birth) : '??'} {gender}
-            </SecondText>
+            <SecondText>{content}</SecondText>
           </Wrapper>
           <Wrapper>
-            <ThirdText>
-              {updatedAt ? dateSimpleConverter(updatedAt) : '??'}
-            </ThirdText>
+            <ThirdText>{dateSimpleConverter(updatedAt)}</ThirdText>
           </Wrapper>
         </InfoWrapper>
       </Touchable>
@@ -84,4 +73,4 @@ const PostRow: React.FunctionComponent<IProp> = ({
   );
 };
 
-export default React.memo(PostRow);
+export default React.memo(CommentRow);
