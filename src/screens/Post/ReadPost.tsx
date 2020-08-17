@@ -75,6 +75,9 @@ const ReadPost: React.FunctionComponent<IProp> = ({route}) => {
   const [commentList, setCommentList] = useState<
     Array<GetPost_GetPost_post_comments>
   >([]);
+
+  const [deepCommentId, setDeepCommentId] = useState<number>();
+
   const [getPost] = useLazyQuery<GetPost, GetPostVariables>(GET_POST, {
     variables: {
       id: id,
@@ -92,7 +95,7 @@ const ReadPost: React.FunctionComponent<IProp> = ({route}) => {
     },
   });
 
-  const [AddCommentMutation] = useMutation<AddComment, AddCommentVariables>(
+  const [addCommentMutation] = useMutation<AddComment, AddCommentVariables>(
     ADD_COMMENT,
   );
 
@@ -102,7 +105,7 @@ const ReadPost: React.FunctionComponent<IProp> = ({route}) => {
 
   const commentRegOnPress = async () => {
     try {
-      const {data} = await AddCommentMutation({
+      const {data} = await addCommentMutation({
         variables: {postId: id, content: comment},
       });
 
@@ -114,6 +117,10 @@ const ReadPost: React.FunctionComponent<IProp> = ({route}) => {
     } catch (error) {
       console.log(error);
     }
+  };
+
+  const deepCommentOnPress = (id: number) => {
+    setDeepCommentId(id);
   };
 
   return (
@@ -148,6 +155,8 @@ const ReadPost: React.FunctionComponent<IProp> = ({route}) => {
               gender={item.user.gender}
               content={content}
               updatedAt={updatedAt ? updatedAt : createdAt}
+              deepCommentOnPress={deepCommentOnPress}
+              deepCommentId={deepCommentId}
             />
           );
         }}
@@ -156,8 +165,10 @@ const ReadPost: React.FunctionComponent<IProp> = ({route}) => {
       <CommentInputWrapper>
         <CommentInput
           comment={comment}
+          deepCommentId={deepCommentId}
           onCommentChange={(text: string) => setComment(text)}
-          commentRegOnPress={() => commentRegOnPress()}
+          commentRegOnPress={commentRegOnPress}
+          deepCommentOnPress={() => setDeepCommentId(undefined)}
         />
       </CommentInputWrapper>
     </>

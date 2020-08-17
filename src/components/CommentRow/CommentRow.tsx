@@ -1,12 +1,8 @@
-import React from 'react';
+import React, {useState} from 'react';
 import styled from 'styled-components/native';
-import {StyleSheet, GestureResponderEvent} from 'react-native';
-import {getAge, dateSimpleConverter} from '../../utils';
-import PeoplePhoto from '../PeoplePhoto';
+import {dateSimpleConverter} from '../../utils';
 
-const Container = styled.View`
-  flex-direction: row;
-`;
+const Container = styled.View``;
 const Wrapper = styled.View`
   justify-content: center;
   background-color: #ddd;
@@ -19,11 +15,7 @@ const ImageTouchable = styled.TouchableOpacity`
   padding: 0px 8px;
 `;
 const InfoWrapper = styled.View``;
-const Touchable = styled.TouchableOpacity`
-  flex: 1;
-  justify-content: center;
-  background-color: #ddd;
-`;
+const Touchable = styled.TouchableOpacity``;
 interface TextProp {
   gender: string;
 }
@@ -38,6 +30,13 @@ const ThirdText = styled.Text`
   font-size: 13px;
   color: ${(props: any) => props.theme.darkGreyColor};
 `;
+interface CommentProp {
+  commentActive: boolean;
+}
+const CommentText = styled.Text<CommentProp>`
+  font-size: 13px;
+  color: ${(props: any) => (props.commentActive ? 'red' : 'black')};
+`;
 
 interface IProp {
   id: number;
@@ -45,6 +44,8 @@ interface IProp {
   gender: string;
   content: string;
   updatedAt: string;
+  deepCommentOnPress: Function;
+  deepCommentId: number | undefined;
 }
 
 const CommentRow: React.FunctionComponent<IProp> = ({
@@ -53,22 +54,33 @@ const CommentRow: React.FunctionComponent<IProp> = ({
   gender,
   content,
   updatedAt,
+  deepCommentOnPress,
+  deepCommentId,
 }) => {
   return (
     <Container>
-      <Touchable activeOpacity={1}>
-        <InfoWrapper>
-          <Wrapper>
-            <FirstText gender={gender}>댓쓴이</FirstText>
-          </Wrapper>
-          <Wrapper>
-            <SecondText>{content}</SecondText>
-          </Wrapper>
-          <Wrapper>
-            <ThirdText>{dateSimpleConverter(updatedAt)}</ThirdText>
-          </Wrapper>
-        </InfoWrapper>
-      </Touchable>
+      <InfoWrapper>
+        <Wrapper>
+          <FirstText gender={gender}>댓쓴이</FirstText>
+        </Wrapper>
+        <Wrapper>
+          <SecondText>{content}</SecondText>
+        </Wrapper>
+        <Wrapper>
+          <ThirdText>{dateSimpleConverter(updatedAt)}</ThirdText>
+          <Touchable
+            onPress={() => {
+              deepCommentOnPress(id);
+            }}>
+            <CommentText
+              commentActive={
+                deepCommentId && deepCommentId === id ? true : false
+              }>
+              {'+ 답글'}
+            </CommentText>
+          </Touchable>
+        </Wrapper>
+      </InfoWrapper>
     </Container>
   );
 };
