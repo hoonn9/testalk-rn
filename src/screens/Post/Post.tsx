@@ -13,6 +13,7 @@ import {FlatList, RefreshControl} from 'react-native';
 import PostRow from '../../components/PostRow';
 import {FirstElementFromId} from '../../utils';
 import RowSeparator from '../../components/RowSeparator';
+import FloatButton from '../../components/FloatButton';
 
 const View = styled.View``;
 const SafeAreaView = styled.SafeAreaView`
@@ -21,9 +22,10 @@ const SafeAreaView = styled.SafeAreaView`
 const Container = styled.View`
   flex: 1;
 `;
-const Wrapper = styled.View`
-  flex-direction: row;
-  background-color: #ddd;
+const FloatButtonWrapper = styled.View`
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
 `;
 const Touchable = styled.TouchableOpacity``;
 const Text = styled.Text``;
@@ -136,12 +138,11 @@ const Post: React.FunctionComponent<IProp> = ({}) => {
             onEndReachedThreshold={0.01}
           />
         </SafeAreaView>
-        <Wrapper>
-          <Touchable
-            onPress={() => navigation.navigate('UploadPostNavigation')}>
-            <Text>글쓰기</Text>
-          </Touchable>
-        </Wrapper>
+        <FloatButtonWrapper>
+          <FloatButton
+            onPress={() => navigation.navigate('UploadPostNavigation')}
+          />
+        </FloatButtonWrapper>
       </Container>
     </>
   );

@@ -6,28 +6,26 @@ import PeoplePhoto from '../PeoplePhoto';
 
 const Container = styled.View`
   flex-direction: row;
+  background-color: ${(props: any) => props.theme.whiteColor};
 `;
 const Wrapper = styled.View`
   justify-content: center;
-  background-color: #ddd;
-  padding: 1px 0px;
+  padding: 1.5px 0px;
 `;
 const ImageTouchable = styled.TouchableOpacity`
   justify-content: center;
-  background-color: #ddd;
   padding: 0px 8px;
 `;
 const InfoWrapper = styled.View``;
 const Touchable = styled.TouchableOpacity`
   flex: 1;
   justify-content: center;
-  background-color: #ddd;
 `;
 const FirstText = styled.Text`
-  font-size: 16px;
+  font-size: 15px;
 `;
 const SecondText = styled.Text`
-  font-size: 15px;
+  font-size: 14px;
   color: ${(props: any) => props.theme.darkGreyColor};
 `;
 const ThirdText = styled.Text`

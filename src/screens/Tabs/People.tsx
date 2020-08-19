@@ -1,5 +1,11 @@
 import React, {useState, useEffect, useCallback, useLayoutEffect} from 'react';
-import {Alert, ActivityIndicator, RefreshControl, FlatList} from 'react-native';
+import {
+  Alert,
+  ActivityIndicator,
+  RefreshControl,
+  FlatList,
+  Animated,
+} from 'react-native';
 import styled from 'styled-components/native';
 import {useLazyQuery, useMutation} from '@apollo/react-hooks';
 import AsyncStorage from '@react-native-community/async-storage';
@@ -21,6 +27,8 @@ import {toast} from '../../tools';
 import HeaderTab from '../../components/HeaderTab';
 import {TabProp} from '../../components/HeaderTab/HeaderTab';
 import Post from '../Post/Post';
+import Swipeable from 'react-native-gesture-handler/Swipeable';
+import {RectButton} from 'react-native-gesture-handler';
 
 const View = styled.View`
   justify-content: center;

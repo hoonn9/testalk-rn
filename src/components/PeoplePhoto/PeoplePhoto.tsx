@@ -20,7 +20,7 @@ const styles = (props: StyleProp) =>
     image: {
       width: props.size,
       height: props.size,
-      borderRadius: 50 / 2,
+      borderRadius: 52 / 2,
       borderWidth: 1,
     },
   });
@@ -28,7 +28,7 @@ const styles = (props: StyleProp) =>
 const PeoplePhoto: React.FunctionComponent<IProp> = ({
   uri,
   gender,
-  size = 65,
+  size = 58,
 }) => {
   return (
     <Wrapper>

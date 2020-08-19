@@ -14,7 +14,12 @@ const ImageTouchable = styled.TouchableOpacity`
   background-color: #ddd;
   padding: 0px 8px;
 `;
-const InfoWrapper = styled.View``;
+interface ContentProp {
+  depth: number;
+}
+const InfoWrapper = styled.View<ContentProp>`
+  padding-left: ${(props: any) => (props.depth === 1 ? '16px' : '0px')};
+`;
 const Touchable = styled.TouchableOpacity``;
 interface TextProp {
   gender: string;
@@ -41,6 +46,8 @@ const CommentText = styled.Text<CommentProp>`
 interface IProp {
   id: number;
   userId: number;
+  parentId: number | null;
+  depth: number;
   gender: string;
   content: string;
   updatedAt: string;
@@ -51,6 +58,8 @@ interface IProp {
 const CommentRow: React.FunctionComponent<IProp> = ({
   id,
   userId,
+  parentId,
+  depth,
   gender,
   content,
   updatedAt,
@@ -59,7 +68,7 @@ const CommentRow: React.FunctionComponent<IProp> = ({
 }) => {
   return (
     <Container>
-      <InfoWrapper>
+      <InfoWrapper depth={depth}>
         <Wrapper>
           <FirstText gender={gender}>댓쓴이</FirstText>
         </Wrapper>
@@ -70,7 +79,7 @@ const CommentRow: React.FunctionComponent<IProp> = ({
           <ThirdText>{dateSimpleConverter(updatedAt)}</ThirdText>
           <Touchable
             onPress={() => {
-              deepCommentOnPress(id);
+              deepCommentOnPress(depth === 0 ? id : parentId);
             }}>
             <CommentText
               commentActive={

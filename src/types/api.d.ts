@@ -520,6 +520,50 @@ export interface AddCommentVariables {
 // This file was automatically generated and should not be edited.
 
 // ====================================================
+// GraphQL query operation: GetCommentList
+// ====================================================
+
+export interface GetCommentList_GetCommentList_comments_user {
+  __typename: "User";
+  id: number;
+  gender: string;
+}
+
+export interface GetCommentList_GetCommentList_comments {
+  __typename: "Comment";
+  id: number;
+  parentId: number | null;
+  content: string;
+  depth: number;
+  user: GetCommentList_GetCommentList_comments_user;
+  createdAt: string;
+  updatedAt: string | null;
+}
+
+export interface GetCommentList_GetCommentList {
+  __typename: "GetCommentListResponse";
+  ok: boolean;
+  error: string | null;
+  comments: (GetCommentList_GetCommentList_comments | null)[] | null;
+}
+
+export interface GetCommentList {
+  GetCommentList: GetCommentList_GetCommentList;
+}
+
+export interface GetCommentListVariables {
+  id: number;
+  skip: number;
+  take: number;
+  sort: SortTarget;
+}
+
+/* tslint:disable */
+/* eslint-disable */
+// @generated
+// This file was automatically generated and should not be edited.
+
+// ====================================================
 // GraphQL query operation: GetMyProfile
 // ====================================================
 
@@ -706,6 +750,11 @@ export enum CustomTokenMeansOptions {
 export enum PhotoTarget {
   delete = "delete",
   upload = "upload",
+}
+
+export enum SortTarget {
+  ASC = "ASC",
+  DESC = "DESC",
 }
 
 export interface PhotoObject {

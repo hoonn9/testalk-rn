@@ -2,6 +2,7 @@ import React from 'react';
 import styled from 'styled-components/native';
 import PeoplePhoto from '../PeoplePhoto';
 import {dateSimpleConverter} from '../../utils';
+import {SortTarget} from '../../types/api.d';
 
 const Container = styled.View`
   background-color: ${(props: any) => props.theme.whiteColor};
@@ -52,6 +53,19 @@ const PeopleText = styled.Text<TextProp>`
   color: ${(props: any) => (props.gender === 'male' ? 'blue' : 'red')};
 `;
 const Text = styled.Text``;
+const CommentToggleWrapper = styled.View`
+  flex-direction: row;
+  justify-content: flex-end;
+`;
+const CommentTouchable = styled.TouchableOpacity`
+  padding: 8px;
+`;
+const CommentSelectedText = styled.Text`
+  color: ${(props: any) => props.theme.blackColor};
+`;
+const CommentUnSelectedText = styled.Text`
+  color: ${(props: any) => props.theme.darkGreyColor};
+`;
 interface IProp {
   id: number;
   userId: number;
@@ -59,6 +73,8 @@ interface IProp {
   title: string;
   content: string;
   updatedAt: string;
+  commentSort: SortTarget;
+  setCommentSort: Function;
 }
 
 const PostContent: React.FunctionComponent<IProp> = ({
@@ -68,6 +84,8 @@ const PostContent: React.FunctionComponent<IProp> = ({
   title,
   content,
   updatedAt,
+  commentSort,
+  setCommentSort,
 }) => {
   return (
     <Container>
@@ -86,6 +104,26 @@ const PostContent: React.FunctionComponent<IProp> = ({
       <ContentWrapper>
         <ContentText>{content}</ContentText>
       </ContentWrapper>
+      <CommentToggleWrapper>
+        <CommentTouchable
+          activeOpacity={1}
+          onPress={() => setCommentSort(SortTarget.DESC)}>
+          {commentSort === SortTarget.DESC ? (
+            <CommentSelectedText>최신순</CommentSelectedText>
+          ) : (
+            <CommentUnSelectedText>최신순</CommentUnSelectedText>
+          )}
+        </CommentTouchable>
+        <CommentTouchable
+          activeOpacity={1}
+          onPress={() => setCommentSort(SortTarget.ASC)}>
+          {commentSort === SortTarget.ASC ? (
+            <CommentSelectedText>오래된순</CommentSelectedText>
+          ) : (
+            <CommentUnSelectedText>오래된순</CommentUnSelectedText>
+          )}
+        </CommentTouchable>
+      </CommentToggleWrapper>
     </Container>
   );
 };

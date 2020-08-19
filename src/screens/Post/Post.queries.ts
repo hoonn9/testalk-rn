@@ -88,3 +88,24 @@ export const ADD_COMMENT = gql`
         }
     }
 `;
+
+export const GET_COMMENT_LIST = gql`
+    query GetCommentList($id: Int!, $skip: Int!, $take: Int!, $sort: SortTarget!) {
+        GetCommentList(id: $id, skip: $skip, take: $take, sort: $sort) {
+            ok
+            error
+            comments {
+                id
+                parentId
+                content
+                depth
+                user {
+                    id
+                    gender
+                }
+                createdAt
+                updatedAt
+            }
+        }
+    }
+`;
