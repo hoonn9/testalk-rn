@@ -1,14 +1,22 @@
 import React from 'react';
 import styled from 'styled-components/native';
 import PeoplePhoto from '../PeoplePhoto';
-import {dateSimpleConverter} from '../../utils';
+import {dateSimpleConverter, getAge} from '../../utils';
 import {SortTarget} from '../../types/api.d';
 
 const Container = styled.View`
   background-color: ${(props: any) => props.theme.whiteColor};
 `;
 const Wrapper = styled.View`
+  flex: 1;
   padding: 0px 8px;
+  align-items: center;
+  justify-content: center;
+  background-color: #000;
+`;
+const RowWrapper = styled.View`
+  flex-direction: row;
+  align-items: center;
 `;
 const TitleWrapper = styled.View`
   flex-direction: row;
@@ -17,6 +25,12 @@ const TitleWrapper = styled.View`
   margin-bottom: 8px;
 `;
 const PeopleWrapper = styled.View`
+  flex-direction: row;
+  align-items: center;
+  padding: 0px 8px;
+  margin-bottom: 8px;
+`;
+const DateWrapper = styled.View`
   flex-direction: row;
   align-items: center;
   padding: 0px 8px;
@@ -44,6 +58,10 @@ const ContentText = styled.Text`
   border-bottom-width: 1px;
   border-color: ${(props: any) => props.theme.darkGreyColor};
 `;
+const DateText = styled.Text`
+  width: 100%;
+  text-align: right;
+`;
 interface TextProp {
   gender: string;
 }
@@ -51,6 +69,7 @@ const PeopleText = styled.Text<TextProp>`
   flex: 1;
   font-size: 15px;
   color: ${(props: any) => (props.gender === 'male' ? 'blue' : 'red')};
+  padding: 0px 8px;
 `;
 const Text = styled.Text``;
 const CommentToggleWrapper = styled.View`
@@ -69,23 +88,31 @@ const CommentUnSelectedText = styled.Text`
 interface IProp {
   id: number;
   userId: number;
+  nickName: string;
+  birth: string;
   gender: string;
+  profilePhoto: string | undefined;
   title: string;
   content: string;
   updatedAt: string;
   commentSort: SortTarget;
   setCommentSort: Function;
+  postPhotoOnPress: Function;
 }
 
 const PostContent: React.FunctionComponent<IProp> = ({
   id,
   userId,
+  nickName,
+  birth,
   gender,
+  profilePhoto,
   title,
   content,
   updatedAt,
   commentSort,
   setCommentSort,
+  postPhotoOnPress,
 }) => {
   return (
     <Container>
@@ -95,12 +122,16 @@ const PostContent: React.FunctionComponent<IProp> = ({
         </TitleText>
       </TitleWrapper>
       <PeopleWrapper>
-        <PeoplePhoto gender={gender} size={50} />
-        <Wrapper>
-          <PeopleText gender={gender}>글쓴이</PeopleText>
-          <Text>{dateSimpleConverter(updatedAt)}</Text>
-        </Wrapper>
+        <Touchable onPress={() => postPhotoOnPress(userId)}>
+          <PeoplePhoto gender={gender} uri={profilePhoto} size={50} />
+        </Touchable>
+        <PeopleText gender={gender}>{`${nickName}, ${getAge(
+          birth,
+        )} `}</PeopleText>
       </PeopleWrapper>
+      <DateWrapper>
+        <DateText>{dateSimpleConverter(updatedAt)}</DateText>
+      </DateWrapper>
       <ContentWrapper>
         <ContentText>{content}</ContentText>
       </ContentWrapper>

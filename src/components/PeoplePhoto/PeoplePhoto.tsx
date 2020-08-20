@@ -20,7 +20,7 @@ const styles = (props: StyleProp) =>
     image: {
       width: props.size,
       height: props.size,
-      borderRadius: 52 / 2,
+      borderRadius: (props.size - props.size / 10) / 2,
       borderWidth: 1,
     },
   });

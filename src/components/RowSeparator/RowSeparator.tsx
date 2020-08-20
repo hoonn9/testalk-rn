@@ -1,10 +1,10 @@
-import React from "react";
-import styled from "styled-components/native";
+import React from 'react';
+import styled from 'styled-components/native';
 
 interface IProp {}
 
 const View = styled.View`
-  height: 0.5px;
+  height: 1px;
   background-color: ${(props: any) => props.theme.lightGreyColor};
 `;
 

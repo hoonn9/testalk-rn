@@ -118,6 +118,7 @@ const Post: React.FunctionComponent<IProp> = ({}) => {
                 <PostRow
                   id={item.id}
                   title={item.title}
+                  content={item.content}
                   userId={userId}
                   nickName={nickName}
                   gender={gender}
@@ -133,7 +134,6 @@ const Post: React.FunctionComponent<IProp> = ({}) => {
                 />
               );
             }}
-            ItemSeparatorComponent={() => <RowSeparator />}
             onEndReached={onEndReached}
             onEndReachedThreshold={0.01}
           />

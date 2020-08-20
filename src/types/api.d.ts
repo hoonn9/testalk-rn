@@ -387,23 +387,6 @@ export interface GetPost_GetPost_post_files {
   url: string;
 }
 
-export interface GetPost_GetPost_post_comments_user {
-  __typename: "User";
-  id: number;
-  gender: string;
-}
-
-export interface GetPost_GetPost_post_comments {
-  __typename: "Comment";
-  id: number;
-  parentId: number | null;
-  content: string;
-  depth: number;
-  user: GetPost_GetPost_post_comments_user;
-  createdAt: string;
-  updatedAt: string | null;
-}
-
 export interface GetPost_GetPost_post {
   __typename: "Post";
   id: number;
@@ -411,7 +394,6 @@ export interface GetPost_GetPost_post {
   content: string;
   user: GetPost_GetPost_post_user;
   files: GetPost_GetPost_post_files[] | null;
-  comments: GetPost_GetPost_post_comments[] | null;
   createdAt: string;
   updatedAt: string | null;
 }
@@ -527,6 +509,8 @@ export interface GetCommentList_GetCommentList_comments_user {
   __typename: "User";
   id: number;
   gender: string;
+  nickName: string;
+  birth: string;
 }
 
 export interface GetCommentList_GetCommentList_comments {

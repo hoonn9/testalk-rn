@@ -100,6 +100,7 @@ const ReadPost: React.FunctionComponent<IProp> = ({route}) => {
     onCompleted: data => {
       if (data) {
         if (data.GetPost.post) {
+          console.log(data.GetPost.post.user);
           setPostData(data.GetPost.post);
         }
       }
@@ -183,6 +184,10 @@ const ReadPost: React.FunctionComponent<IProp> = ({route}) => {
     }
   };
 
+  const userOnPress = (id: number) => {
+    navigation.navigate('Profile', {userId: id});
+  };
+
   const deepCommentOnPress = (id: number) => {
     setDeepCommentId(id);
   };
@@ -203,6 +208,14 @@ const ReadPost: React.FunctionComponent<IProp> = ({route}) => {
             <PostContent
               id={postData.id}
               userId={postData.user.id}
+              nickName={postData.user.nickName}
+              birth={postData.user.birth}
+              profilePhoto={
+                postData.user.profilePhoto &&
+                postData.user.profilePhoto.length > 0
+                  ? postData.user.profilePhoto[0].url
+                  : undefined
+              }
               gender={postData.user.gender}
               title={title}
               content={content}
@@ -211,6 +224,7 @@ const ReadPost: React.FunctionComponent<IProp> = ({route}) => {
               }
               commentSort={commentSort}
               setCommentSort={setCommentSort}
+              postPhotoOnPress={userOnPress}
             />
           ) : (
             <Indicator showing={true} />
@@ -226,6 +240,8 @@ const ReadPost: React.FunctionComponent<IProp> = ({route}) => {
             <CommentRow
               id={id}
               userId={item.user.id}
+              nickName={item.user.nickName}
+              birth={item.user.birth}
               parentId={item.parentId}
               depth={item.depth}
               gender={item.user.gender}
@@ -233,6 +249,7 @@ const ReadPost: React.FunctionComponent<IProp> = ({route}) => {
               updatedAt={updatedAt ? updatedAt : createdAt}
               deepCommentOnPress={deepCommentOnPress}
               deepCommentId={deepCommentId}
+              nickNameOnPress={userOnPress}
             />
           );
         }}

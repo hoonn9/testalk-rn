@@ -157,7 +157,7 @@ const Profile: React.FunctionComponent<IProp> = ({route}) => {
     } = data.GetUserProfile;
 
     const photoUrls: Array<string> = [];
-    if (profilePhoto) {
+    if (profilePhoto && profilePhoto.length > 0) {
       profilePhoto.map(e => photoUrls.push(e.url));
     }
 

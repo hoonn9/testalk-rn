@@ -3,6 +3,7 @@ import {createStackNavigator} from '@react-navigation/stack';
 import ReadPost from '../screens/Post/ReadPost';
 import {RouteProp} from '@react-navigation/native';
 import {GetPostList_GetPostList_posts} from '../types/api';
+import Profile from '../screens/Tabs/Profile';
 type RouteParamProp = {
   ReadPostNavigation: {
     post: GetPostList_GetPostList_posts;
@@ -34,6 +35,7 @@ const ReadPostNavigation: FunctionComponent<IProp> = ({route}) => {
         options={{}}
         initialParams={route.params}
       />
+      <Stack.Screen name="Profile" component={Profile} options={{}} />
     </Stack.Navigator>
   );
 };

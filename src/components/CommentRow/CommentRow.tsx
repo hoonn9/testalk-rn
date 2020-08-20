@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import styled from 'styled-components/native';
-import {dateSimpleConverter} from '../../utils';
+import {dateSimpleConverter, getAge} from '../../utils';
 
 const Container = styled.View``;
 const Wrapper = styled.View`
@@ -46,6 +46,8 @@ const CommentText = styled.Text<CommentProp>`
 interface IProp {
   id: number;
   userId: number;
+  nickName: string;
+  birth: string;
   parentId: number | null;
   depth: number;
   gender: string;
@@ -53,11 +55,14 @@ interface IProp {
   updatedAt: string;
   deepCommentOnPress: Function;
   deepCommentId: number | undefined;
+  nickNameOnPress: Function;
 }
 
 const CommentRow: React.FunctionComponent<IProp> = ({
   id,
   userId,
+  nickName,
+  birth,
   parentId,
   depth,
   gender,
@@ -65,12 +70,17 @@ const CommentRow: React.FunctionComponent<IProp> = ({
   updatedAt,
   deepCommentOnPress,
   deepCommentId,
+  nickNameOnPress,
 }) => {
   return (
     <Container>
       <InfoWrapper depth={depth}>
         <Wrapper>
-          <FirstText gender={gender}>댓쓴이</FirstText>
+          <Touchable onPress={() => nickNameOnPress(userId)}>
+            <FirstText gender={gender}>{`${nickName}, ${getAge(
+              birth,
+            )}`}</FirstText>
+          </Touchable>
         </Wrapper>
         <Wrapper>
           <SecondText>{content}</SecondText>

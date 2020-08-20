@@ -7,6 +7,7 @@ import PeoplePhoto from '../PeoplePhoto';
 const Container = styled.View`
   flex-direction: row;
   background-color: ${(props: any) => props.theme.whiteColor};
+  padding: 6px 0px;
 `;
 const Wrapper = styled.View`
   justify-content: center;

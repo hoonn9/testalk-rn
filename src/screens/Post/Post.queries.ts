@@ -32,18 +32,6 @@ export const GET_POST = gql`
                         id
                         url
                     }
-                    comments {
-                        id
-                        parentId
-                        content
-                        depth
-                        user {
-                            id
-                            gender
-                        }
-                        createdAt
-                        updatedAt
-                    }
                     createdAt
                     updatedAt
                 }
@@ -102,6 +90,8 @@ export const GET_COMMENT_LIST = gql`
                 user {
                     id
                     gender
+                    nickName
+                    birth
                 }
                 createdAt
                 updatedAt
