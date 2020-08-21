@@ -10,9 +10,12 @@ import UserLikeButton from '../UserLikeButton';
 const View = styled.View``;
 const Container = styled.View`
   flex: 1;
+  height: 100%;
   background-color: #ddd;
 `;
-const Wrapper = styled.View``;
+const Wrapper = styled.View`
+  flex: 1;
+`;
 const Touchable = styled.TouchableOpacity`
   flex: 1;
 `;

@@ -1,9 +1,10 @@
 import React from 'react';
 import styled from 'styled-components/native';
-import {StyleSheet, GestureResponderEvent} from 'react-native';
+import {GestureResponderEvent} from 'react-native';
 import {getAge, dateSimpleConverter} from '../../utils';
 import PeoplePhoto from '../PeoplePhoto';
 import RowSeparator from '../RowSeparator';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 const RowContainer = styled.View`
   flex-direction: row;
@@ -29,32 +30,44 @@ const Touchable = styled.TouchableOpacity`
   justify-content: center;
 `;
 const TitleText = styled.Text`
-  font-size: 16px;
+  font-size: 15px;
   padding: 8px;
-`;
-const ContentText = styled.Text`
-  font-size: 14px;
+  color: ${(props: any) => props.theme.blackColor};
 `;
 const SecondText = styled.Text`
   font-size: 15px;
-  color: ${(props: any) => props.theme.darkGreyColor};
   padding: 0px 8px;
+  color: ${(props: any) => props.theme.darkGreyColor};
 `;
 const ThirdText = styled.Text`
   font-size: 13px;
   padding: 0px 8px;
+  color: ${(props: any) => props.theme.blackColor};
+`;
+const CountWrapper = styled.View`
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+  margin: 4px;
+`;
+const CountText = styled.Text`
+  font-size: 11px;
+  color: ${(props: any) => props.theme.darkGreyColor};
+  padding: 0px 4px;
 `;
 
 interface IProp {
   id: number;
   userId: number;
   title: string;
-  content: string;
   nickName: string;
   birth: string;
   gender: string;
   profilePhoto: string;
-  updatedAt: string | undefined | null;
+  createdAt: string;
+  readCount: number;
+  likeCount: number;
+  commentCount: number;
   onSelected: ((event: GestureResponderEvent) => void) | undefined;
   imageOnPress: ((event: GestureResponderEvent) => void) | undefined;
 }
@@ -62,12 +75,14 @@ interface IProp {
 const PostRow: React.FunctionComponent<IProp> = ({
   id,
   title,
-  content,
   nickName,
   birth,
   gender,
   profilePhoto,
-  updatedAt,
+  createdAt,
+  readCount,
+  likeCount,
+  commentCount,
   onSelected = () => null,
   imageOnPress = () => null,
 }) => {
@@ -91,23 +106,31 @@ const PostRow: React.FunctionComponent<IProp> = ({
         <Touchable activeOpacity={1} onPress={onSelected}>
           <Wrapper>
             <SecondText>
-              {nickName} {birth ? getAge(birth) : '??'} {gender}
+              {nickName} {getAge(birth)} {gender}
             </SecondText>
           </Wrapper>
           <Wrapper>
-            <ThirdText>
-              {updatedAt ? dateSimpleConverter(updatedAt) : '??'}
-            </ThirdText>
+            <ThirdText>{dateSimpleConverter(createdAt)}</ThirdText>
           </Wrapper>
         </Touchable>
       </RowContainer>
       <InfoContainer>
-        <InfoWrapper>
-          <Wrapper>
-            <TitleText>{title}</TitleText>
-          </Wrapper>
-          <RowSeparator />
-        </InfoWrapper>
+        <Touchable activeOpacity={1} onPress={onSelected}>
+          <InfoWrapper>
+            <Wrapper>
+              <TitleText>{title}</TitleText>
+            </Wrapper>
+            <RowSeparator />
+            <CountWrapper>
+              <Icon name="heart-sharp" />
+              <CountText>{likeCount}</CountText>
+              <Icon name="chatbox-ellipses-outline" />
+              <CountText>{commentCount}</CountText>
+              <Icon name="eye-outline" />
+              <CountText>{readCount}</CountText>
+            </CountWrapper>
+          </InfoWrapper>
+        </Touchable>
       </InfoContainer>
     </Container>
   );

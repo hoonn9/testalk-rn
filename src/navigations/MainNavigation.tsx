@@ -5,6 +5,7 @@ import MessageNavigation from './MessageNavigation';
 import EditProfileNavigation from './EditProfileNavigation';
 import UploadPostNavigation from './UploadPostNavigation';
 import ReadPostNavigation from './ReadPostNavigation';
+import SettingNavigation from './SettingNavigation';
 
 const Stack = createStackNavigator();
 
@@ -41,6 +42,11 @@ const MainNavigation = () => {
       <Stack.Screen
         name="ReadPostNavigation"
         component={ReadPostNavigation}
+        options={{}}
+      />
+      <Stack.Screen
+        name="SettingNavigation"
+        component={SettingNavigation}
         options={{}}
       />
     </Stack.Navigator>

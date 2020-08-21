@@ -394,6 +394,7 @@ export interface GetPost_GetPost_post {
   content: string;
   user: GetPost_GetPost_post_user;
   files: GetPost_GetPost_post_files[] | null;
+  likeCount: number;
   createdAt: string;
   updatedAt: string | null;
 }
@@ -403,6 +404,7 @@ export interface GetPost_GetPost {
   ok: boolean;
   error: string | null;
   post: GetPost_GetPost_post | null;
+  isLiked: boolean | null;
 }
 
 export interface GetPost {
@@ -450,7 +452,10 @@ export interface GetPostList_GetPostList_posts {
   content: string;
   user: GetPostList_GetPostList_posts_user;
   files: GetPostList_GetPostList_posts_files[] | null;
-  updatedAt: string | null;
+  createdAt: string;
+  readCount: number;
+  commentCount: number;
+  likeCount: number;
 }
 
 export interface GetPostList_GetPostList {
@@ -540,6 +545,29 @@ export interface GetCommentListVariables {
   skip: number;
   take: number;
   sort: SortTarget;
+}
+
+/* tslint:disable */
+/* eslint-disable */
+// @generated
+// This file was automatically generated and should not be edited.
+
+// ====================================================
+// GraphQL mutation operation: TogglePostLike
+// ====================================================
+
+export interface TogglePostLike_TogglePostLike {
+  __typename: "TogglePostLikeResponse";
+  ok: boolean;
+  error: string | null;
+}
+
+export interface TogglePostLike {
+  TogglePostLike: TogglePostLike_TogglePostLike;
+}
+
+export interface TogglePostLikeVariables {
+  id: number;
 }
 
 /* tslint:disable */

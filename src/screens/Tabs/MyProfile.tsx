@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useLayoutEffect} from 'react';
 import styled from 'styled-components/native';
 import {ScrollView} from 'react-native-gesture-handler';
 import {useQuery} from '@apollo/react-hooks';
@@ -13,6 +13,7 @@ import Icon from 'react-native-vector-icons/AntDesign';
 import FastImage from 'react-native-fast-image';
 import Indicator from '../../components/Indicator';
 import EmptyScreen from '../../components/EmptyScreen';
+import IconButton from '../../components/IconButton';
 
 const View = styled.View``;
 const Container = styled.View`
@@ -83,11 +84,31 @@ const styles = StyleSheet.create({
   },
 });
 
+const headerButtonStyle = {
+  marginEnd: 16,
+};
+
 interface IProp {}
 
 const Profile: React.FunctionComponent<IProp> = () => {
   const maxNameLength = 16;
   const navigation = useNavigation();
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <View style={headerButtonStyle}>
+          <IconButton
+            packageName="Ionicons"
+            name="settings"
+            onPress={() => navigation.navigate('SettingNavigation')}
+            size={22}
+          />
+        </View>
+      ),
+    });
+  }, [navigation]);
+
   const {loading, error, refetch, data} = useQuery<
     GetMyProfile,
     GetMyProfile_GetMyProfile

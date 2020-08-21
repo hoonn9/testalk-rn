@@ -20,6 +20,7 @@ import {
   GetCommentListVariables,
   GetCommentList_GetCommentList_comments,
   SortTarget,
+  GetPost_GetPost,
 } from '../../types/api.d';
 import {toast} from '../../tools';
 import CommentInput from '../../components/CommentInput';
@@ -30,6 +31,7 @@ import PostContent from '../../components/PostContent';
 import Indicator from '../../components/Indicator';
 import styles from '../../styles';
 import {View as ViewProp} from 'react-native';
+import EmptyScreen from '../../components/EmptyScreen';
 
 const View = styled.View``;
 const Container = styled.View`
@@ -75,17 +77,17 @@ const ReadPost: React.FunctionComponent<IProp> = ({route}) => {
       headerMode: 'screen',
       headerRight: () => (
         <Touchable onPress={() => null}>
-          <Text>완료</Text>
+          <Text>?</Text>
         </Touchable>
       ),
     });
-  }, [content]);
+  }, [navigation]);
 
   const [inputHeight, setInputHeight] = useState<number>();
 
   const [commentSort, setCommentSort] = useState<SortTarget>(SortTarget.ASC);
   const [comment, setComment] = useState<string>('');
-  const [postData, setPostData] = useState<GetPost_GetPost_post>();
+  const [postData, setPostData] = useState<GetPost_GetPost>();
   const [commentList, setCommentList] = useState<
     Array<GetCommentList_GetCommentList_comments>
   >([]);
@@ -98,10 +100,11 @@ const ReadPost: React.FunctionComponent<IProp> = ({route}) => {
     },
     fetchPolicy: 'cache-and-network',
     onCompleted: data => {
+      console.log(data);
       if (data) {
-        if (data.GetPost.post) {
-          console.log(data.GetPost.post.user);
-          setPostData(data.GetPost.post);
+        if (data.GetPost) {
+          console.log(data.GetPost);
+          setPostData(data.GetPost);
         }
       }
     },
@@ -204,33 +207,21 @@ const ReadPost: React.FunctionComponent<IProp> = ({route}) => {
           backgroundColor: `${styles.whiteColor}`,
         }}
         ListHeaderComponent={
-          postData ? (
+          postData &&
+          postData.ok &&
+          postData.post &&
+          postData.isLiked !== null ? (
             <PostContent
-              id={postData.id}
-              userId={postData.user.id}
-              nickName={postData.user.nickName}
-              birth={postData.user.birth}
-              profilePhoto={
-                postData.user.profilePhoto &&
-                postData.user.profilePhoto.length > 0
-                  ? postData.user.profilePhoto[0].url
-                  : undefined
-              }
-              gender={postData.user.gender}
-              title={title}
-              content={content}
-              updatedAt={
-                postData.updatedAt ? postData.updatedAt : postData.createdAt
-              }
+              postData={postData.post}
               commentSort={commentSort}
               setCommentSort={setCommentSort}
               postPhotoOnPress={userOnPress}
+              isLiked={postData.isLiked}
             />
           ) : (
             <Indicator showing={true} />
           )
         }
-        stickyHeaderIndices={[0]}
         keyExtractor={(e, i) => i.toString()}
         windowSize={10}
         data={commentList}
@@ -256,9 +247,14 @@ const ReadPost: React.FunctionComponent<IProp> = ({route}) => {
         onEndReached={onEndReached}
         onEndReachedThreshold={0.01}
         ItemSeparatorComponent={() => <RowSeparator />}
-        ListFooterComponent={<View style={{height: inputHeight}} />}
+        ListFooterComponent={
+          <>
+            {commentList.length === 0 ? <Text>댓글이 없습니다.</Text> : null}
+            <View style={{height: inputHeight}} />
+          </>
+        }
       />
-      {commentList.length === 0 ? <Indicator showing={true} /> : null}
+
       <CommentInputWrapper
         onLayout={event => {
           setInputHeight(event.nativeEvent.layout.height);

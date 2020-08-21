@@ -32,9 +32,11 @@ export const GET_POST = gql`
                         id
                         url
                     }
+                    likeCount
                     createdAt
                     updatedAt
                 }
+                isLiked
             }
         }
 `;
@@ -47,7 +49,6 @@ export const GET_POST_LIST = gql`
             posts {
                 id
                 title
-                content
                 user {
                     id
                     nickName
@@ -62,8 +63,12 @@ export const GET_POST_LIST = gql`
                     id
                     url
                 }
-                updatedAt
+                createdAt
+                readCount
+                commentCount
+                likeCount
             }
+            
         }
     }
 `;
@@ -98,4 +103,15 @@ export const GET_COMMENT_LIST = gql`
             }
         }
     }
+`;
+
+
+export const TOGGLE_POST_LIKE = gql`
+    mutation TogglePostLike($id: Int!) {
+        TogglePostLike(id: $id) {
+            ok
+            error
+        }
+    }
+
 `;

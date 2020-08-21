@@ -24,12 +24,23 @@ import {toast} from '../../tools';
 import ModalSelector from '../../components/ModalSelector';
 const View = styled.View`
   flex: 1;
-  width: 100%;
-  height: 100%;
 `;
 
 const Text = styled.Text``;
 const Touchable = styled.TouchableOpacity``;
+const SendMessageTouchable = styled.TouchableOpacity`
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+  justify-content: center;
+  align-items: center;
+  background-color: ${(props: any) => props.theme.darkGreyColor};
+`;
+const SendMessageText = styled.Text`
+  text-align: center;
+  font-size: 16px;
+  padding: 8px;
+`;
 const ModalBackButton = styled.TouchableOpacity`
   position: absolute;
   width: 50px;
@@ -133,6 +144,10 @@ const Profile: React.FunctionComponent<IProp> = ({route}) => {
     }
   };
 
+  const sendMessageOnPress = (id: number, userInfo: object) => {
+    navigation.navigate('MessageNavigation', {userId: id, userInfo: userInfo});
+  };
+
   useEffect(() => {
     const getUser = async () => {
       const getUserInfo = await getUserInfoFromId(userId);
@@ -151,7 +166,7 @@ const Profile: React.FunctionComponent<IProp> = ({route}) => {
     data.GetUserProfile.isLiked !== null
   ) {
     const {
-      user: {nickName, gender, birth, profilePhoto},
+      user: {nickName, gender, birth, profilePhoto, intro},
       likeCount,
       isLiked,
     } = data.GetUserProfile;
@@ -177,6 +192,21 @@ const Profile: React.FunctionComponent<IProp> = ({route}) => {
             />
           </View>
         </ScrollView>
+        <SendMessageTouchable
+          onPress={() =>
+            sendMessageOnPress(userId, {
+              nickName,
+              birth,
+              gender,
+              intro,
+              profilePhoto:
+                profilePhoto && profilePhoto.length > 0
+                  ? profilePhoto[0].url
+                  : undefined,
+            })
+          }>
+          <SendMessageText>채팅 시작하기</SendMessageText>
+        </SendMessageTouchable>
         <Modal
           isVisible={isModalVisible}
           animationOut="fadeOutDown"

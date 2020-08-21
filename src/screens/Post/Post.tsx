@@ -14,7 +14,7 @@ import PostRow from '../../components/PostRow';
 import {FirstElementFromId} from '../../utils';
 import RowSeparator from '../../components/RowSeparator';
 import FloatButton from '../../components/FloatButton';
-
+import Icon from 'react-native-vector-icons/Ionicons';
 const View = styled.View``;
 const SafeAreaView = styled.SafeAreaView`
   flex: 1;
@@ -118,7 +118,6 @@ const Post: React.FunctionComponent<IProp> = ({}) => {
                 <PostRow
                   id={item.id}
                   title={item.title}
-                  content={item.content}
                   userId={userId}
                   nickName={nickName}
                   gender={gender}
@@ -128,7 +127,10 @@ const Post: React.FunctionComponent<IProp> = ({}) => {
                       ? FirstElementFromId(profilePhoto).url
                       : 'https://i.stack.imgur.com/l60Hf.png'
                   }
-                  updatedAt={item.updatedAt}
+                  createdAt={item.createdAt}
+                  readCount={item.readCount}
+                  commentCount={item.commentCount}
+                  likeCount={item.likeCount}
                   onSelected={() => onSelected(item)}
                   imageOnPress={() => imageOnPress(userId)}
                 />
@@ -141,6 +143,8 @@ const Post: React.FunctionComponent<IProp> = ({}) => {
         <FloatButtonWrapper>
           <FloatButton
             onPress={() => navigation.navigate('UploadPostNavigation')}
+            size={65}
+            icon={<Icon name="pencil" size={33} />}
           />
         </FloatButtonWrapper>
       </Container>
