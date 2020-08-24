@@ -6,22 +6,22 @@ import {
   PhotoObject,
   UpdateUserProfile,
   UpdateUserProfileVariables,
-} from '../../types/api';
+} from '../../../types/api';
 import {useNavigation, RouteProp} from '@react-navigation/native';
 import {Platform, GestureResponderEvent, ActivityIndicator} from 'react-native';
 import Modal from 'react-native-modal';
-import constants from '../../constants';
-import EditProfilePhoto from '../../components/EditProfilePhoto';
-import EditProfileAddPhoto from '../../components/EditProfileAddPhoto';
+import constants from '../../../constants';
+import EditProfilePhoto from '../../../components/EditProfilePhoto';
+import EditProfileAddPhoto from '../../../components/EditProfileAddPhoto';
 import ImagePicker from 'react-native-image-picker';
-import {toast} from '../../tools';
+import {toast} from '../../../tools';
 import axios from 'axios';
-import getEnvVars from '../../enviroments';
+import getEnvVars from '../../../enviroments';
 import {UPDATE_USER_PROFILE} from './EditProfile.queries';
-import styles from '../../styles';
-import ModalSelector from '../../components/ModalSelector';
-import TextInputRow from '../../components/TextInputRow';
-import Indicator from '../../components/Indicator';
+import styles from '../../../styles';
+import ModalSelector from '../../../components/ModalSelector';
+import TextInputRow from '../../../components/TextInputRow';
+import Indicator from '../../../components/Indicator';
 
 const View = styled.View``;
 const Container = styled.View`

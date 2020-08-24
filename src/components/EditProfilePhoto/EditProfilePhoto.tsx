@@ -4,7 +4,7 @@ import {StyleSheet} from 'react-native';
 import constants from '../../constants';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import styles from '../../styles';
-import {PhotoProp} from '../../screens/EditProfile/EditProfile';
+import {PhotoProp} from '../../screens/Profile/EditProfile/EditProfile';
 import FastImage from 'react-native-fast-image';
 
 const Container = styled.View`

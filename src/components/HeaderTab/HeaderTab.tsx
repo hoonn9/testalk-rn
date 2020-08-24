@@ -1,6 +1,7 @@
 import React, {useEffect, useLayoutEffect, useState} from 'react';
 import styled from 'styled-components/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import styles from '../../styles';
 
 interface ContainerProp {
   height: number;
@@ -17,8 +18,12 @@ const Wrapper = styled.View`
   flex-direction: row;
   justify-content: center;
   width: 40%;
+  height: 37px;
 `;
-const Divider = styled.View``;
+const Divider = styled.View`
+  justify-content: center;
+  height: 100%;
+`;
 interface TouchableProp {
   currentTab: TabProp;
 }
@@ -26,7 +31,7 @@ const LeftTouchable = styled.TouchableOpacity<TouchableProp>`
   width: 50%;
   background-color: ${(props: any) =>
     props.currentTab === 'people'
-      ? props.theme.lightGreyColor
+      ? props.theme.backPrimaryColor
       : props.theme.whiteColor};
   border-top-left-radius: 1000px;
   border-bottom-left-radius: 1000px;
@@ -38,7 +43,7 @@ const RightTouchable = styled.TouchableOpacity<TouchableProp>`
   width: 50%;
   background-color: ${(props: any) =>
     props.currentTab === 'post'
-      ? props.theme.lightGreyColor
+      ? props.theme.backPrimaryColor
       : props.theme.whiteColor};
   border-top-right-radius: 1000px;
   border-bottom-right-radius: 1000px;
@@ -80,7 +85,8 @@ const HeaderTab: React.FunctionComponent<IProp> = ({
                   ? 'md-people-circle'
                   : 'md-people-circle-outline'
               }
-              size={31}
+              color={styles.blackColor}
+              size={25}
             />
           </Divider>
         </LeftTouchable>
@@ -99,7 +105,8 @@ const HeaderTab: React.FunctionComponent<IProp> = ({
                   ? 'md-navigate-circle'
                   : 'md-navigate-circle-outline'
               }
-              size={31}
+              color={styles.blackColor}
+              size={25}
             />
           </Divider>
         </RightTouchable>

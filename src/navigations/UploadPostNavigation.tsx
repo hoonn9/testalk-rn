@@ -1,7 +1,7 @@
 import React, {FunctionComponent} from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
-import EditProfile from '../screens/EditProfile/EditProfile';
-import UploadPost from '../screens/Post/UploadPost';
+import EditProfile from '../screens/Profile/EditProfile/EditProfile';
+import UploadPost from '../screens/Home/Post/UploadPost';
 
 interface IProp {}
 const Stack = createStackNavigator();

@@ -1,7 +1,7 @@
 import React, {FunctionComponent} from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import {RouteProp} from '@react-navigation/native';
-import EditProfile from '../screens/EditProfile/EditProfile';
+import EditProfile from '../screens/Profile/EditProfile/EditProfile';
 import {GetMyProfile_GetMyProfile_user} from '../types/api';
 
 type RouteParamProp = {

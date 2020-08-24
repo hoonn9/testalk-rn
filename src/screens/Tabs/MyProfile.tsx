@@ -14,6 +14,7 @@ import FastImage from 'react-native-fast-image';
 import Indicator from '../../components/Indicator';
 import EmptyScreen from '../../components/EmptyScreen';
 import IconButton from '../../components/IconButton';
+import CountButton from '../../components/CountButton';
 
 const View = styled.View``;
 const Container = styled.View`
@@ -185,7 +186,15 @@ const Profile: React.FunctionComponent<IProp> = () => {
                 <EditTouchable activeOpacity={0.8} onPress={editOnPress}>
                   <Icon name="form" size={26} />
                 </EditTouchable>
-                <Text>{likeCount}</Text>
+
+                {likeCount ? (
+                  <CountButton
+                    count={likeCount}
+                    text="나의 좋아요"
+                    onPress={() => navigation.navigate('CheckLike')}
+                  />
+                ) : null}
+
                 <Text>{cash}</Text>
                 <Touchable onPress={() => navigation.navigate('Purchase')}>
                   <Text>캐시 구매하기</Text>

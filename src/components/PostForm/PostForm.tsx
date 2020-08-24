@@ -12,7 +12,7 @@ import TextInputRow from '../TextInputRow';
 import ToogleInput from '../RadioButton';
 import AuthButton from '../AuthButton';
 import FloatButton from '../FloatButton';
-import {PhotoProp} from '../../screens/EditProfile/EditProfile';
+import {PhotoProp} from '../../screens/Profile/EditProfile/EditProfile';
 import FastImage from 'react-native-fast-image';
 import PostPhoto from '../PostPhoto';
 const Touchable = styled.TouchableOpacity``;

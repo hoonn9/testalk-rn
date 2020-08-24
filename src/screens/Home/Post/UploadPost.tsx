@@ -1,7 +1,7 @@
 import React, {useEffect, useLayoutEffect, useState, useCallback} from 'react';
 import styled from 'styled-components/native';
 import {useNavigation, RouteProp} from '@react-navigation/native';
-import PostForm from '../../components/PostForm';
+import PostForm from '../../../components/PostForm';
 import {useMutation} from '@apollo/react-hooks';
 import {UPLOAD_POST} from './Post.queries';
 import {
@@ -9,19 +9,19 @@ import {
   UploadPostVariables,
   PhotoTarget,
   PhotoObject,
-} from '../../types/api.d';
+} from '../../../types/api.d';
 import ImagePicker from 'react-native-image-picker';
-import {toast} from '../../tools';
-import {PhotoProp} from '../EditProfile/EditProfile';
-import FloatButton from '../../components/FloatButton';
+import {toast} from '../../../tools';
+import {PhotoProp} from '../../Profile/EditProfile/EditProfile';
+import FloatButton from '../../../components/FloatButton';
 import Icon from 'react-native-vector-icons/Ionicons';
-import getEnvVars from '../../enviroments';
+import getEnvVars from '../../../enviroments';
 import Modal from 'react-native-modal';
 import {Platform} from 'react-native';
 import axios from 'axios';
-import styles from '../../styles';
-import ModalSelector from '../../components/ModalSelector';
-import Indicator from '../../components/Indicator';
+import styles from '../../../styles';
+import ModalSelector from '../../../components/ModalSelector';
+import Indicator from '../../../components/Indicator';
 
 const View = styled.View``;
 const Container = styled.View`

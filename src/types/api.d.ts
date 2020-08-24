@@ -133,23 +133,281 @@ export interface LoginCompletePhoneVerificationVariables {
 // This file was automatically generated and should not be edited.
 
 // ====================================================
-// GraphQL mutation operation: UpdateUserProfile
+// GraphQL query operation: GetUserList
 // ====================================================
 
-export interface UpdateUserProfile_UpdateUserProfile {
-  __typename: "UpdateUserProfileResponse";
+export interface GetUserList_GetUserList_users_profilePhoto {
+  __typename: "File";
+  id: number;
+  url: string;
+}
+
+export interface GetUserList_GetUserList_users {
+  __typename: "User";
+  id: number;
+  nickName: string;
+  birth: string;
+  gender: string;
+  intro: string;
+  updatedAt: string | null;
+  profilePhoto: GetUserList_GetUserList_users_profilePhoto[] | null;
+  lastLat: number | null;
+  lastLng: number | null;
+}
+
+export interface GetUserList_GetUserList {
+  __typename: "GetUserListResponse";
+  ok: boolean;
+  error: string | null;
+  users: (GetUserList_GetUserList_users | null)[] | null;
+}
+
+export interface GetUserList {
+  GetUserList: GetUserList_GetUserList;
+}
+
+export interface GetUserListVariables {
+  requestTime: string;
+  means: GetUserListMeans;
+  skip: number;
+  take: number;
+}
+
+/* tslint:disable */
+/* eslint-disable */
+// @generated
+// This file was automatically generated and should not be edited.
+
+// ====================================================
+// GraphQL mutation operation: UploadPost
+// ====================================================
+
+export interface UploadPost_UploadPost {
+  __typename: "UploadPostResponse";
   ok: boolean;
   error: string | null;
 }
 
-export interface UpdateUserProfile {
-  UpdateUserProfile: UpdateUserProfile_UpdateUserProfile;
+export interface UploadPost {
+  UploadPost: UploadPost_UploadPost | null;
 }
 
-export interface UpdateUserProfileVariables {
+export interface UploadPostVariables {
+  title: string;
+  content: string;
+  postPhotos?: PhotoObject[] | null;
+}
+
+/* tslint:disable */
+/* eslint-disable */
+// @generated
+// This file was automatically generated and should not be edited.
+
+// ====================================================
+// GraphQL query operation: GetPost
+// ====================================================
+
+export interface GetPost_GetPost_post_user_profilePhoto {
+  __typename: "File";
+  id: number;
+  url: string;
+}
+
+export interface GetPost_GetPost_post_user {
+  __typename: "User";
+  id: number;
   nickName: string;
-  intro: string;
-  profilePhoto: PhotoObject[];
+  birth: string;
+  gender: string;
+  profilePhoto: GetPost_GetPost_post_user_profilePhoto[] | null;
+}
+
+export interface GetPost_GetPost_post_files {
+  __typename: "File";
+  id: number;
+  url: string;
+}
+
+export interface GetPost_GetPost_post {
+  __typename: "Post";
+  id: number;
+  title: string;
+  content: string;
+  user: GetPost_GetPost_post_user;
+  files: GetPost_GetPost_post_files[] | null;
+  likeCount: number;
+  createdAt: string;
+  updatedAt: string | null;
+}
+
+export interface GetPost_GetPost {
+  __typename: "GetPostResponse";
+  ok: boolean;
+  error: string | null;
+  post: GetPost_GetPost_post | null;
+  isLiked: boolean | null;
+}
+
+export interface GetPost {
+  GetPost: GetPost_GetPost;
+}
+
+export interface GetPostVariables {
+  id: number;
+}
+
+/* tslint:disable */
+/* eslint-disable */
+// @generated
+// This file was automatically generated and should not be edited.
+
+// ====================================================
+// GraphQL query operation: GetPostList
+// ====================================================
+
+export interface GetPostList_GetPostList_posts_user_profilePhoto {
+  __typename: "File";
+  id: number;
+  url: string;
+}
+
+export interface GetPostList_GetPostList_posts_user {
+  __typename: "User";
+  id: number;
+  nickName: string;
+  birth: string;
+  gender: string;
+  profilePhoto: GetPostList_GetPostList_posts_user_profilePhoto[] | null;
+}
+
+export interface GetPostList_GetPostList_posts_files {
+  __typename: "File";
+  id: number;
+  url: string;
+}
+
+export interface GetPostList_GetPostList_posts {
+  __typename: "Post";
+  id: number;
+  title: string;
+  user: GetPostList_GetPostList_posts_user;
+  files: GetPostList_GetPostList_posts_files[] | null;
+  createdAt: string;
+  readCount: number;
+  commentCount: number;
+  likeCount: number;
+}
+
+export interface GetPostList_GetPostList {
+  __typename: "GetPostListResponse";
+  ok: boolean;
+  error: string | null;
+  posts: (GetPostList_GetPostList_posts | null)[] | null;
+}
+
+export interface GetPostList {
+  GetPostList: GetPostList_GetPostList;
+}
+
+export interface GetPostListVariables {
+  requestTime: string;
+  means: string;
+  skip: number;
+  take: number;
+}
+
+/* tslint:disable */
+/* eslint-disable */
+// @generated
+// This file was automatically generated and should not be edited.
+
+// ====================================================
+// GraphQL mutation operation: AddComment
+// ====================================================
+
+export interface AddComment_AddComment {
+  __typename: "AddCommentResponse";
+  ok: boolean;
+  error: string | null;
+}
+
+export interface AddComment {
+  AddComment: AddComment_AddComment;
+}
+
+export interface AddCommentVariables {
+  postId: number;
+  parentId?: number | null;
+  content: string;
+}
+
+/* tslint:disable */
+/* eslint-disable */
+// @generated
+// This file was automatically generated and should not be edited.
+
+// ====================================================
+// GraphQL query operation: GetCommentList
+// ====================================================
+
+export interface GetCommentList_GetCommentList_comments_user {
+  __typename: "User";
+  id: number;
+  gender: string;
+  nickName: string;
+  birth: string;
+}
+
+export interface GetCommentList_GetCommentList_comments {
+  __typename: "Comment";
+  id: number;
+  parentId: number | null;
+  content: string;
+  depth: number;
+  user: GetCommentList_GetCommentList_comments_user;
+  createdAt: string;
+  updatedAt: string | null;
+}
+
+export interface GetCommentList_GetCommentList {
+  __typename: "GetCommentListResponse";
+  ok: boolean;
+  error: string | null;
+  comments: (GetCommentList_GetCommentList_comments | null)[] | null;
+}
+
+export interface GetCommentList {
+  GetCommentList: GetCommentList_GetCommentList;
+}
+
+export interface GetCommentListVariables {
+  id: number;
+  skip: number;
+  take: number;
+  sort: SortTarget;
+}
+
+/* tslint:disable */
+/* eslint-disable */
+// @generated
+// This file was automatically generated and should not be edited.
+
+// ====================================================
+// GraphQL mutation operation: TogglePostLike
+// ====================================================
+
+export interface TogglePostLike_TogglePostLike {
+  __typename: "TogglePostLikeResponse";
+  ok: boolean;
+  error: string | null;
+}
+
+export interface TogglePostLike {
+  TogglePostLike: TogglePostLike_TogglePostLike;
+}
+
+export interface TogglePostLikeVariables {
+  id: number;
 }
 
 /* tslint:disable */
@@ -338,140 +596,47 @@ export interface SetUserNotifyVariables {
 // This file was automatically generated and should not be edited.
 
 // ====================================================
-// GraphQL mutation operation: UploadPost
+// GraphQL query operation: GetLikeMeUserList
 // ====================================================
 
-export interface UploadPost_UploadPost {
-  __typename: "UploadPostResponse";
-  ok: boolean;
-  error: string | null;
-}
-
-export interface UploadPost {
-  UploadPost: UploadPost_UploadPost | null;
-}
-
-export interface UploadPostVariables {
-  title: string;
-  content: string;
-  postPhotos?: PhotoObject[] | null;
-}
-
-/* tslint:disable */
-/* eslint-disable */
-// @generated
-// This file was automatically generated and should not be edited.
-
-// ====================================================
-// GraphQL query operation: GetPost
-// ====================================================
-
-export interface GetPost_GetPost_post_user_profilePhoto {
+export interface GetLikeMeUserList_GetLikeMeUserList_likes_likeUser_profilePhoto {
   __typename: "File";
   id: number;
   url: string;
 }
 
-export interface GetPost_GetPost_post_user {
+export interface GetLikeMeUserList_GetLikeMeUserList_likes_likeUser {
   __typename: "User";
   id: number;
   nickName: string;
   birth: string;
   gender: string;
-  profilePhoto: GetPost_GetPost_post_user_profilePhoto[] | null;
-}
-
-export interface GetPost_GetPost_post_files {
-  __typename: "File";
-  id: number;
-  url: string;
-}
-
-export interface GetPost_GetPost_post {
-  __typename: "Post";
-  id: number;
-  title: string;
-  content: string;
-  user: GetPost_GetPost_post_user;
-  files: GetPost_GetPost_post_files[] | null;
-  likeCount: number;
-  createdAt: string;
+  intro: string;
   updatedAt: string | null;
+  profilePhoto: GetLikeMeUserList_GetLikeMeUserList_likes_likeUser_profilePhoto[] | null;
+  lastLat: number | null;
+  lastLng: number | null;
 }
 
-export interface GetPost_GetPost {
-  __typename: "GetPostResponse";
+export interface GetLikeMeUserList_GetLikeMeUserList_likes {
+  __typename: "Like";
+  id: number;
+  likeUser: GetLikeMeUserList_GetLikeMeUserList_likes_likeUser;
+}
+
+export interface GetLikeMeUserList_GetLikeMeUserList {
+  __typename: "GetLikeMeUserListResponse";
   ok: boolean;
   error: string | null;
-  post: GetPost_GetPost_post | null;
-  isLiked: boolean | null;
+  likes: (GetLikeMeUserList_GetLikeMeUserList_likes | null)[] | null;
 }
 
-export interface GetPost {
-  GetPost: GetPost_GetPost;
+export interface GetLikeMeUserList {
+  GetLikeMeUserList: GetLikeMeUserList_GetLikeMeUserList;
 }
 
-export interface GetPostVariables {
-  id: number;
-}
-
-/* tslint:disable */
-/* eslint-disable */
-// @generated
-// This file was automatically generated and should not be edited.
-
-// ====================================================
-// GraphQL query operation: GetPostList
-// ====================================================
-
-export interface GetPostList_GetPostList_posts_user_profilePhoto {
-  __typename: "File";
-  id: number;
-  url: string;
-}
-
-export interface GetPostList_GetPostList_posts_user {
-  __typename: "User";
-  id: number;
-  nickName: string;
-  birth: string;
-  gender: string;
-  profilePhoto: GetPostList_GetPostList_posts_user_profilePhoto[] | null;
-}
-
-export interface GetPostList_GetPostList_posts_files {
-  __typename: "File";
-  id: number;
-  url: string;
-}
-
-export interface GetPostList_GetPostList_posts {
-  __typename: "Post";
-  id: number;
-  title: string;
-  content: string;
-  user: GetPostList_GetPostList_posts_user;
-  files: GetPostList_GetPostList_posts_files[] | null;
-  createdAt: string;
-  readCount: number;
-  commentCount: number;
-  likeCount: number;
-}
-
-export interface GetPostList_GetPostList {
-  __typename: "GetPostListResponse";
-  ok: boolean;
-  error: string | null;
-  posts: (GetPostList_GetPostList_posts | null)[] | null;
-}
-
-export interface GetPostList {
-  GetPostList: GetPostList_GetPostList;
-}
-
-export interface GetPostListVariables {
+export interface GetLikeMeUserListVariables {
   requestTime: string;
-  means: string;
   skip: number;
   take: number;
 }
@@ -482,69 +647,48 @@ export interface GetPostListVariables {
 // This file was automatically generated and should not be edited.
 
 // ====================================================
-// GraphQL mutation operation: AddComment
+// GraphQL query operation: GetILikeUserList
 // ====================================================
 
-export interface AddComment_AddComment {
-  __typename: "AddCommentResponse";
-  ok: boolean;
-  error: string | null;
+export interface GetILikeUserList_GetILikeUserList_likes_user_profilePhoto {
+  __typename: "File";
+  id: number;
+  url: string;
 }
 
-export interface AddComment {
-  AddComment: AddComment_AddComment;
-}
-
-export interface AddCommentVariables {
-  postId: number;
-  parentId?: number | null;
-  content: string;
-}
-
-/* tslint:disable */
-/* eslint-disable */
-// @generated
-// This file was automatically generated and should not be edited.
-
-// ====================================================
-// GraphQL query operation: GetCommentList
-// ====================================================
-
-export interface GetCommentList_GetCommentList_comments_user {
+export interface GetILikeUserList_GetILikeUserList_likes_user {
   __typename: "User";
   id: number;
-  gender: string;
   nickName: string;
   birth: string;
-}
-
-export interface GetCommentList_GetCommentList_comments {
-  __typename: "Comment";
-  id: number;
-  parentId: number | null;
-  content: string;
-  depth: number;
-  user: GetCommentList_GetCommentList_comments_user;
-  createdAt: string;
+  gender: string;
+  intro: string;
   updatedAt: string | null;
+  profilePhoto: GetILikeUserList_GetILikeUserList_likes_user_profilePhoto[] | null;
+  lastLat: number | null;
+  lastLng: number | null;
 }
 
-export interface GetCommentList_GetCommentList {
-  __typename: "GetCommentListResponse";
+export interface GetILikeUserList_GetILikeUserList_likes {
+  __typename: "Like";
+  id: number;
+  user: GetILikeUserList_GetILikeUserList_likes_user;
+}
+
+export interface GetILikeUserList_GetILikeUserList {
+  __typename: "GetILikeUserListResponse";
   ok: boolean;
   error: string | null;
-  comments: (GetCommentList_GetCommentList_comments | null)[] | null;
+  likes: (GetILikeUserList_GetILikeUserList_likes | null)[] | null;
 }
 
-export interface GetCommentList {
-  GetCommentList: GetCommentList_GetCommentList;
+export interface GetILikeUserList {
+  GetILikeUserList: GetILikeUserList_GetILikeUserList;
 }
 
-export interface GetCommentListVariables {
-  id: number;
+export interface GetILikeUserListVariables {
   skip: number;
   take: number;
-  sort: SortTarget;
 }
 
 /* tslint:disable */
@@ -553,21 +697,47 @@ export interface GetCommentListVariables {
 // This file was automatically generated and should not be edited.
 
 // ====================================================
-// GraphQL mutation operation: TogglePostLike
+// GraphQL mutation operation: UpdateUserProfile
 // ====================================================
 
-export interface TogglePostLike_TogglePostLike {
-  __typename: "TogglePostLikeResponse";
+export interface UpdateUserProfile_UpdateUserProfile {
+  __typename: "UpdateUserProfileResponse";
   ok: boolean;
   error: string | null;
 }
 
-export interface TogglePostLike {
-  TogglePostLike: TogglePostLike_TogglePostLike;
+export interface UpdateUserProfile {
+  UpdateUserProfile: UpdateUserProfile_UpdateUserProfile;
 }
 
-export interface TogglePostLikeVariables {
-  id: number;
+export interface UpdateUserProfileVariables {
+  nickName: string;
+  intro: string;
+  profilePhoto: PhotoObject[];
+}
+
+/* tslint:disable */
+/* eslint-disable */
+// @generated
+// This file was automatically generated and should not be edited.
+
+// ====================================================
+// GraphQL mutation operation: ReportMovement
+// ====================================================
+
+export interface ReportMovement_ReportMovement {
+  __typename: "ReportMovementResponse";
+  ok: boolean;
+  error: string | null;
+}
+
+export interface ReportMovement {
+  ReportMovement: ReportMovement_ReportMovement;
+}
+
+export interface ReportMovementVariables {
+  lastLat: number;
+  lastLng: number;
 }
 
 /* tslint:disable */
@@ -607,76 +777,6 @@ export interface GetMyProfile_GetMyProfile {
 
 export interface GetMyProfile {
   GetMyProfile: GetMyProfile_GetMyProfile;
-}
-
-/* tslint:disable */
-/* eslint-disable */
-// @generated
-// This file was automatically generated and should not be edited.
-
-// ====================================================
-// GraphQL mutation operation: ReportMovement
-// ====================================================
-
-export interface ReportMovement_ReportMovement {
-  __typename: "ReportMovementResponse";
-  ok: boolean;
-  error: string | null;
-}
-
-export interface ReportMovement {
-  ReportMovement: ReportMovement_ReportMovement;
-}
-
-export interface ReportMovementVariables {
-  lastLat: number;
-  lastLng: number;
-}
-
-/* tslint:disable */
-/* eslint-disable */
-// @generated
-// This file was automatically generated and should not be edited.
-
-// ====================================================
-// GraphQL query operation: GetUserList
-// ====================================================
-
-export interface GetUserList_GetUserList_users_profilePhoto {
-  __typename: "File";
-  id: number;
-  url: string;
-}
-
-export interface GetUserList_GetUserList_users {
-  __typename: "User";
-  id: number;
-  nickName: string;
-  birth: string;
-  gender: string;
-  intro: string;
-  updatedAt: string | null;
-  profilePhoto: GetUserList_GetUserList_users_profilePhoto[] | null;
-  lastLat: number | null;
-  lastLng: number | null;
-}
-
-export interface GetUserList_GetUserList {
-  __typename: "GetUserListResponse";
-  ok: boolean;
-  error: string | null;
-  users: (GetUserList_GetUserList_users | null)[] | null;
-}
-
-export interface GetUserList {
-  GetUserList: GetUserList_GetUserList;
-}
-
-export interface GetUserListVariables {
-  requestTime: string;
-  means: string;
-  skip: number;
-  take: number;
 }
 
 /* tslint:disable */
@@ -757,6 +857,13 @@ export interface ToggleUserLikeVariables {
 
 export enum CustomTokenMeansOptions {
   KAKAO = "KAKAO",
+}
+
+export enum GetUserListMeans {
+  distance = "distance",
+  hot = "hot",
+  join = "join",
+  login = "login",
 }
 
 export enum PhotoTarget {

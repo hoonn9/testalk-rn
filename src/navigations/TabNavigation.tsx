@@ -4,12 +4,13 @@ import Profile from '../screens/Tabs/Profile';
 import React from 'react';
 import {Platform} from 'react-native';
 import NavIcon from '../components/NavIcon';
-import People from '../screens/Tabs/People';
-import ChatLink from '../components/ChatLink';
 import Chat from '../screens/Tabs/Chat';
 import MyProfile from '../screens/Tabs/MyProfile';
-import Purchase from '../screens/Purchase/Purchase';
-import HeaderTab from '../components/HeaderTab';
+import Purchase from '../screens/Profile/Purchase/Purchase';
+import CheckLike from '../screens/Profile/CheckLike/CheckLike';
+import LinearGradient from 'react-native-linear-gradient';
+import styles from '../styles';
+import Home from '../screens/Tabs/Home';
 
 interface IProp {
   routeName: string;
@@ -22,12 +23,19 @@ const Stack = createStackNavigator();
 const PeopleTab = () => {
   return (
     <Stack.Navigator
-      initialRouteName={'People'}
+      initialRouteName={'Home'}
       headerMode="screen"
       screenOptions={{
-        title: 'People',
+        headerBackground: () => (
+          <LinearGradient
+            colors={[styles.backPrimaryColor, styles.backSubColor]}
+            style={{flex: 1}}
+            start={{x: 0, y: 0}}
+            end={{x: 1, y: 1}}
+          />
+        ),
       }}>
-      <Stack.Screen name="People" component={People} options={{}} />
+      <Stack.Screen name="Home" component={Home} options={{}} />
       <Stack.Screen name="Profile" component={Profile} options={{}} />
     </Stack.Navigator>
   );
@@ -58,6 +66,7 @@ const ProfileTab = () => {
       <Stack.Screen name="MyProfile" component={MyProfile} options={{}} />
       <Stack.Screen name="Profile" component={Profile} options={{}} />
       <Stack.Screen name="Purchase" component={Purchase} options={{}} />
+      <Stack.Screen name="CheckLike" component={CheckLike} options={{}} />
     </Stack.Navigator>
   );
 };

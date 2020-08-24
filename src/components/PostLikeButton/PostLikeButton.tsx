@@ -11,7 +11,7 @@ import {
   TogglePostLike,
   TogglePostLikeVariables,
 } from '../../types/api';
-import {TOGGLE_POST_LIKE} from '../../screens/Post/Post.queries';
+import {TOGGLE_POST_LIKE} from '../../screens/Home/Post/Post.queries';
 
 const Container = styled.View``;
 const Wrapper = styled.View`

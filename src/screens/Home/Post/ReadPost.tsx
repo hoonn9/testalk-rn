@@ -21,17 +21,17 @@ import {
   GetCommentList_GetCommentList_comments,
   SortTarget,
   GetPost_GetPost,
-} from '../../types/api.d';
-import {toast} from '../../tools';
-import CommentInput from '../../components/CommentInput';
+} from '../../../types/api.d';
+import {toast} from '../../../tools';
+import CommentInput from '../../../components/CommentInput';
 import {FlatList} from 'react-native-gesture-handler';
-import CommentRow from '../../components/CommentRow';
-import RowSeparator from '../../components/RowSeparator';
-import PostContent from '../../components/PostContent';
-import Indicator from '../../components/Indicator';
-import styles from '../../styles';
+import CommentRow from '../../../components/CommentRow';
+import RowSeparator from '../../../components/RowSeparator';
+import PostContent from '../../../components/PostContent';
+import Indicator from '../../../components/Indicator';
+import styles from '../../../styles';
 import {View as ViewProp} from 'react-native';
-import EmptyScreen from '../../components/EmptyScreen';
+import EmptyScreen from '../../../components/EmptyScreen';
 
 const View = styled.View``;
 const Container = styled.View`
@@ -69,7 +69,7 @@ type ReadPostRoute = RouteProp<ReadPostRouteProp, 'ReadPost'>;
 const ReadPost: React.FunctionComponent<IProp> = ({route}) => {
   const navigation = useNavigation();
   const {
-    post: {id, title, content},
+    post: {id, title},
   } = route.params;
 
   useLayoutEffect(() => {

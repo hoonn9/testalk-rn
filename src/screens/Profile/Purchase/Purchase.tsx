@@ -1,11 +1,11 @@
 import React, {useEffect, useLayoutEffect, useState} from 'react';
 import styled from 'styled-components/native';
-import {GetMyProfile_GetMyProfile_user} from '../../types/api';
+import {GetMyProfile_GetMyProfile_user} from '../../../types/api';
 import {useNavigation, RouteProp} from '@react-navigation/native';
-import constants from '../../constants';
+import constants from '../../../constants';
 import * as RNIap from 'react-native-iap';
 import {Platform} from 'react-native';
-import CashPurchaseButton from '../../components/CashPurchaseButton';
+import CashPurchaseButton from '../../../components/CashPurchaseButton';
 
 const View = styled.View``;
 const Container = styled.View`
