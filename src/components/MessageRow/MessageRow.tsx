@@ -31,7 +31,6 @@ const DateWrapper = styled.View`
 const Text = styled.Text``;
 
 interface IProp {
-  id: string;
   message: string;
   createdAt: number;
   mine: boolean;
@@ -39,7 +38,6 @@ interface IProp {
 }
 
 const MessageRow: React.FunctionComponent<IProp> = ({
-  id,
   message,
   mine,
   createdAt,

@@ -19,8 +19,8 @@ interface StyleSheetProp {
 const styleSheets = (props: StyleSheetProp) =>
   StyleSheet.create({
     image: {
-      width: props.height - 8,
-      height: props.height - 8,
+      width: props.height / 2,
+      height: props.height / 2,
       borderRadius: props.height / 2,
       borderWidth: 0,
     },

@@ -25,16 +25,7 @@ const PeopleTab = () => {
     <Stack.Navigator
       initialRouteName={'Home'}
       headerMode="screen"
-      screenOptions={{
-        headerBackground: () => (
-          <LinearGradient
-            colors={[styles.backPrimaryColor, styles.backSubColor]}
-            style={{flex: 1}}
-            start={{x: 0, y: 0}}
-            end={{x: 1, y: 1}}
-          />
-        ),
-      }}>
+      screenOptions={{}}>
       <Stack.Screen name="Home" component={Home} options={{}} />
       <Stack.Screen name="Profile" component={Profile} options={{}} />
     </Stack.Navigator>

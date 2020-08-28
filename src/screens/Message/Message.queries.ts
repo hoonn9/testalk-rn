@@ -3,7 +3,6 @@ import { gql } from "apollo-boost";
 export const SUBSCRIBE_MESSAGE = gql`
     subscription MessageSubscription {
         MessageSubscription {
-            id
             userId
             chatId
             text
@@ -52,17 +51,11 @@ export const GET_CHAT_USER = gql`
 `;
 
 export const SEND_MESSAGE = gql`
-    mutation SendChatMessage($chatId: Int, $receiveUserId: Int, $text: String!) {
-        SendChatMessage(chatId: $chatId, receiveUserId: $receiveUserId, text: $text) {
+    mutation SendChatMessage($chatId: Int, $receiveUserId: Int, $text: String!, $sendTime: String!) {
+        SendChatMessage(chatId: $chatId, receiveUserId: $receiveUserId, text: $text, sendTime: $sendTime) {
             ok
             error
-            message {
-                id
-                userId
-                chatId
-                text
-                createdAt
-            }
+            chatId
         }
     }
 `;

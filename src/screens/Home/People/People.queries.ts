@@ -19,6 +19,7 @@ export const GET_USER_LIST = gql`
                 lastLat
                 lastLng
             }
+            order
         }
     }
 `;

@@ -106,12 +106,14 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
 
   const modalConfirmEvent = async () => {
     try {
+      console.log(chatId);
       if (chatId) {
         const {data} = await leaveChatMutation({
           variables: {
             id: chatId,
           },
         });
+        console.log(data);
         if (data && data.LeaveChat) {
           if (data.LeaveChat.ok) {
             removeChat(userId, chatId);
@@ -216,9 +218,11 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
     LEAVE_CHAT,
   );
 
-  const {data: subscribeData, loading: subscribeLoading} = useSubscription<
-    MessageSubscription
-  >(SUBSCRIBE_MESSAGE);
+  const {
+    data: subscribeData,
+    loading: subscribeLoading,
+    error: subscribeError,
+  } = useSubscription<MessageSubscription>(SUBSCRIBE_MESSAGE);
 
   const onEndReached = async () => {
     if (chatId) {
@@ -279,9 +283,9 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
   // Subscribe Chat
   useEffect(() => {
     if (subscribeData) {
+      console.log(subscribeData);
       if (subscribeData.MessageSubscription) {
         const {
-          id,
           chatId,
           userId,
           text,
@@ -302,7 +306,6 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
               setMessageList([
                 {
                   _id: messageList.length,
-                  id: id,
                   chat_id: chatId,
                   user_id: userId,
                   content: text,
@@ -328,66 +331,54 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
     setIsCashVisible(false);
 
     if (myId) {
+      const now = new Date().getTime().toString();
       try {
         const {data} = await sendMessageMutation({
           variables: {
             chatId,
             receiveUserId: userId,
             text: messageContent.value,
+            sendTime: now,
           },
         });
         console.log(data);
 
-        if (data && data.SendChatMessage.ok) {
-          if (data.SendChatMessage.message) {
-            const {
-              id,
+        if (data && data.SendChatMessage.ok && data.SendChatMessage.chatId) {
+          const sendedChatId = data.SendChatMessage.chatId;
+          addMessage(
+            sendedChatId,
+            myId,
+            userId,
+            messageContent.value,
+            parseInt(now),
+          );
+          if (userInfo) {
+            addFriend({
+              userId,
               chatId: sendedChatId,
-              userId: sendedUserId,
-              text: content,
-              createdAt,
-            } = data.SendChatMessage.message;
-            if (sendedChatId) {
-              addMessage(
-                sendedChatId,
-                id,
-                sendedUserId || myId,
-                userId,
-                content,
-                parseInt(createdAt),
-              );
-              if (userInfo) {
-                addFriend({
-                  userId,
-                  chatId: sendedChatId,
-                  nickName: userInfo.nick_name,
-                  birth: userInfo.birth,
-                  gender: userInfo.gender,
-                  intro: userInfo.intro,
-                  profilePhoto: userInfo.profile_photo,
-                });
-              } else {
-                if (receiveUserInfo) {
-                  addFriend({
-                    userId,
-                    chatId: sendedChatId,
-                    nickName: receiveUserInfo.nickName,
-                    birth: receiveUserInfo.birth,
-                    gender: receiveUserInfo.gender,
-                    intro: receiveUserInfo.intro,
-                    profilePhoto: receiveUserInfo.profilePhoto,
-                  });
-                } else {
-                  toast('상대를 저장하는데 실패했어요.');
-                }
-              }
-              // 채팅방 처음 생성 되었을 때
-              setChatId(sendedChatId);
-              messageContent.setValue('');
-            }
+              nickName: userInfo.nick_name,
+              birth: userInfo.birth,
+              gender: userInfo.gender,
+              intro: userInfo.intro,
+              profilePhoto: userInfo.profile_photo,
+            });
           } else {
-            toast('캐시가 부족해요.');
+            if (receiveUserInfo) {
+              addFriend({
+                userId,
+                chatId: sendedChatId,
+                nickName: receiveUserInfo.nickName,
+                birth: receiveUserInfo.birth,
+                gender: receiveUserInfo.gender,
+                intro: receiveUserInfo.intro,
+                profilePhoto: receiveUserInfo.profilePhoto,
+              });
+            } else {
+              toast('상대를 저장하는데 실패했어요.');
+            }
           }
+          setChatId(sendedChatId);
+          messageContent.setValue('');
         } else {
           toast('문제가 생겨 메시지를 보낼 수 없어요.');
         }
@@ -468,7 +459,6 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
                 renderItem={({item}) => {
                   return (
                     <MessageRow
-                      id={item.id.toString()}
                       message={item.content}
                       createdAt={item.created_at}
                       isDateSeparator={item.separate}

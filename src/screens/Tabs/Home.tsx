@@ -12,6 +12,8 @@ import {TabProp} from '../../components/HeaderTab/HeaderTab';
 import People from '../Home/People/People';
 import Post from '../Home/Post/Post';
 import AsyncStorage from '@react-native-community/async-storage';
+import LinearGradient from 'react-native-linear-gradient';
+import styles from '../../styles';
 
 const View = styled.View`
   justify-content: center;
@@ -77,6 +79,14 @@ const Home: React.FunctionComponent<IProp> = ({navigation}) => {
 
   useLayoutEffect(() => {
     navigation.setOptions({
+      headerBackground: () => (
+        <LinearGradient
+          colors={[styles.backPrimaryColor, styles.backSubColor]}
+          style={{flex: 1}}
+          start={{x: 0, y: 0}}
+          end={{x: 1, y: 1}}
+        />
+      ),
       headerTitle: () => (
         <HeaderTab
           currentTab={currentTab}

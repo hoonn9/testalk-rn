@@ -14,6 +14,7 @@ import {
   GetUserListVariables,
   GetUserList_GetUserList_users_profilePhoto,
   GetUserListMeans,
+  GetUserList_GetUserList_users,
 } from '../../../types/api.d';
 import {GET_USER_LIST} from './People.queries';
 import PeopleRow from '../../../components/PeopleRow';
@@ -104,7 +105,7 @@ const People: React.FunctionComponent<IProp> = ({
   const [skip, setSkip] = useState<number>(0);
 
   const [category, setCategory] = useState<GetUserListMeans>(
-    GetUserListMeans.login,
+    GetUserListMeans.distance,
   );
 
   const [getUserList] = useLazyQuery<GetUserList, GetUserListVariables>(
@@ -122,10 +123,37 @@ const People: React.FunctionComponent<IProp> = ({
           setIsRefreshing(false);
 
           if (data.GetUserList.users) {
-            setListData([...listData, ...data.GetUserList.users]);
-            data.GetUserList.users.forEach(element => {
-              if (element) console.log(element.profilePhoto);
+            const users: GetUserList_GetUserList_users[] = [];
+            data.GetUserList.users.forEach(e => {
+              if (e) {
+                users.push(e);
+              }
             });
+
+            // 순서 있을때
+            if (data.GetUserList.order) {
+              const order: number[] = [];
+              const temp = [];
+
+              data.GetUserList.order.forEach(e => {
+                if (e) {
+                  order.push(e);
+                }
+              });
+
+              for (let i = 0; i < order.length; i++) {
+                for (let j = 0; j < users.length; j++) {
+                  if (users[j].id === order[i]) {
+                    temp.push(users[j]);
+                  }
+                }
+              }
+
+              setListData([...listData, ...temp]);
+            } else {
+              //순서 없을때
+              setListData([...listData, ...users]);
+            }
           }
         }
       },
@@ -163,6 +191,8 @@ const People: React.FunctionComponent<IProp> = ({
   }, []);
 
   useEffect(() => {
+    setUpdateTime(Date.now().toString());
+    setSkip(0);
     setListData([]);
   }, [category]);
 

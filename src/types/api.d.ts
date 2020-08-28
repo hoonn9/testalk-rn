@@ -160,6 +160,7 @@ export interface GetUserList_GetUserList {
   ok: boolean;
   error: string | null;
   users: (GetUserList_GetUserList_users | null)[] | null;
+  order: (number | null)[] | null;
 }
 
 export interface GetUserList {
@@ -420,12 +421,11 @@ export interface TogglePostLikeVariables {
 // ====================================================
 
 export interface MessageSubscription_MessageSubscription {
-  __typename: "Message";
-  id: number;
-  userId: number | null;
-  chatId: number | null;
+  __typename: "MessageSubscribeResponse";
+  userId: number;
+  chatId: number;
   text: string;
-  target: string;
+  target: MessageTarget;
   createdAt: string;
 }
 
@@ -518,20 +518,11 @@ export interface GetChatUserVariables {
 // GraphQL mutation operation: SendChatMessage
 // ====================================================
 
-export interface SendChatMessage_SendChatMessage_message {
-  __typename: "Message";
-  id: number;
-  userId: number | null;
-  chatId: number | null;
-  text: string;
-  createdAt: string;
-}
-
 export interface SendChatMessage_SendChatMessage {
   __typename: "SendChatMessageResponse";
   ok: boolean;
   error: string | null;
-  message: SendChatMessage_SendChatMessage_message | null;
+  chatId: number | null;
 }
 
 export interface SendChatMessage {
@@ -542,6 +533,7 @@ export interface SendChatMessageVariables {
   chatId?: number | null;
   receiveUserId?: number | null;
   text: string;
+  sendTime: string;
 }
 
 /* tslint:disable */
@@ -864,6 +856,11 @@ export enum GetUserListMeans {
   hot = "hot",
   join = "join",
   login = "login",
+}
+
+export enum MessageTarget {
+  CHAT = "CHAT",
+  LEAVE = "LEAVE",
 }
 
 export enum PhotoTarget {

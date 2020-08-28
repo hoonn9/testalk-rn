@@ -18,7 +18,6 @@ import {AuthProvider} from './src/AuthContext';
 import NavContoller from './src/components/NavContoller/NavContoller';
 import styles from './src/styles';
 import {vibration} from './src/tools';
-import gql from 'graphql-tag';
 import messaging from '@react-native-firebase/messaging';
 import {
   createTable,
@@ -97,140 +96,6 @@ export default function App() {
       const client = new ApolloClient({
         link: from([errorLink, concat(authMiddleware, combinedLinks)]),
         cache,
-        resolvers: {
-          Query: {
-            GetLocalChatMessages: async (_: any, args: any, {cache}: any) => {
-              console.log('Get Local Chat Messages', args);
-              const query = gql`
-                query($id: Int!) {
-                  GetChatMessages(chatId: $id, requestTime: $requestTime) {
-                    __typename
-                    ok
-                    error
-                    messages {
-                      __typename
-                      id
-                      userId
-                      chatId
-                      text
-                      createdAt
-                    }
-                  }
-                }
-              `;
-              try {
-                const previous = cache.readQuery({
-                  query,
-                  variables: {
-                    id: args.id,
-                    requestTime: null,
-                  },
-                });
-                console.log('prev', previous);
-                if (previous) {
-                  return previous.GetChatMessages;
-                } else {
-                  return null;
-                }
-              } catch (error) {
-                console.log('뮤테이션 에러', error);
-                return null;
-              }
-            },
-          },
-          Mutation: {
-            SetLocalChatMessages: async (_: any, args: any, {cache}: any) => {
-              console.log('Set Local Chat Messages:', args);
-              const query = gql`
-                query($id: Int!) {
-                  GetChatMessages(chatId: $id, requestTime: $requestTime) {
-                    __typename
-                    ok
-                    error
-                    messages {
-                      __typename
-                      id
-                      userId
-                      chatId
-                      text
-                      createdAt
-                    }
-                  }
-                }
-              `;
-              try {
-                const previous = cache.readQuery({
-                  query,
-                  variables: {
-                    id: args.id,
-                    requestTime: null,
-                  },
-                });
-                const {GetChatMessages} = previous;
-                console.log('mutation prev', previous);
-                const data = Object.assign({}, GetChatMessages, {
-                  GetChatMessages: {
-                    __typename: 'GetChatMessagesResponse',
-                    error: 'TestError',
-                    messages: [...GetChatMessages.messages, ...args.messages],
-                    ok: true,
-                  },
-                });
-                if (previous) {
-                  cache.writeQuery({
-                    query,
-                    variables: {id: args.id, requestTime: null},
-                    data: data,
-                  });
-                  return null;
-                } else {
-                  return null;
-                }
-              } catch (error) {
-                console.log('뮤테이션 에러', error);
-                return null;
-              }
-            },
-            InitLocalChatMessages: async (_: any, args: any, {cache}: any) => {
-              console.log('Init Local Chat Messages:', args);
-              const query = gql`
-                query($id: Int!) {
-                  GetLocalChatMessages(id: $id) {
-                    __typename
-                    ok
-                    error
-                    messages {
-                      __typename
-                      id
-                      userId
-                      chatId
-                      text
-                      createdAt
-                    }
-                  }
-                }
-              `;
-              try {
-                cache.writeQuery({
-                  query,
-                  variables: {id: args.id, requestTime: null},
-                  data: {
-                    GetLocalChatMessages: {
-                      __typename: '',
-                      ok: '',
-                      error: '',
-                      messages: [],
-                    },
-                  },
-                });
-                return null;
-              } catch (error) {
-                console.log(error);
-                return null;
-              }
-            },
-          },
-        },
       });
 
       const jwt = await AsyncStorage.getItem('jwt');
@@ -275,34 +140,27 @@ export default function App() {
     console.log(notification);
 
     const {
-      data: {user, chatId, messageId, content, createdAt},
+      data: {user, chatId, content, createdAt},
     } = notification;
     const {userId, nickName, birth, gender, profilePhoto} = JSON.parse(user);
     const clientUser = await getUserInfoFromId(userId);
-
-    if (clientUser.blocked) {
-      return;
-    } else {
-      vibration();
-      // 받은 메시지의 인수는 보낸 USER ID
-      addFriend({
-        userId,
-        chatId,
-        nickName,
-        birth: new Date(birth).getTime(),
-        gender,
-        intro: '',
-        profilePhoto,
-      });
-      addMessage(
-        chatId,
-        messageId,
-        userId,
-        userId,
-        content,
-        parseInt(createdAt),
-      );
+    if (clientUser) {
+      if (clientUser.blocked) {
+        return;
+      }
     }
+    vibration();
+    // 받은 메시지의 인수는 보낸 USER ID
+    addFriend({
+      userId,
+      chatId,
+      nickName,
+      birth: new Date(birth).getTime(),
+      gender,
+      intro: '',
+      profilePhoto,
+    });
+    addMessage(chatId, userId, userId, content, parseInt(createdAt));
   };
 
   useEffect(() => {

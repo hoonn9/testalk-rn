@@ -43,24 +43,24 @@ const db = SQLite.openDatabase({ name: "db.db", location: "default" }, () => { }
 export const createTable = () => {
     db.transaction(tx => {
         tx.executeSql("create table if not exists chat_room (_id INTEGER PRIMARY KEY NOT NULL, id INTEGER, user_id INTEGER, content TEXT, created_at INTEGER)");
-        tx.executeSql("create table if not exists chat_logs (_id INTEGER PRIMARY KEY NOT NULL, id INTEGER, " +
+        tx.executeSql("create table if not exists chat_logs (_id INTEGER PRIMARY KEY NOT NULL, " +
             "chat_id INTEGER, user_id INTEGER, content TEXT, created_at INTEGER, separate INTEGER DEFAULT 0, FOREIGN KEY (chat_id) REFERENCES chat_room (id))");
         tx.executeSql("create table if not exists friends (_id INTEGER PRIMARY KEY NOT NULL, id INTEGER, " +
             "chat_id INTEGER, nick_name TEXT, birth INTEGER, gender TEXT, intro TEXT, blocked INTEGER DEFAULT 0, profile_photo TEXT, FOREIGN KEY (chat_id) REFERENCES chat_room (id))");
     });
 }
 
-export const addMessage = (chatId: number, messageId: number, senderId: number, receiverId: number, content: string, createdAt: number) => {
+export const addMessage = (chatId: number, senderId: number, receiverId: number, content: string, createdAt: number) => {
     const date = initTimestamp(createdAt);
     db.transaction(tx => {
         tx.executeSql("SELECT * FROM chat_logs WHERE created_at >= ? AND chat_id = ?", [date, chatId], (_: any, { rows }: any) => {
             if (rows.length > 0) {
                 tx.executeSql("insert or replace into chat_room(_id, id, user_id, content, created_at) values ((select id from chat_room where id = ? ), ?, ?, ?, ?)", [chatId, chatId, receiverId, content, createdAt], (_, { insertId }) => {
-                    tx.executeSql("insert into chat_logs(id, chat_id, user_id, content, created_at) values(?, ?, ?, ?, ?)", [messageId, chatId, senderId, content, createdAt])
+                    tx.executeSql("insert into chat_logs(chat_id, user_id, content, created_at) values(?, ?, ?, ?)", [chatId, senderId, content, createdAt])
                 });
             } else {
                 tx.executeSql("insert or replace into chat_room(_id, id, user_id, content, created_at) values ((select id from chat_room where id = ? ), ?, ?, ?, ?)", [chatId, chatId, receiverId, content, createdAt], (_, { insertId }) => {
-                    tx.executeSql("insert into chat_logs(id, chat_id, user_id, content, created_at, separate) values(?, ?, ?, ?, ?, ?)", [messageId, chatId, senderId, content, createdAt, 1])
+                    tx.executeSql("insert into chat_logs(chat_id, user_id, content, created_at, separate) values(?, ?, ?, ?, ?)", [chatId, senderId, content, createdAt, 1])
                 });
             }
         })
@@ -74,7 +74,7 @@ export const addMessage = (chatId: number, messageId: number, senderId: number, 
 
 export const getChatRooms = async () => {
     // db.transaction(tx => {
-    //     tx.executeSql("drop table friends");
+    //     tx.executeSql("drop table chat_logs");
     // }, error => console.log(error))
 
     return new Promise<GetChatRoomProp>((resolve, reject) => {
@@ -105,7 +105,6 @@ export interface ChatLogRowProp {
     content: string,
     created_at: number,
     separate: number,
-    id: number,
     user_id: number,
 }
 
@@ -219,10 +218,10 @@ export const unblockFriend = (userId: number) => {
 }
 
 export const getUserInfoFromId = async (userId: number) => {
-    return new Promise<UserInfoProp>((resolve, reject) => {
+    return new Promise<UserInfoProp | undefined>((resolve, reject) => {
         db.transaction(tx => {
             tx.executeSql("select * from friends where id = ?", [userId], (_: any, { rows }: any) => {
-                const friend = rows.item(0)
+                const friend = rows.item(0);
                 resolve(friend);
             })
         }
