@@ -58,7 +58,7 @@ type NavigationProp = StackNavigationProp<
   'MessageNavigation'
 >;
 interface IProp {
-  navigation: NavigationProp;
+  navigation: NavigationProp | any;
 }
 
 interface LocationProp {
@@ -92,6 +92,7 @@ const Home: React.FunctionComponent<IProp> = ({navigation}) => {
           currentTab={currentTab}
           setCurrentTab={setCurrentTab}
           headerHeight={headerHeight}
+          voiceOnPress={() => navigation.navigate('VoiceNavigation')}
         />
       ),
     });

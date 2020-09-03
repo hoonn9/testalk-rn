@@ -30,6 +30,7 @@ import {
   LeaveChatVariables,
   GetChatUser,
   GetChatUserVariables,
+  MessageSubscriptionVariables,
 } from '../../types/api';
 import {
   getChatLogs,
@@ -197,6 +198,7 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
   const [offset, setOffset] = useState<number>(10);
   const [selectCount, setSelectCount] = useState<number>(0);
   const [userInfo, setUserInfo] = useState<UserInfoProp>();
+  const [isSendLoading, setIsSendLoading] = useState<boolean>(false);
 
   const [
     getChatUser,
@@ -222,7 +224,10 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
     data: subscribeData,
     loading: subscribeLoading,
     error: subscribeError,
-  } = useSubscription<MessageSubscription>(SUBSCRIBE_MESSAGE);
+  } = useSubscription<MessageSubscription, MessageSubscriptionVariables>(
+    SUBSCRIBE_MESSAGE,
+    {variables: {chatId: chatId || -1}, skip: !chatId},
+  );
 
   const onEndReached = async () => {
     if (chatId) {
@@ -280,18 +285,40 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
     initChat();
   }, []);
 
+  const addMessageList = (
+    chatId: number,
+    userId: number,
+    text: string,
+    createdAt: string,
+  ) => {
+    const existSeparate = messageList.find(
+      e => e.created_at >= initTimestamp(parseInt(createdAt)),
+    );
+    setMessageList([
+      {
+        _id: messageList.length,
+        chat_id: chatId,
+        user_id: userId,
+        content: text,
+        created_at: parseInt(createdAt),
+        separate: existSeparate ? 0 : 1,
+      },
+      ...messageList,
+    ]);
+  };
+
   // Subscribe Chat
   useEffect(() => {
     if (subscribeData) {
       console.log(subscribeData);
       if (subscribeData.MessageSubscription) {
         const {
-          chatId,
           userId,
           text,
           target,
           createdAt,
         } = subscribeData.MessageSubscription;
+        console.log(chatId, userId);
 
         if (chatId && userId) {
           if (userId !== myId && target === LEAVE) {
@@ -300,20 +327,8 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
             setIsLeaveModalVisible(true);
           } else {
             if (text) {
-              const existSeparate = messageList.find(
-                e => e.created_at >= initTimestamp(parseInt(createdAt)),
-              );
-              setMessageList([
-                {
-                  _id: messageList.length,
-                  chat_id: chatId,
-                  user_id: userId,
-                  content: text,
-                  created_at: parseInt(createdAt),
-                  separate: existSeparate ? 0 : 1,
-                },
-                ...messageList,
-              ]);
+              addMessageList(chatId, userId, text, createdAt);
+
               // 수신 시 최하단으로 스크롤
               if (flatRef && messageList.length > 0) {
                 flatRef.scrollToIndex({index: 0});
@@ -329,7 +344,7 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
 
   const senderOnSubmit = async () => {
     setIsCashVisible(false);
-
+    setIsSendLoading(true);
     if (myId) {
       const now = new Date().getTime().toString();
       try {
@@ -341,7 +356,6 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
             sendTime: now,
           },
         });
-        console.log(data);
 
         if (data && data.SendChatMessage.ok && data.SendChatMessage.chatId) {
           const sendedChatId = data.SendChatMessage.chatId;
@@ -377,6 +391,12 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
               toast('상대를 저장하는데 실패했어요.');
             }
           }
+
+          // 첫 대화
+          if (!chatId) {
+            addMessageList(sendedChatId, myId, messageContent.value, now);
+          }
+
           setChatId(sendedChatId);
           messageContent.setValue('');
         } else {
@@ -385,7 +405,11 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
       } catch (error) {
         toast('문제가 생겨 메시지를 보낼 수 없어요.');
         console.log(error);
+      } finally {
+        setIsSendLoading(false);
       }
+    } else {
+      toast('잘못된 접근이에요.');
     }
   };
 
@@ -430,7 +454,7 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
   }, [getChatUserData, getChatUserLoading, getChatUserError]);
 
   const sendMessageOnPress = () => {
-    if (!messageContent.value) {
+    if (!messageContent.value || isSendLoading) {
       return;
     } else if (messageContent.value.length >= 500) {
       toast('메시지는 500자 이내로 전송할 수 있습니다.');
@@ -443,6 +467,8 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
       setIsCashVisible(true);
     }
   };
+
+  console.log('render message');
   return (
     <>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>

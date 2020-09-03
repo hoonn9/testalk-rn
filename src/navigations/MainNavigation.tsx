@@ -6,6 +6,7 @@ import EditProfileNavigation from './EditProfileNavigation';
 import UploadPostNavigation from './UploadPostNavigation';
 import ReadPostNavigation from './ReadPostNavigation';
 import SettingNavigation from './SettingNavigation';
+import VoiceNavigation from './VoiceNavigation';
 
 const Stack = createStackNavigator();
 
@@ -47,6 +48,11 @@ const MainNavigation = () => {
       <Stack.Screen
         name="SettingNavigation"
         component={SettingNavigation}
+        options={{}}
+      />
+      <Stack.Screen
+        name="VoiceNavigation"
+        component={VoiceNavigation}
         options={{}}
       />
     </Stack.Navigator>

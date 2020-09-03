@@ -1,31 +1,14 @@
 import { gql } from "apollo-boost";
 
 export const SUBSCRIBE_MESSAGE = gql`
-    subscription MessageSubscription {
-        MessageSubscription {
+    subscription MessageSubscription($chatId: Int!) {
+        MessageSubscription(chatId: $chatId) {
             userId
-            chatId
             text
             target
             createdAt
         }
     }
-`;
-
-export const GET_CHAT_MESSAGES = gql`
-    query GetChatMessages($id: Int!, $requestTime: String) {
-        GetChatMessages(chatId: $id, requestTime: $requestTime) {
-            ok
-            error
-            messages {
-                id
-                userId
-                chatId
-                text
-                createdAt
-            }
-        }
-    } 
 `;
 
 export const GET_CHAT_USER = gql`

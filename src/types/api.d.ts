@@ -423,7 +423,6 @@ export interface TogglePostLikeVariables {
 export interface MessageSubscription_MessageSubscription {
   __typename: "MessageSubscribeResponse";
   userId: number;
-  chatId: number;
   text: string;
   target: MessageTarget;
   createdAt: string;
@@ -433,38 +432,8 @@ export interface MessageSubscription {
   MessageSubscription: MessageSubscription_MessageSubscription | null;
 }
 
-/* tslint:disable */
-/* eslint-disable */
-// @generated
-// This file was automatically generated and should not be edited.
-
-// ====================================================
-// GraphQL query operation: GetChatMessages
-// ====================================================
-
-export interface GetChatMessages_GetChatMessages_messages {
-  __typename: "Message";
-  id: number;
-  userId: number | null;
-  chatId: number | null;
-  text: string;
-  createdAt: string;
-}
-
-export interface GetChatMessages_GetChatMessages {
-  __typename: "GetChatMessagesResponse";
-  ok: boolean;
-  error: string | null;
-  messages: (GetChatMessages_GetChatMessages_messages | null)[] | null;
-}
-
-export interface GetChatMessages {
-  GetChatMessages: GetChatMessages_GetChatMessages;
-}
-
-export interface GetChatMessagesVariables {
-  id: number;
-  requestTime?: string | null;
+export interface MessageSubscriptionVariables {
+  chatId: number;
 }
 
 /* tslint:disable */

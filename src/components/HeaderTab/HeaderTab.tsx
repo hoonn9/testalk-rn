@@ -1,7 +1,8 @@
-import React, {useEffect, useLayoutEffect, useState} from 'react';
+import React, {useState} from 'react';
 import styled from 'styled-components/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import styles from '../../styles';
+import {GestureResponderEvent} from 'react-native';
 
 interface ContainerProp {
   height: number;
@@ -17,7 +18,7 @@ const Wrapper = styled.View`
   flex: 1;
   flex-direction: row;
   justify-content: center;
-  width: 40%;
+  width: 100%;
   height: 37px;
 `;
 const Divider = styled.View`
@@ -27,8 +28,16 @@ const Divider = styled.View`
 interface TouchableProp {
   currentTab: TabProp;
 }
+const VoiceTouchable = styled.TouchableOpacity`
+  position: absolute;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  padding: 8px;
+  right: 8px;
+`;
 const LeftTouchable = styled.TouchableOpacity<TouchableProp>`
-  width: 50%;
+  width: 20%;
   background-color: ${(props: any) =>
     props.currentTab === 'people'
       ? props.theme.backPrimaryColor
@@ -40,7 +49,7 @@ const LeftTouchable = styled.TouchableOpacity<TouchableProp>`
   border-color: ${(props: any) => props.theme.darkGreyColor};
 `;
 const RightTouchable = styled.TouchableOpacity<TouchableProp>`
-  width: 50%;
+  width: 20%;
   background-color: ${(props: any) =>
     props.currentTab === 'post'
       ? props.theme.backPrimaryColor
@@ -59,12 +68,14 @@ interface IProp {
   currentTab: TabProp;
   setCurrentTab: Function;
   headerHeight: number;
+  voiceOnPress: ((event: GestureResponderEvent) => void) | undefined;
 }
 
 const HeaderTab: React.FunctionComponent<IProp> = ({
   currentTab,
   setCurrentTab,
   headerHeight,
+  voiceOnPress,
 }) => {
   const [tabState, setTabState] = useState<TabProp>(currentTab);
 
@@ -110,6 +121,9 @@ const HeaderTab: React.FunctionComponent<IProp> = ({
             />
           </Divider>
         </RightTouchable>
+        <VoiceTouchable onPress={voiceOnPress}>
+          <Ionicons name="call" color={styles.blackColor} size={25} />
+        </VoiceTouchable>
       </Wrapper>
     </Container>
   );

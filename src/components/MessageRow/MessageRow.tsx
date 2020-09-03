@@ -28,6 +28,7 @@ const DateWrapper = styled.View`
   margin: 0px 10px;
   margin-bottom: 10px;
 `;
+const Touchable = styled.TouchableOpacity``;
 const Text = styled.Text``;
 
 interface IProp {
@@ -45,30 +46,32 @@ const MessageRow: React.FunctionComponent<IProp> = ({
 }) => {
   return (
     <Container>
-      {isDateSeparator ? <DateSeparator timestamp={createdAt} /> : null}
-      {mine ? (
-        <>
-          <ChatWrapper mine={mine}>
-            <DateWrapper>
-              <Text>{dateMessageConverter(createdAt)}</Text>
-            </DateWrapper>
-            <Wrapper mine={mine}>
-              <Text>{message}</Text>
-            </Wrapper>
-          </ChatWrapper>
-        </>
-      ) : (
-        <>
-          <ChatWrapper mine={mine}>
-            <Wrapper mine={mine}>
-              <Text>{message}</Text>
-            </Wrapper>
-            <DateWrapper>
-              <Text>{dateMessageConverter(createdAt)}</Text>
-            </DateWrapper>
-          </ChatWrapper>
-        </>
-      )}
+      <Touchable activeOpacity={1}>
+        {isDateSeparator ? <DateSeparator timestamp={createdAt} /> : null}
+        {mine ? (
+          <>
+            <ChatWrapper mine={mine}>
+              <DateWrapper>
+                <Text>{dateMessageConverter(createdAt)}</Text>
+              </DateWrapper>
+              <Wrapper mine={mine}>
+                <Text>{message}</Text>
+              </Wrapper>
+            </ChatWrapper>
+          </>
+        ) : (
+          <>
+            <ChatWrapper mine={mine}>
+              <Wrapper mine={mine}>
+                <Text>{message}</Text>
+              </Wrapper>
+              <DateWrapper>
+                <Text>{dateMessageConverter(createdAt)}</Text>
+              </DateWrapper>
+            </ChatWrapper>
+          </>
+        )}
+      </Touchable>
     </Container>
   );
 };

@@ -64,6 +64,7 @@
     "react-native-screens": "~2.9.0",
     "react-native-sqlite-storage": "^5.0.0",
     "react-native-swiper": "^1.6.0",
+    "react-native-twilio-programmable-voice": "https://github.com/hoxfon/react-native-twilio-programmable-voice#android-twilio-v3",
     "react-native-vector-icons": "^7.0.0",
     "react-native-web": "~0.11.7",
     "react-navigation-header-buttons": "^4.0.2",
