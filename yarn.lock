@@ -5575,6 +5575,11 @@ react-is@^16.12.0, react-is@^16.13.0, react-is@^16.7.0, react-is@^16.8.1, react-
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.13.1.tgz#789729a4dc36de2999dc156dd6c1d9c18cea56a4"
   integrity sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==
 
+react-native-agora@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/react-native-agora/-/react-native-agora-3.0.1.tgz#d67f808446ef5cd4e8c3cc16f600d80d71ba6381"
+  integrity sha512-IpAvE8GaSQ9iIn40obOKjEYQvLNIosw5kEwJlfmZ/R00fvvBDZnWGoWO7kPu2MzOHjfqJi0xBgFYpWH8QqHFmQ==
+
 react-native-animatable@1.3.3:
   version "1.3.3"
   resolved "https://registry.yarnpkg.com/react-native-animatable/-/react-native-animatable-1.3.3.tgz#a13a4af8258e3bb14d0a9d839917e9bb9274ec8a"
@@ -5692,10 +5697,6 @@ react-native-swiper@^1.6.0:
   integrity sha512-OnkTTZi+9uZUgy0uz1I9oYDhCU3z36lZn+LFsk9FXPRelxb/KeABzvPs3r3SrHWy1aA67KGtSFj0xNK2QD0NJQ==
   dependencies:
     prop-types "^15.5.10"
-
-"react-native-twilio-programmable-voice@https://github.com/hoxfon/react-native-twilio-programmable-voice#android-twilio-v3":
-  version "4.0.0"
-  resolved "https://github.com/hoxfon/react-native-twilio-programmable-voice#23b8632f60ee4183e4728d46759a6fbb4b938522"
 
 react-native-vector-icons@^7.0.0:
   version "7.0.0"
