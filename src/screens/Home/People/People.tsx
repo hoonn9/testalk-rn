@@ -1,14 +1,9 @@
-import React, {useState, useEffect, useCallback} from 'react';
-import {
-  ActivityIndicator,
-  RefreshControl,
-  FlatList,
-  StatusBar,
-} from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { ActivityIndicator, RefreshControl, FlatList, StatusBar } from 'react-native';
 import styled from 'styled-components/native';
-import {useLazyQuery} from '@apollo/react-hooks';
+import { useLazyQuery } from '@apollo/react-hooks';
 import Geolocation from '@react-native-community/geolocation';
-import {StackNavigationProp, useHeaderHeight} from '@react-navigation/stack';
+import { StackNavigationProp, useHeaderHeight } from '@react-navigation/stack';
 import {
   GetUserList,
   GetUserListVariables,
@@ -16,11 +11,11 @@ import {
   GetUserListMeans,
   GetUserList_GetUserList_users,
 } from '../../../types/api.d';
-import {GET_USER_LIST} from './People.queries';
+import { GET_USER_LIST } from './People.queries';
 import PeopleRow from '../../../components/PeopleRow';
 import RowSeparator from '../../../components/RowSeparator';
-import {distance} from '../../../utils';
-import {toast} from '../../../tools';
+import { distance } from '../../../utils';
+import { toast } from '../../../tools';
 import HeaderCategoryTab from '../../../components/HeaderCategoryTab';
 
 const View = styled.View`
@@ -61,10 +56,7 @@ type FeedsTabParamList = {
   };
 };
 
-type NavigationProp = StackNavigationProp<
-  FeedsTabParamList,
-  'MessageNavigation'
->;
+type NavigationProp = StackNavigationProp<FeedsTabParamList, 'MessageNavigation'>;
 interface IProp {
   navigation: NavigationProp;
   userId: number;
@@ -89,12 +81,7 @@ export interface CategoryProp {
   name: string;
   type: GetUserListMeans;
 }
-const People: React.FunctionComponent<IProp> = ({
-  navigation,
-  userId,
-  myLat,
-  myLng,
-}) => {
+const People: React.FunctionComponent<IProp> = ({ navigation, userId, myLat, myLng }) => {
   console.log('render people');
   const headerHeight = useHeaderHeight();
   const PEOPLE_LIMIT = 10;
@@ -104,65 +91,60 @@ const People: React.FunctionComponent<IProp> = ({
   const [updateTime, setUpdateTime] = useState<string>(Date.now().toString());
   const [skip, setSkip] = useState<number>(0);
 
-  const [category, setCategory] = useState<GetUserListMeans>(
-    GetUserListMeans.distance,
-  );
+  const [category, setCategory] = useState<GetUserListMeans>(GetUserListMeans.distance);
 
-  const [getUserList] = useLazyQuery<GetUserList, GetUserListVariables>(
-    GET_USER_LIST,
-    {
-      variables: {
-        means: category,
-        requestTime: updateTime,
-        skip,
-        take: PEOPLE_LIMIT,
-      },
-      onCompleted: data => {
-        console.log(data);
-        if (data) {
-          setIsRefreshing(false);
+  const [getUserList] = useLazyQuery<GetUserList, GetUserListVariables>(GET_USER_LIST, {
+    variables: {
+      means: category,
+      requestTime: updateTime,
+      skip,
+      take: PEOPLE_LIMIT,
+    },
+    onCompleted: data => {
+      console.log(data);
+      if (data) {
+        setIsRefreshing(false);
 
-          if (data.GetUserList.users) {
-            const users: GetUserList_GetUserList_users[] = [];
-            data.GetUserList.users.forEach(e => {
+        if (data.GetUserList.users) {
+          const users: GetUserList_GetUserList_users[] = [];
+          data.GetUserList.users.forEach(e => {
+            if (e) {
+              users.push(e);
+            }
+          });
+
+          // 순서 있을때
+          if (data.GetUserList.order) {
+            const order: number[] = [];
+            const temp = [];
+
+            data.GetUserList.order.forEach(e => {
               if (e) {
-                users.push(e);
+                order.push(e);
               }
             });
 
-            // 순서 있을때
-            if (data.GetUserList.order) {
-              const order: number[] = [];
-              const temp = [];
-
-              data.GetUserList.order.forEach(e => {
-                if (e) {
-                  order.push(e);
-                }
-              });
-
-              for (let i = 0; i < order.length; i++) {
-                for (let j = 0; j < users.length; j++) {
-                  if (users[j].id === order[i]) {
-                    temp.push(users[j]);
-                  }
+            for (let i = 0; i < order.length; i++) {
+              for (let j = 0; j < users.length; j++) {
+                if (users[j].id === order[i]) {
+                  temp.push(users[j]);
                 }
               }
-
-              setListData([...listData, ...temp]);
-            } else {
-              //순서 없을때
-              setListData([...listData, ...users]);
             }
+
+            setListData([...listData, ...temp]);
+          } else {
+            //순서 없을때
+            setListData([...listData, ...users]);
           }
         }
-      },
-      onError: () => {
-        setIsRefreshing(false);
-        toast('유저 리스트를 불러올 수 없어요!');
-      },
+      }
     },
-  );
+    onError: () => {
+      setIsRefreshing(false);
+      toast('유저 리스트를 불러올 수 없어요!');
+    },
+  });
 
   const getDistance = (lat: number, lng: number) => {
     return distance(myLat, myLng, lat, lng, 'K');
@@ -179,11 +161,11 @@ const People: React.FunctionComponent<IProp> = ({
   };
 
   const infoOnPress = useCallback((userId, userInfo) => {
-    navigation.navigate('MessageNavigation', {userId, userInfo});
+    navigation.navigate('MessageNavigation', { userId, userInfo });
   }, []);
 
   const imageOnPress = (id: number) => {
-    navigation.navigate('Profile', {userId: id});
+    navigation.navigate('Profile', { userId: id });
   };
 
   useEffect(() => {
@@ -196,9 +178,7 @@ const People: React.FunctionComponent<IProp> = ({
     setListData([]);
   }, [category]);
 
-  const sortProfilePhoto = (
-    photos: Array<GetUserList_GetUserList_users_profilePhoto>,
-  ) => {
+  const sortProfilePhoto = (photos: Array<GetUserList_GetUserList_users_profilePhoto>) => {
     let photo = photos[0];
     for (let i = 1; i < photos.length; i++) {
       if (photo.id > photos[i].id) {
@@ -209,20 +189,15 @@ const People: React.FunctionComponent<IProp> = ({
   };
 
   const categories: Array<CategoryProp> = [
-    {name: '로그인', type: GetUserListMeans.login},
-    {name: '근처', type: GetUserListMeans.distance},
-    {name: '인기', type: GetUserListMeans.hot},
-    {name: '가입', type: GetUserListMeans.join},
+    { name: '로그인', type: GetUserListMeans.login },
+    { name: '근처', type: GetUserListMeans.distance },
+    { name: '인기', type: GetUserListMeans.hot },
+    { name: '가입', type: GetUserListMeans.join },
   ];
 
   return (
     <>
-      <StatusBar
-        barStyle="dark-content"
-        hidden={false}
-        translucent={true}
-        backgroundColor={'transparent'}
-      />
+      <StatusBar barStyle="dark-content" hidden={false} translucent={true} backgroundColor={'transparent'} />
       <HeaderCategoryTab
         categories={categories}
         category={category}
@@ -232,9 +207,7 @@ const People: React.FunctionComponent<IProp> = ({
       {listData ? (
         <SafeAreaView>
           <FlatList
-            refreshControl={
-              <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
-            }
+            refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />}
             keyExtractor={(e, i) => i.toString()}
             windowSize={5}
             data={listData}
@@ -248,8 +221,7 @@ const People: React.FunctionComponent<IProp> = ({
                     birth={data.item.birth}
                     intro={data.item.intro}
                     profilePhoto={
-                      data.item.profilePhoto &&
-                      data.item.profilePhoto.length > 0
+                      data.item.profilePhoto && data.item.profilePhoto.length > 0
                         ? sortProfilePhoto(data.item.profilePhoto).url
                         : 'https://i.stack.imgur.com/l60Hf.png'
                     }

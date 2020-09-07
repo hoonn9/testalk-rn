@@ -4,6 +4,7 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "isolatedModules": true,
+    "noUnusedParameters": true,
     "jsx": "react",
     "lib": ["es6"],
     "moduleResolution": "node",
@@ -12,10 +13,5 @@
     "target": "esnext",
     "typeRoots": ["./types", "./node_modules/@types"]
   },
-  "exclude": [
-    "node_modules",
-    "babel.config.js",
-    "metro.config.js",
-    "jest.config.js"
-  ]
+  "exclude": ["node_modules", "babel.config.js", "metro.config.js", "jest.config.js"]
 }

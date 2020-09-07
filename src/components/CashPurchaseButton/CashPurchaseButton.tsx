@@ -1,8 +1,7 @@
 import React from 'react';
 import styled from 'styled-components/native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import constants from '../../constants';
-import {numberWithCommas} from '../../utils';
+import { numberWithCommas } from '../../utils';
 
 const Container = styled.View`
   flex: 1;
@@ -28,13 +27,13 @@ interface IProp {
   unit: number;
 }
 
-const CashPurchaseButton: React.FunctionComponent<IProp> = ({price, unit}) => {
+const CashPurchaseButton: React.FunctionComponent<IProp> = ({ price, unit }) => {
   return (
     <Container>
       <Touchable activeOpacity={0.5}>
         <Text>{`₩ ${numberWithCommas(price)}`}</Text>
         <Wrapper>
-          <Icon name="dollar" size={21} style={{margin: 8}} />
+          <Icon name="dollar" size={21} style={{ margin: 8 }} />
           <Text>{unit}</Text>
         </Wrapper>
       </Touchable>

@@ -1,17 +1,14 @@
-import React, {useState} from 'react';
-import {TouchableWithoutFeedback, Keyboard, StyleSheet} from 'react-native';
+import React, { useState } from 'react';
+import { TouchableWithoutFeedback, Keyboard, StyleSheet } from 'react-native';
 import styled from 'styled-components/native';
 import useInput from '../../hooks/useInput';
-import {Picker} from '@react-native-community/picker';
-import {useMutation} from '@apollo/react-hooks';
+import { Picker } from '@react-native-community/picker';
+import { useMutation } from '@apollo/react-hooks';
 import AuthButton from '../../components/AuthButton';
-import {StackNavigationProp} from '@react-navigation/stack';
+import { StackNavigationProp } from '@react-navigation/stack';
 import AuthInput from '../../components/AuthInput';
-import {useLogIn} from '../../AuthContext';
-import {
-  REQUEST_LOGIN_PHONE_VERIFICATION,
-  CONFIRM_LOGIN_PHONE_VERIFICATION,
-} from './PhoneVerification.queries';
+import { useLogIn } from '../../AuthContext';
+import { REQUEST_LOGIN_PHONE_VERIFICATION, CONFIRM_LOGIN_PHONE_VERIFICATION } from './PhoneVerification.queries';
 import {
   LoginStartPhoneVerification,
   LoginStartPhoneVerificationVariables,
@@ -19,7 +16,7 @@ import {
   LoginCompletePhoneVerificationVariables,
 } from '../../types/api';
 import countries from '../../countries';
-import {toast, vibration} from '../../tools';
+import { toast, vibration } from '../../tools';
 import auth from '@react-native-firebase/auth';
 
 const KeyboardAvoidingView = styled.KeyboardAvoidingView`
@@ -83,7 +80,7 @@ interface IProp {
   navigation: NavigationProp;
 }
 
-const PhoneVerification: React.FunctionComponent<IProp> = ({navigation}) => {
+const PhoneVerification: React.FunctionComponent<IProp> = ({}) => {
   const [dialCode, setDialCode] = useState<string>('+82');
   const [isGlobal, setIsGlobal] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
@@ -99,21 +96,20 @@ const PhoneVerification: React.FunctionComponent<IProp> = ({navigation}) => {
     return a.dial_code < b.dial_code ? -1 : a.dial_code > b.dial_code ? 1 : 0;
   });
 
-  const [phoneMutation] = useMutation<
-    LoginStartPhoneVerification,
-    LoginStartPhoneVerificationVariables
-  >(REQUEST_LOGIN_PHONE_VERIFICATION);
+  const [phoneMutation] = useMutation<LoginStartPhoneVerification, LoginStartPhoneVerificationVariables>(
+    REQUEST_LOGIN_PHONE_VERIFICATION,
+  );
 
-  const [confirmMutation] = useMutation<
-    LoginCompletePhoneVerification,
-    LoginCompletePhoneVerificationVariables
-  >(CONFIRM_LOGIN_PHONE_VERIFICATION, {
-    variables: {
-      phoneNumber: dialPhoneNumber,
-      key: secretCode.value,
+  const [confirmMutation] = useMutation<LoginCompletePhoneVerification, LoginCompletePhoneVerificationVariables>(
+    CONFIRM_LOGIN_PHONE_VERIFICATION,
+    {
+      variables: {
+        phoneNumber: dialPhoneNumber,
+        key: secretCode.value,
+      },
+      fetchPolicy: 'no-cache',
     },
-    fetchPolicy: 'no-cache',
-  });
+  );
 
   const verifyMutation = async () => {
     if (!loading && !sendSuccess) {
@@ -124,11 +120,8 @@ const PhoneVerification: React.FunctionComponent<IProp> = ({navigation}) => {
         setDialPhoneNumber(dialCode + phoneNumber.value);
         isValid = /^\+[1-9]{1}[0-9]{7,11}$/.test(dialPhoneNumber);
       } else {
-        dialPhoneNumber =
-          '+82' + phoneNumber.value.substring(1, phoneNumber.value.length);
-        setDialPhoneNumber(
-          '+82' + phoneNumber.value.substring(1, phoneNumber.value.length),
-        );
+        dialPhoneNumber = '+82' + phoneNumber.value.substring(1, phoneNumber.value.length);
+        setDialPhoneNumber('+82' + phoneNumber.value.substring(1, phoneNumber.value.length));
         isValid = /^\d{3}\d{3,4}\d{4}$/.test(phoneNumber.value);
       }
       console.log(dialPhoneNumber);
@@ -141,8 +134,8 @@ const PhoneVerification: React.FunctionComponent<IProp> = ({navigation}) => {
 
       setLoading(true);
       try {
-        const {data} = await phoneMutation({
-          variables: {phoneNumber: dialPhoneNumber},
+        const { data } = await phoneMutation({
+          variables: { phoneNumber: dialPhoneNumber },
         });
 
         console.log(data);
@@ -154,8 +147,7 @@ const PhoneVerification: React.FunctionComponent<IProp> = ({navigation}) => {
             } else {
               setSendSuccess(false);
               toast(
-                data.LoginStartPhoneVerification.error ||
-                  '인증 번호를 전송하는데 실패하였습니다. 다시 시도하세요.',
+                data.LoginStartPhoneVerification.error || '인증 번호를 전송하는데 실패하였습니다. 다시 시도하세요.',
               );
             }
           } else {
@@ -185,13 +177,13 @@ const PhoneVerification: React.FunctionComponent<IProp> = ({navigation}) => {
 
       try {
         setLoading(true);
-        const {data} = await confirmMutation();
+        const { data } = await confirmMutation();
 
         if (data) {
           console.log(data);
           if (data.LoginCompletePhoneVerification) {
             if (data.LoginCompletePhoneVerification.ok) {
-              const {token, userId} = data.LoginCompletePhoneVerification;
+              const { token, userId } = data.LoginCompletePhoneVerification;
 
               //Firebase Login
               auth()
@@ -208,8 +200,7 @@ const PhoneVerification: React.FunctionComponent<IProp> = ({navigation}) => {
               setVerifyError(true);
               vibration();
               toast(
-                data.LoginCompletePhoneVerification.error ||
-                  '인증 하는 과정에서 오류가 발생했어요. 다시 시도하세요.',
+                data.LoginCompletePhoneVerification.error || '인증 하는 과정에서 오류가 발생했어요. 다시 시도하세요.',
               );
             }
           } else {
@@ -245,12 +236,7 @@ const PhoneVerification: React.FunctionComponent<IProp> = ({navigation}) => {
                     />
                   </InputWrapper>
                 </Wrapper>
-                <AuthButton
-                  text="인증 발송"
-                  onClick={verifyMutation}
-                  loading={loading}
-                  bgColor="#000000"
-                />
+                <AuthButton text="인증 발송" onClick={verifyMutation} loading={loading} bgColor="#000000" />
                 <MoreWrapper>
                   <Touchable onPress={() => setIsGlobal(true)}>
                     <Text>{'해외 사용자의 경우 눌러주세요'}</Text>
@@ -265,11 +251,7 @@ const PhoneVerification: React.FunctionComponent<IProp> = ({navigation}) => {
                     selectedValue={dialCode}
                     onValueChange={(e, i) => setDialCode(e.toString())}>
                     {sortedCountries.map((country, index) => (
-                      <Picker.Item
-                        label={country.dial_code}
-                        key={index}
-                        value={country.dial_code}
-                      />
+                      <Picker.Item label={country.dial_code} key={index} value={country.dial_code} />
                     ))}
                   </Picker>
                   <InputWrapper>
@@ -284,12 +266,7 @@ const PhoneVerification: React.FunctionComponent<IProp> = ({navigation}) => {
                     />
                   </InputWrapper>
                 </Wrapper>
-                <AuthButton
-                  text="인증 발송"
-                  onClick={verifyMutation}
-                  loading={loading}
-                  bgColor="#000000"
-                />
+                <AuthButton text="인증 발송" onClick={verifyMutation} loading={loading} bgColor="#000000" />
                 <MoreWrapper>
                   <Touchable
                     onPress={() => {
@@ -316,12 +293,7 @@ const PhoneVerification: React.FunctionComponent<IProp> = ({navigation}) => {
                   />
                 </InputWrapper>
               </Wrapper>
-              <AuthButton
-                text="인증"
-                onClick={verifyCode}
-                loading={loading}
-                bgColor="#000000"
-              />
+              <AuthButton text="인증" onClick={verifyCode} loading={loading} bgColor="#000000" />
             </>
           )}
         </View>

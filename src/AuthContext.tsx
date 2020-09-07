@@ -1,6 +1,6 @@
-import React, {createContext, useContext, useState} from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import AsyncStorage from '@react-native-community/async-storage';
-import {check, PERMISSIONS, RESULTS} from 'react-native-permissions';
+import { check, PERMISSIONS, RESULTS } from 'react-native-permissions';
 
 interface IProps {
   isLoggedIn: boolean;
@@ -83,36 +83,36 @@ export const AuthProvider: React.FunctionComponent<IProps> = ({
 };
 
 export const useIsLoggedIn = () => {
-  const {isLoggedIn} = useContext(AuthContext);
+  const { isLoggedIn } = useContext(AuthContext);
   return isLoggedIn;
 };
 
 export const useLogOut = () => {
-  const {logUserOut} = useContext(AuthContext);
+  const { logUserOut } = useContext(AuthContext);
   return logUserOut;
 };
 
 export const useIsPermit = () => {
-  const {isPermit} = useContext(AuthContext);
+  const { isPermit } = useContext(AuthContext);
   return isPermit;
 };
 
 export const usePermit = () => {
-  const {permitUser} = useContext(AuthContext);
+  const { permitUser } = useContext(AuthContext);
   return permitUser;
 };
 
 export const useLogIn = () => {
-  const {logUserIn} = useContext(AuthContext);
+  const { logUserIn } = useContext(AuthContext);
   return logUserIn;
 };
 
 export const useRoomIn = () => {
-  const {RoomUserIn} = useContext(AuthContext);
+  const { RoomUserIn } = useContext(AuthContext);
   return RoomUserIn;
 };
 
 export const useRoomOut = () => {
-  const {RoomUserOut} = useContext(AuthContext);
+  const { RoomUserOut } = useContext(AuthContext);
   return RoomUserOut;
 };

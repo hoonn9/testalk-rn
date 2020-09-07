@@ -1,7 +1,6 @@
-import React, { useState, useRef, useEffect } from "react";
-import styled from "styled-components/native";
-import { TextInputProps, Easing, Animated } from "react-native";
-import constants from "../../constants";
+import React, { useRef, useEffect } from 'react';
+import styled from 'styled-components/native';
+import { TextInputProps, Animated } from 'react-native';
 
 const Container = styled.View`
   margin-bottom: 10px;
@@ -23,10 +22,10 @@ interface IProp extends TextInputProps {
 const AuthInput: React.FunctionComponent<IProp> = ({
   placeholder,
   value,
-  keyboardType = "default",
-  autoCapitalize = "none",
+  keyboardType = 'default',
+  autoCapitalize = 'none',
   onChangeText = () => null,
-  returnKeyType = "done",
+  returnKeyType = 'done',
   onSubmitEditing = () => null,
   autoCorrect = true,
   isError = false,
@@ -36,7 +35,7 @@ const AuthInput: React.FunctionComponent<IProp> = ({
 
   const getStyle = () => {
     return {
-      borderColor: "red",
+      borderColor: 'red',
       borderWidth: fadeAnim,
       borderRadius: 4,
     };

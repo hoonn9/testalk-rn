@@ -1,27 +1,17 @@
-import React, {useEffect, useState, createRef, useLayoutEffect} from 'react';
-import {TouchableWithoutFeedback, Keyboard, FlatList} from 'react-native';
+import React, { useEffect, useState, createRef, useLayoutEffect } from 'react';
+import { TouchableWithoutFeedback, Keyboard, FlatList } from 'react-native';
 import styled from 'styled-components/native';
-import {useMutation, useSubscription, useLazyQuery} from '@apollo/react-hooks';
-import {useNavigation, RouteProp} from '@react-navigation/native';
+import { useMutation, useSubscription, useLazyQuery } from '@apollo/react-hooks';
+import { useNavigation, RouteProp } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import AsyncStorage from '@react-native-community/async-storage';
-import {
-  HeaderButtons,
-  HeaderButton,
-  HiddenItem,
-  OverflowMenu,
-} from 'react-navigation-header-buttons';
+import { HeaderButtons, HeaderButton, HiddenItem, OverflowMenu } from 'react-navigation-header-buttons';
 import Modal from 'react-native-modal';
 import SendMessage from '../../components/SendMessage';
 import useInput from '../../hooks/useInput';
 import MessageRow from '../../components/MessageRow';
-import {toast} from '../../tools';
-import {
-  SUBSCRIBE_MESSAGE,
-  SEND_MESSAGE,
-  LEAVE_CHAT,
-  GET_CHAT_USER,
-} from './Message.queries';
+import { toast } from '../../tools';
+import { SUBSCRIBE_MESSAGE, SEND_MESSAGE, LEAVE_CHAT, GET_CHAT_USER } from './Message.queries';
 import {
   SendChatMessage,
   SendChatMessageVariables,
@@ -45,13 +35,11 @@ import {
 } from '../../dbTools';
 import ModalSelector from '../../components/ModalSelector';
 import styles from '../../styles';
-import {initTimestamp} from '../../utils';
+import { initTimestamp } from '../../utils';
 import ModalAlert from '../../components/ModalAlert';
 import EmptyScreen from '../../components/EmptyScreen';
-import FastImage from 'react-native-fast-image';
-import PeoplePhoto from '../../components/PeoplePhoto';
 import HeaderImageButton from '../../components/HeaderPhotoButton';
-import {useHeaderHeight} from '@react-navigation/stack';
+import { useHeaderHeight } from '@react-navigation/stack';
 
 const Container = styled.View`
   flex: 1;
@@ -85,23 +73,17 @@ interface IProp {
   route: ProfileScreenRouteProp;
 }
 
-const MaterialHeaderButton = (props: any) => (
-  <HeaderButton iconSize={23} color="blue" {...props} />
-);
+const MaterialHeaderButton = (props: any) => <HeaderButton iconSize={23} color="blue" {...props} />;
 
 const LEAVE = 'LEAVE';
 
-const Message: React.FunctionComponent<IProp> = ({route}) => {
+const Message: React.FunctionComponent<IProp> = ({ route }) => {
   const navigation = useNavigation();
-  const {userId, userInfo: receiveUserInfo} = route.params;
+  const { userId, userInfo: receiveUserInfo } = route.params;
 
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
-  const [isLeaveModalVisible, setIsLeaveModalVisible] = useState<boolean>(
-    false,
-  );
-  const [isBlockModalVisible, setIsBlockModalVisible] = useState<boolean>(
-    false,
-  );
+  const [isLeaveModalVisible, setIsLeaveModalVisible] = useState<boolean>(false);
+  const [isBlockModalVisible, setIsBlockModalVisible] = useState<boolean>(false);
   const [isBlocked, setIsBlocked] = useState<boolean>(false);
   const [isCashVisible, setIsCashVisible] = useState<boolean>(false);
 
@@ -109,7 +91,7 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
     try {
       console.log(chatId);
       if (chatId) {
-        const {data} = await leaveChatMutation({
+        const { data } = await leaveChatMutation({
           variables: {
             id: chatId,
           },
@@ -153,7 +135,7 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
     navigation.navigate('TabNavigation');
   };
   const headerHeight = useHeaderHeight();
-  const imageOnPress = () => navigation.navigate('Profile', {userId: userId});
+  const imageOnPress = () => navigation.navigate('Profile', { userId: userId });
   // 헤더 버튼 생성
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -175,14 +157,8 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
   const MessageHeaderButton = () => {
     return (
       <HeaderButtons HeaderButtonComponent={MaterialHeaderButton}>
-        <OverflowMenu
-          OverflowIcon={
-            <Icon name="more-vert" size={23} color={styles.blackColor} />
-          }>
-          <HiddenItem
-            title={isBlocked ? '차단 해제' : '차단하기'}
-            onPress={() => setIsBlockModalVisible(true)}
-          />
+        <OverflowMenu OverflowIcon={<Icon name="more-vert" size={23} color={styles.blackColor} />}>
+          <HiddenItem title={isBlocked ? '차단 해제' : '차단하기'} onPress={() => setIsBlockModalVisible(true)} />
           <HiddenItem title="나가기" onPress={() => setIsModalVisible(true)} />
         </OverflowMenu>
       </HeaderButtons>
@@ -200,34 +176,21 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
   const [userInfo, setUserInfo] = useState<UserInfoProp>();
   const [isSendLoading, setIsSendLoading] = useState<boolean>(false);
 
-  const [
-    getChatUser,
-    {
-      data: getChatUserData,
-      loading: getChatUserLoading,
-      error: getChatUserError,
-    },
-  ] = useLazyQuery<GetChatUser, GetChatUserVariables>(GET_CHAT_USER, {
+  const [getChatUser, { data: getChatUserData, loading: getChatUserLoading, error: getChatUserError }] = useLazyQuery<
+    GetChatUser,
+    GetChatUserVariables
+  >(GET_CHAT_USER, {
     fetchPolicy: 'network-only',
   });
 
-  const [sendMessageMutation] = useMutation<
-    SendChatMessage,
-    SendChatMessageVariables
-  >(SEND_MESSAGE);
+  const [sendMessageMutation] = useMutation<SendChatMessage, SendChatMessageVariables>(SEND_MESSAGE);
 
-  const [leaveChatMutation] = useMutation<LeaveChat, LeaveChatVariables>(
-    LEAVE_CHAT,
-  );
+  const [leaveChatMutation] = useMutation<LeaveChat, LeaveChatVariables>(LEAVE_CHAT);
 
-  const {
-    data: subscribeData,
-    loading: subscribeLoading,
-    error: subscribeError,
-  } = useSubscription<MessageSubscription, MessageSubscriptionVariables>(
-    SUBSCRIBE_MESSAGE,
-    {variables: {chatId: chatId || -1}, skip: !chatId},
-  );
+  const { data: subscribeData, loading: subscribeLoading, error: subscribeError } = useSubscription<
+    MessageSubscription,
+    MessageSubscriptionVariables
+  >(SUBSCRIBE_MESSAGE, { variables: { chatId: chatId || -1 }, skip: !chatId });
 
   const onEndReached = async () => {
     if (chatId) {
@@ -285,15 +248,8 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
     initChat();
   }, []);
 
-  const addMessageList = (
-    chatId: number,
-    userId: number,
-    text: string,
-    createdAt: string,
-  ) => {
-    const existSeparate = messageList.find(
-      e => e.created_at >= initTimestamp(parseInt(createdAt)),
-    );
+  const addMessageList = (chatId: number, userId: number, text: string, createdAt: string) => {
+    const existSeparate = messageList.find(e => e.created_at >= initTimestamp(parseInt(createdAt)));
     setMessageList([
       {
         _id: messageList.length,
@@ -312,12 +268,7 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
     if (subscribeData) {
       console.log(subscribeData);
       if (subscribeData.MessageSubscription) {
-        const {
-          userId,
-          text,
-          target,
-          createdAt,
-        } = subscribeData.MessageSubscription;
+        const { userId, text, target, createdAt } = subscribeData.MessageSubscription;
         console.log(chatId, userId);
 
         if (chatId && userId) {
@@ -331,7 +282,7 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
 
               // 수신 시 최하단으로 스크롤
               if (flatRef && messageList.length > 0) {
-                flatRef.scrollToIndex({index: 0});
+                flatRef.scrollToIndex({ index: 0 });
               }
             }
           }
@@ -348,7 +299,7 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
     if (myId) {
       const now = new Date().getTime().toString();
       try {
-        const {data} = await sendMessageMutation({
+        const { data } = await sendMessageMutation({
           variables: {
             chatId,
             receiveUserId: userId,
@@ -359,13 +310,7 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
 
         if (data && data.SendChatMessage.ok && data.SendChatMessage.chatId) {
           const sendedChatId = data.SendChatMessage.chatId;
-          addMessage(
-            sendedChatId,
-            myId,
-            userId,
-            messageContent.value,
-            parseInt(now),
-          );
+          addMessage(sendedChatId, myId, userId, messageContent.value, parseInt(now));
           if (userInfo) {
             addFriend({
               userId,
@@ -417,14 +362,7 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
     if (chatId && getChatUserData && getChatUserData.GetChatUser) {
       if (getChatUserData.GetChatUser.ok) {
         if (getChatUserData.GetChatUser.user) {
-          const {
-            id,
-            nickName,
-            birth,
-            gender,
-            intro,
-            profilePhoto,
-          } = getChatUserData.GetChatUser.user;
+          const { id, nickName, birth, gender, intro, profilePhoto } = getChatUserData.GetChatUser.user;
           // TODO
           // 유저 정보 업데이트
           addFriend({
@@ -434,10 +372,7 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
             birth: parseInt(birth),
             gender,
             intro,
-            profilePhoto:
-              profilePhoto && profilePhoto.length > 0
-                ? profilePhoto[0].url
-                : null,
+            profilePhoto: profilePhoto && profilePhoto.length > 0 ? profilePhoto[0].url : null,
           });
         } else {
           // 상대가 떠났을 때
@@ -482,7 +417,7 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
                 onEndReachedThreshold={0.01}
                 data={messageList}
                 keyExtractor={(e, i) => i.toString()}
-                renderItem={({item}) => {
+                renderItem={({ item }) => {
                   return (
                     <MessageRow
                       message={item.content}
@@ -546,9 +481,7 @@ const Message: React.FunctionComponent<IProp> = ({route}) => {
         swipeDirection={['down']}
         onSwipeComplete={() => setIsBlockModalVisible(false)}>
         <ModalSelector
-          description={
-            isBlocked ? '차단을 해제하시겠어요?' : '상대를 차단하시겠어요?'
-          }
+          description={isBlocked ? '차단을 해제하시겠어요?' : '상대를 차단하시겠어요?'}
           confirmEvent={blockConfirmEvent}
           confirmTitle="네"
           cancelEvent={() => setIsBlockModalVisible(false)}

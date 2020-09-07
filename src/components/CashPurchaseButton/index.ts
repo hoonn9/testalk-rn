@@ -1,1 +1,1 @@
-export { default } from "./CashPurchaseButton";
+export { default } from './CashPurchaseButton';
