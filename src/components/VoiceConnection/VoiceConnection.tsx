@@ -3,6 +3,10 @@ import styled from 'styled-components/native';
 import Timer from '../Timer/Timer';
 import Icons from 'react-native-vector-icons/MaterialIcons';
 import styles from '../../styles';
+import { useSubscription } from '@apollo/react-hooks';
+import { VoiceSubscription, VoiceSubscription_VoiceSubscription } from '../../types/api';
+import { SUBSCRIBE_VOICE } from '../../screens/Voice/Voice.queries';
+import { toast } from '../../tools';
 const Container = styled.View`
     flex: 1;
     justify-content: center;
@@ -29,10 +33,33 @@ const Touchable = styled.TouchableOpacity`
 interface IProp {
     peerIds: number[];
     close: Function;
+    start: Function;
+    closeReady: Function;
 }
 
-const VoiceConnection: React.FunctionComponent<IProp> = ({ peerIds, close }) => {
+const VoiceConnection: React.FunctionComponent<IProp> = ({ peerIds, close, start, closeReady }) => {
     console.log('render', peerIds);
+    const { data: subscribeData, loading: subscribeLoading, error: subscribeError } = useSubscription<
+        VoiceSubscription,
+        VoiceSubscription_VoiceSubscription
+    >(SUBSCRIBE_VOICE);
+
+    // Subscribe Chat
+    useEffect(() => {
+        if (subscribeData) {
+            console.log(subscribeData);
+            if (subscribeData.VoiceSubscription) {
+                const { channelName, createdAt } = subscribeData.VoiceSubscription;
+                console.log(channelName, createdAt);
+                start(channelName);
+                if (channelName) {
+                } else {
+                    toast('데이터 수신 중 오류가 발생하였습니다.');
+                }
+            }
+        }
+    }, [subscribeData]);
+
     return (
         <Container>
             {peerIds.length > 0 ? (
@@ -62,7 +89,7 @@ const VoiceConnection: React.FunctionComponent<IProp> = ({ peerIds, close }) => 
                         </Wrapper>
                     </Wrapper>
                     <Wrapper>
-                        <Touchable onPress={() => close()}>
+                        <Touchable onPress={() => closeReady()}>
                             <Icons name="call-end" size={40} color={styles.redColor} />
                         </Touchable>
                     </Wrapper>

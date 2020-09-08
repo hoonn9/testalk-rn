@@ -812,12 +812,62 @@ export interface ToggleUserLikeVariables {
 // @generated
 // This file was automatically generated and should not be edited.
 
+// ====================================================
+// GraphQL subscription operation: VoiceSubscription
+// ====================================================
+
+export interface VoiceSubscription_VoiceSubscription {
+  __typename: "VoiceSubscriptionResponse";
+  channelName: string;
+  createdAt: string;
+}
+
+export interface VoiceSubscription {
+  VoiceSubscription: VoiceSubscription_VoiceSubscription;
+}
+
+/* tslint:disable */
+/* eslint-disable */
+// @generated
+// This file was automatically generated and should not be edited.
+
+// ====================================================
+// GraphQL mutation operation: FindVoiceUser
+// ====================================================
+
+export interface FindVoiceUser_FindVoiceUser {
+  __typename: "FindVoiceUserResponse";
+  ok: boolean;
+  error: string | null;
+  channelName: string | null;
+}
+
+export interface FindVoiceUser {
+  FindVoiceUser: FindVoiceUser_FindVoiceUser;
+}
+
+export interface FindVoiceUserVariables {
+  age?: number | null;
+  distance?: number | null;
+  gender?: GenderTarget | null;
+}
+
+/* tslint:disable */
+/* eslint-disable */
+// @generated
+// This file was automatically generated and should not be edited.
+
 //==============================================================
 // START Enums and Input Objects
 //==============================================================
 
 export enum CustomTokenMeansOptions {
   KAKAO = "KAKAO",
+}
+
+export enum GenderTarget {
+  female = "female",
+  male = "male",
 }
 
 export enum GetUserListMeans {

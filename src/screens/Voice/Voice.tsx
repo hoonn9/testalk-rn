@@ -17,6 +17,10 @@ import { useNavigation } from '@react-navigation/native';
 import Modal from 'react-native-modal';
 import ModalSelector from '../../components/ModalSelector';
 import styles from '../../styles';
+import { useMutation } from '@apollo/react-hooks';
+import { FIND_VOICE_USER } from './Voice.queries';
+import { FindVoiceUser, FindVoiceUserVariables, GenderTarget } from '../../types/api.d';
+import VoiceFilter from '../../components/VoiceFilter';
 
 const View = styled.View``;
 const Container = styled.View`
@@ -83,49 +87,21 @@ const Voice: React.FunctionComponent<IProp> = () => {
     const navigation = useNavigation();
     const [loading, setLoading] = useState<boolean>(false);
     const [isPermit, setIsPermit] = useState<boolean>(false);
-
-    const [uid, setUid] = useState<number>(0);
-    // const [initialized, setInitialized] = useState<string>();
     const [engine, setEngine] = useState<RtcEngine>();
-    const [channelName, setChannelName] = useState<string>('test');
+    const [isReady, setIsReady] = useState<boolean>(false);
     const [joinSucceed, setJoinSucceed] = useState<boolean>();
     const [peerIds, setPeerIds] = useState<number[]>([]);
 
     const [isExitModalVisible, setIsExitModalVisible] = useState<boolean>(false);
+    const [isFilterModalVisible, setIsFilterModalVisible] = useState<boolean>(false);
 
-    // const renderVideos = () => {
-    //     return joinSucceed ? (
-    //         <View style={styleSheets.fullView}>
-    //             <RtcLocalView.SurfaceView
-    //                 style={{ flex: 1 }}
-    //                 channelId={channelName}
-    //                 renderMode={VideoRenderMode.Hidden}
-    //             />
-    //             {renderRemoteVideos()}
-    //         </View>
-    //     ) : null;
-    // };
+    const [gender, setGender] = useState<GenderTarget>(GenderTarget.male);
+    const [age, setAge] = useState<number>(20);
+    const [distance, setDistance] = useState<number>(5000);
 
-    const renderRemoteVideos = () => {
-        return (
-            <ScrollView
-                style={styleSheets.remoteContainer}
-                contentContainerStyle={{ paddingHorizontal: 2.5 }}
-                horizontal={true}>
-                {peerIds.map((value, index, array) => {
-                    return (
-                        <RtcRemoteView.SurfaceView
-                            style={styleSheets.remote}
-                            uid={value}
-                            channelId={channelName}
-                            renderMode={VideoRenderMode.Hidden}
-                            zOrderMediaOverlay={true}
-                        />
-                    );
-                })}
-            </ScrollView>
-        );
-    };
+    const [findVoiceUserMutation] = useMutation<FindVoiceUser, FindVoiceUserVariables>(FIND_VOICE_USER, {
+        variables: { gender, age, distance },
+    });
 
     const initVoice = async () => {
         // Pass in the App ID to initialize the RtcEngine object.
@@ -188,35 +164,65 @@ const Voice: React.FunctionComponent<IProp> = () => {
         });
     }, []);
 
-    const join = useCallback(async () => {
-        if (!engine) {
-            console.log('not engine');
-            return;
+    const start = useCallback(
+        async channelName => {
+            if (!engine) {
+                console.log('not engine');
+                return;
+            }
+            toast('시작');
+            const jwt = await AsyncStorage.getItem('jwt');
+            const myId = await AsyncStorage.getItem('userId');
+            if (jwt && myId) {
+                const data = await axios
+                    .get(getEnvVars().apiUrl + 'generateRtcToken', {
+                        params: { uid: myId, channelName: channelName },
+                        headers: { 'X-JWT': jwt },
+                    })
+                    .then(e => {
+                        return e.data;
+                    })
+                    .catch(e => {
+                        console.log(e);
+                    });
+                if (data && data.key) {
+                    console.log(data.key);
+                    await engine.enableAudio();
+                    await engine.enableLocalAudio(true);
+                    await engine.joinChannel(data.key, channelName, null, parseInt(myId));
+                } else {
+                    toast('인증 실패.');
+                }
+            } else {
+                toast('해당 계정의 인증을 실패하였습니다.');
+            }
+        },
+        [engine],
+    );
+
+    const ready = async () => {
+        const { data } = await findVoiceUserMutation();
+        console.log(data);
+        if (data && data.FindVoiceUser && data.FindVoiceUser.ok) {
+            if (data.FindVoiceUser.channelName) {
+                start(data.FindVoiceUser.channelName);
+            }
+            setIsReady(true);
+        } else {
+            toast('접속 실패. 잠시 후 다시 시도 해주세요.');
         }
-        toast('시작');
-        const jwt = await AsyncStorage.getItem('jwt');
-        const { key } = await axios
-            .get(getEnvVars().apiUrl + 'generateRtcToken', {
-                params: { uid: uid, channelName: channelName },
-                headers: { 'X-JWT': jwt },
-            })
-            .then(e => {
-                return e.data;
-            })
-            .catch(e => {
-                console.log(e);
-            });
-        console.log(key);
-        await engine.enableAudio();
-        await engine.enableLocalAudio(true);
-        await engine.joinChannel(key, channelName, null, uid);
-    }, [uid, channelName, engine]);
+    };
+
+    const closeReady = async () => {
+        setIsReady(false);
+    };
 
     const close = () => {
         if (!engine) return;
         toast('종료');
         console.log('close');
         engine.leaveChannel();
+        setIsReady(false);
     };
 
     useEffect(() => {
@@ -231,7 +237,7 @@ const Voice: React.FunctionComponent<IProp> = () => {
         };
         BackHandler.addEventListener('hardwareBackPress', handleBackButtonClick);
         return () => BackHandler.removeEventListener('hardwareBackPress', handleBackButtonClick);
-    }, []);
+    }, [joinSucceed]);
 
     const VoiceRenderer: React.FunctionComponent = () => {
         if (!isPermit) {
@@ -240,10 +246,10 @@ const Voice: React.FunctionComponent<IProp> = () => {
                     <EmptyScreen text="보이스톡을 이용하시려면 권한이 필요해요." />
                 </Container>
             );
-        } else if (joinSucceed) {
+        } else if (isReady) {
             return (
                 <Container>
-                    <VoiceConnection peerIds={peerIds} close={close} />
+                    <VoiceConnection peerIds={peerIds} close={close} start={start} closeReady={closeReady} />
                 </Container>
             );
         }
@@ -251,8 +257,11 @@ const Voice: React.FunctionComponent<IProp> = () => {
         return (
             <Container style={styleSheets.max}>
                 <Wrapper>
-                    <Touchable onPress={() => join()} style={styleSheets.button}>
+                    <Touchable onPress={() => ready()} style={styleSheets.button}>
                         <Text style={styleSheets.buttonText}> {`매칭 시작`} </Text>
+                    </Touchable>
+                    <Touchable onPress={() => setIsFilterModalVisible(true)}>
+                        <Text>필터</Text>
                     </Touchable>
                 </Wrapper>
             </Container>
@@ -286,6 +295,22 @@ const Voice: React.FunctionComponent<IProp> = () => {
                     confirmEvent={exitConfirmEvent}
                     confirmTitle="네"
                     cancelEvent={() => setIsExitModalVisible(false)}
+                />
+            </Modal>
+            <Modal
+                isVisible={isFilterModalVisible}
+                animationOut="fadeOutDown"
+                backdropColor={styles.modalBackDropColor}
+                backdropOpacity={0.3}
+                backdropTransitionOutTiming={0}
+                swipeDirection={['down']}>
+                <VoiceFilter
+                    gender={gender}
+                    age={age}
+                    distance={distance}
+                    setGender={setGender}
+                    setAge={setAge}
+                    setDistance={setDistance}
                 />
             </Modal>
         </Container>
