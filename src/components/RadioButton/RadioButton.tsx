@@ -1,59 +1,90 @@
-import React from "react";
-import styled from "styled-components/native";
-import { TextInputProps, TouchableOpacityProps } from "react-native";
-import constants from "../../constants";
+import React from 'react';
+import styled from 'styled-components/native';
+import { TextInputProps, TouchableOpacityProps } from 'react-native';
+import constants from '../../constants';
 
-const Container = styled.View``;
+const Container = styled.View`
+    width: 100%;
+`;
 const Title = styled.Text``;
 const Text = styled.Text`
-  text-align: center;
+    text-align: center;
+    font-size: 16px;
+    color: ${(props: any) => props.theme.blackColor};
 `;
 const Wrapper = styled.View`
-  flex-direction: row;
-  justify-content: space-between;
+    flex-direction: row;
+    margin: 16px 16px;
 `;
 interface TouchableViewProp {
-  len: number;
+    len: number;
 }
-const TouchableView = styled.View<TouchableViewProp>`
-  width: ${(props: any) => `${constants.width / props.len}px`};
+const Touchable = styled.TouchableOpacity<TouchableViewProp>`
+    width: ${(props: any) => `${100 / props.len}%`};
+    padding: 8px;
+    border-radius: 32px;
+    justify-content: center;
+    align-items: center;
 `;
-const Touchable = styled.TouchableOpacity``;
-interface IProp extends TextInputProps {
-  title: string;
-  buttons: Array<string>;
-  value: string;
-  setValue: Function;
+
+const ActiveTouchable = styled.TouchableOpacity<TouchableViewProp>`
+    width: ${(props: any) => `${100 / props.len}%`};
+    background-color: ${(props: any) => props.theme.lightGreyColor};
+    padding: 8px;
+    border-radius: 32px;
+    justify-content: center;
+    align-items: center;
+`;
+
+interface ButtonProp {
+    name: string;
+    value: any;
 }
 
-const RadioButton: React.FunctionComponent<IProp> = ({
-  title,
-  buttons,
-  value,
-  setValue,
-}) => {
-  const onChangeUseState = (e: string) => {
-    if (value !== e) {
-      setValue(e);
-    }
-  };
+interface IProp extends TextInputProps {
+    title?: string;
+    buttons: Array<ButtonProp>;
+    value: any;
+    setValue: Function;
+}
 
-  return (
-    <Container>
-      <Title>{title}</Title>
-      <Wrapper>
-        {buttons.map((e, i) => {
-          return (
-            <Touchable key={i} onPress={() => onChangeUseState.bind(null)(e)}>
-              <TouchableView len={buttons.length}>
-                <Text>{e}</Text>
-              </TouchableView>
-            </Touchable>
-          );
-        })}
-      </Wrapper>
-    </Container>
-  );
+const RadioButton: React.FunctionComponent<IProp> = ({ title, buttons, value, setValue }) => {
+    const onChangeUseState = (e: string) => {
+        if (value !== e) {
+            setValue(e);
+        }
+    };
+
+    return (
+        <Container>
+            {title ? <Title>{title}</Title> : null}
+            <Wrapper>
+                {buttons.map((e, i) => {
+                    if (e.value === value) {
+                        return (
+                            <ActiveTouchable
+                                activeOpacity={0.5}
+                                len={buttons.length}
+                                key={i}
+                                onPress={() => onChangeUseState.bind(null)(e.value)}>
+                                <Text>{e.name}</Text>
+                            </ActiveTouchable>
+                        );
+                    } else {
+                        return (
+                            <Touchable
+                                activeOpacity={0.5}
+                                len={buttons.length}
+                                key={i}
+                                onPress={() => onChangeUseState.bind(null)(e.value)}>
+                                <Text>{e.name}</Text>
+                            </Touchable>
+                        );
+                    }
+                })}
+            </Wrapper>
+        </Container>
+    );
 };
 
 export default RadioButton;

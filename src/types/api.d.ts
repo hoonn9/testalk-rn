@@ -849,7 +849,26 @@ export interface FindVoiceUser {
 export interface FindVoiceUserVariables {
   age?: number | null;
   distance?: number | null;
-  gender?: GenderTarget | null;
+  gender: GenderTarget;
+}
+
+/* tslint:disable */
+/* eslint-disable */
+// @generated
+// This file was automatically generated and should not be edited.
+
+// ====================================================
+// GraphQL mutation operation: RemoveVoiceWait
+// ====================================================
+
+export interface RemoveVoiceWait_RemoveVoiceWait {
+  __typename: "RemoveVoiceWaitResponse";
+  ok: boolean;
+  error: string | null;
+}
+
+export interface RemoveVoiceWait {
+  RemoveVoiceWait: RemoveVoiceWait_RemoveVoiceWait;
 }
 
 /* tslint:disable */
@@ -866,6 +885,7 @@ export enum CustomTokenMeansOptions {
 }
 
 export enum GenderTarget {
+  any = "any",
   female = "female",
   male = "male",
 }

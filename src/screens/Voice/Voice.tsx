@@ -1,26 +1,25 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import styled from 'styled-components/native';
 import axios from 'axios';
 import getEnvVars, { AGORA_APP_ID } from '../../enviroments';
 import AsyncStorage from '@react-native-community/async-storage';
-import RtcEngine, { RtcLocalView, RtcRemoteView, VideoRenderMode } from 'react-native-agora';
-import { ScrollView } from 'react-native-gesture-handler';
+import RtcEngine from 'react-native-agora';
 import { toast } from '../../tools';
-import { PermissionsAndroid, StyleSheet, BackHandler } from 'react-native';
+import { StyleSheet, BackHandler, AppState } from 'react-native';
 import constants from '../../constants';
-import { requestNotifications, check, PERMISSIONS, RESULTS, request } from 'react-native-permissions';
 import { getVoicePermission } from '../../permissions';
 import EmptyScreen from '../../components/EmptyScreen';
-import { RtcStatsCallback, EmptyCallback } from 'react-native-agora/lib/src/RtcEvents';
 import VoiceConnection from '../../components/VoiceConnection';
 import { useNavigation } from '@react-navigation/native';
 import Modal from 'react-native-modal';
 import ModalSelector from '../../components/ModalSelector';
 import styles from '../../styles';
 import { useMutation } from '@apollo/react-hooks';
-import { FIND_VOICE_USER } from './Voice.queries';
-import { FindVoiceUser, FindVoiceUserVariables, GenderTarget } from '../../types/api.d';
+import { FIND_VOICE_USER, REMOVE_VOICE_WAIT } from './Voice.queries';
+import { FindVoiceUser, FindVoiceUserVariables, GenderTarget, RemoveVoiceWait } from '../../types/api.d';
 import VoiceFilter from '../../components/VoiceFilter';
+import FloatButton from '../../components/FloatButton';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const View = styled.View``;
 const Container = styled.View`
@@ -38,50 +37,15 @@ const VoiceRowTouchable = styled.TouchableOpacity`
     margin: 8px 16px;
     border-color: ${(props: any) => props.theme.darkGreyColor};
 `;
+const FilterWrapper = styled.View`
+    position: absolute;
+    right: 32px;
+    bottom: 32px;
+`;
+
+export type AgeType = 10 | 20 | 30 | 40 | null;
 
 interface IProp {}
-
-const styleSheets = StyleSheet.create({
-    max: {
-        flex: 1,
-    },
-    buttonHolder: {
-        height: 100,
-        alignItems: 'center',
-        flex: 1,
-        flexDirection: 'row',
-        justifyContent: 'space-evenly',
-    },
-    button: {
-        paddingHorizontal: 20,
-        paddingVertical: 10,
-        backgroundColor: '#0093E9',
-        borderRadius: 25,
-    },
-    buttonText: {
-        color: '#fff',
-    },
-    fullView: {
-        width: constants.width,
-        height: constants.height - 100,
-    },
-    remoteContainer: {
-        width: '100%',
-        height: 150,
-        position: 'absolute',
-        top: 5,
-    },
-    remote: {
-        width: 150,
-        height: 150,
-        marginHorizontal: 2.5,
-    },
-    noUserText: {
-        paddingHorizontal: 10,
-        paddingVertical: 5,
-        color: '#0093E9',
-    },
-});
 
 const Voice: React.FunctionComponent<IProp> = () => {
     const navigation = useNavigation();
@@ -95,13 +59,14 @@ const Voice: React.FunctionComponent<IProp> = () => {
     const [isExitModalVisible, setIsExitModalVisible] = useState<boolean>(false);
     const [isFilterModalVisible, setIsFilterModalVisible] = useState<boolean>(false);
 
-    const [gender, setGender] = useState<GenderTarget>(GenderTarget.male);
-    const [age, setAge] = useState<number>(20);
-    const [distance, setDistance] = useState<number>(5000);
-
+    const [gender, setGender] = useState<GenderTarget>(GenderTarget.any);
+    const [age, setAge] = useState<AgeType>(20);
+    const [distance, setDistance] = useState<number>(100);
+    console.log(gender, age, distance);
     const [findVoiceUserMutation] = useMutation<FindVoiceUser, FindVoiceUserVariables>(FIND_VOICE_USER, {
         variables: { gender, age, distance },
     });
+    const [RemoveVoiceWaitMutation] = useMutation<RemoveVoiceWait>(REMOVE_VOICE_WAIT);
 
     const initVoice = async () => {
         // Pass in the App ID to initialize the RtcEngine object.
@@ -148,6 +113,9 @@ const Voice: React.FunctionComponent<IProp> = () => {
         setEngine(engine);
     };
 
+    const appState = useRef(AppState.currentState);
+    const [appStateVisible, setAppStateVisible] = useState(appState.current);
+
     useEffect(() => {
         const init = async () => {
             const permit = await getVoicePermission();
@@ -155,6 +123,23 @@ const Voice: React.FunctionComponent<IProp> = () => {
             initVoice();
         };
         init();
+
+        const handleAppStateChange = (nextAppState: any) => {
+            if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
+                console.log('App has come to the foreground!');
+            }
+
+            appState.current = nextAppState;
+            setAppStateVisible(appState.current);
+
+            if (appState.current === 'background') {
+                close();
+                closeReady();
+                RemoveVoiceWaitMutation();
+            }
+            console.log('AppState', appState.current);
+        };
+
         navigation.addListener('blur', () => {
             // 스크린 종료 시
             if (engine && !joinSucceed) {
@@ -162,6 +147,12 @@ const Voice: React.FunctionComponent<IProp> = () => {
             }
             console.log('didBlur');
         });
+
+        AppState.addEventListener('change', handleAppStateChange);
+
+        return () => {
+            AppState.removeEventListener('change', handleAppStateChange);
+        };
     }, []);
 
     const start = useCallback(
@@ -215,6 +206,7 @@ const Voice: React.FunctionComponent<IProp> = () => {
 
     const closeReady = async () => {
         setIsReady(false);
+        RemoveVoiceWaitMutation();
     };
 
     const close = () => {
@@ -239,32 +231,31 @@ const Voice: React.FunctionComponent<IProp> = () => {
         return () => BackHandler.removeEventListener('hardwareBackPress', handleBackButtonClick);
     }, [joinSucceed]);
 
+    useEffect(() => {
+        console.log(peerIds);
+    }, [peerIds]);
+
     const VoiceRenderer: React.FunctionComponent = () => {
         if (!isPermit) {
-            return (
-                <Container>
-                    <EmptyScreen text="보이스톡을 이용하시려면 권한이 필요해요." />
-                </Container>
-            );
+            return <EmptyScreen text="보이스톡을 이용하시려면 권한이 필요해요." />;
         } else if (isReady) {
-            return (
-                <Container>
-                    <VoiceConnection peerIds={peerIds} close={close} start={start} closeReady={closeReady} />
-                </Container>
-            );
+            return <VoiceConnection peerIds={peerIds} close={close} start={start} closeReady={closeReady} />;
         }
 
         return (
-            <Container style={styleSheets.max}>
+            <>
                 <Wrapper>
-                    <Touchable onPress={() => ready()} style={styleSheets.button}>
-                        <Text style={styleSheets.buttonText}> {`매칭 시작`} </Text>
-                    </Touchable>
-                    <Touchable onPress={() => setIsFilterModalVisible(true)}>
-                        <Text>필터</Text>
+                    <Touchable onPress={() => ready()}>
+                        <Text> {`매칭 시작`} </Text>
                     </Touchable>
                 </Wrapper>
-            </Container>
+                <FilterWrapper>
+                    <FloatButton
+                        onPress={() => setIsFilterModalVisible(true)}
+                        icon={<Ionicons name="filter-outline" size={38} />}
+                    />
+                </FilterWrapper>
+            </>
         );
     };
 
@@ -311,6 +302,7 @@ const Voice: React.FunctionComponent<IProp> = () => {
                     setGender={setGender}
                     setAge={setAge}
                     setDistance={setDistance}
+                    close={() => setIsFilterModalVisible(false)}
                 />
             </Modal>
         </Container>
