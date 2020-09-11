@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useLayoutEffect } from 'react';
 import styled from 'styled-components/native';
 import axios from 'axios';
 import getEnvVars, { AGORA_APP_ID } from '../../enviroments';
@@ -20,6 +20,8 @@ import { FindVoiceUser, FindVoiceUserVariables, GenderTarget, RemoveVoiceWait } 
 import VoiceFilter from '../../components/VoiceFilter';
 import FloatButton from '../../components/FloatButton';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { HeaderBackButton } from '@react-navigation/stack';
+import useInterval from '../../hooks/useInterval';
 
 const View = styled.View``;
 const Container = styled.View`
@@ -30,12 +32,15 @@ const Container = styled.View`
 const Wrapper = styled.View``;
 const Text = styled.Text``;
 const Touchable = styled.TouchableOpacity``;
-const VoiceRowTouchable = styled.TouchableOpacity`
+const MatchButtonTouchable = styled.TouchableOpacity`
     padding: 16px 8px;
-    border-top-width: 1px;
-    border-bottom-width: 1px;
-    margin: 8px 16px;
-    border-color: ${(props: any) => props.theme.darkGreyColor};
+    margin: 16px 16px;
+    border-radius: 16px;
+    background-color: ${(props: any) => props.theme.lightGreyColor};
+`;
+const MatchButtonText = styled.Text`
+    font-size: 30px;
+    color: ${(props: any) => props.theme.blackColor};
 `;
 const FilterWrapper = styled.View`
     position: absolute;
@@ -44,16 +49,33 @@ const FilterWrapper = styled.View`
 `;
 
 export type AgeType = 10 | 20 | 30 | 40 | null;
-
+export type VoiceStateType = 'idle' | 'ready' | 'joined' | 'connected' | 'disconnected';
 interface IProp {}
 
 const Voice: React.FunctionComponent<IProp> = () => {
     const navigation = useNavigation();
+    const [currentState, setCurrentState] = useState<VoiceStateType>('idle');
+
+    useLayoutEffect(() => {
+        navigation.setOptions({
+            headerLeft: () => (
+                <HeaderBackButton
+                    onPress={() => {
+                        if (currentState === 'idle') {
+                            navigation.goBack();
+                        } else {
+                            setIsExitModalVisible(true);
+                        }
+                    }}
+                />
+            ),
+        });
+    }, [navigation, currentState]);
+
     const [loading, setLoading] = useState<boolean>(false);
     const [isPermit, setIsPermit] = useState<boolean>(false);
     const [engine, setEngine] = useState<RtcEngine>();
-    const [isReady, setIsReady] = useState<boolean>(false);
-    const [joinSucceed, setJoinSucceed] = useState<boolean>();
+    const [isMatching, setIsMatching] = useState<boolean>(false);
     const [peerIds, setPeerIds] = useState<number[]>([]);
 
     const [isExitModalVisible, setIsExitModalVisible] = useState<boolean>(false);
@@ -77,7 +99,7 @@ const Voice: React.FunctionComponent<IProp> = () => {
         // This callback occurs when the local user successfully joins the channel.
         engine.addListener('JoinChannelSuccess', (channel, uid, elapsed) => {
             console.log('success', channel);
-            setJoinSucceed(true);
+            setCurrentState('joined');
         });
 
         engine.addListener('LeaveChannel', stats => {
@@ -92,6 +114,7 @@ const Voice: React.FunctionComponent<IProp> = () => {
         // This callback occurs when the remote user successfully joins the channel.
         engine.addListener('UserJoined', (uid, elapsed) => {
             console.log('userjoined', uid);
+            setCurrentState('connected');
             // If new user
             if (peerIds.indexOf(uid) === -1) {
                 setPeerIds([...peerIds, uid]);
@@ -101,12 +124,13 @@ const Voice: React.FunctionComponent<IProp> = () => {
         // This callback occurs when the remote user leaves the channel or drops offline.
         engine.addListener('UserOffline', (uid, reason) => {
             console.log('UserOffline', uid, reason);
+            setCurrentState('disconnected');
             setPeerIds(peerIds.filter(id => id !== uid));
         });
 
         engine.addListener('NetworkQuality', (uid, txQuality, rxQuality) => {
             // agora 서버와 연결 끊김
-            console.log('NetworkQuality', uid, txQuality, rxQuality);
+            // console.log('NetworkQuality', uid, txQuality, rxQuality);
         });
 
         //engine.setChannelProfile(ChannelProfile.LiveBroadcasting);
@@ -123,7 +147,9 @@ const Voice: React.FunctionComponent<IProp> = () => {
             initVoice();
         };
         init();
+    }, []);
 
+    useEffect(() => {
         const handleAppStateChange = (nextAppState: any) => {
             if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
                 console.log('App has come to the foreground!');
@@ -133,27 +159,30 @@ const Voice: React.FunctionComponent<IProp> = () => {
             setAppStateVisible(appState.current);
 
             if (appState.current === 'background') {
-                close();
-                closeReady();
-                RemoveVoiceWaitMutation();
+                console.log('check', currentState);
+                if (currentState !== 'connected') {
+                    close();
+                    closeReady();
+                    RemoveVoiceWaitMutation();
+                }
             }
             console.log('AppState', appState.current);
         };
 
-        navigation.addListener('blur', () => {
-            // 스크린 종료 시
-            if (engine && !joinSucceed) {
-                engine.destroy();
-            }
-            console.log('didBlur');
-        });
+        // navigation.addListener('blur', () => {
+        //     // 스크린 종료 시
+        //     if (engine && ) {
+        //         engine.destroy();
+        //     }
+        //     console.log('didBlur');
+        // });
 
         AppState.addEventListener('change', handleAppStateChange);
 
         return () => {
             AppState.removeEventListener('change', handleAppStateChange);
         };
-    }, []);
+    }, [currentState]);
 
     const start = useCallback(
         async channelName => {
@@ -180,7 +209,9 @@ const Voice: React.FunctionComponent<IProp> = () => {
                     console.log(data.key);
                     await engine.enableAudio();
                     await engine.enableLocalAudio(true);
-                    await engine.joinChannel(data.key, channelName, null, parseInt(myId));
+                    await engine.joinChannel(data.key, channelName, null, parseInt(myId)).then(() => {
+                        setCurrentState('joined');
+                    });
                 } else {
                     toast('인증 실패.');
                 }
@@ -197,58 +228,101 @@ const Voice: React.FunctionComponent<IProp> = () => {
         if (data && data.FindVoiceUser && data.FindVoiceUser.ok) {
             if (data.FindVoiceUser.channelName) {
                 start(data.FindVoiceUser.channelName);
+            } else {
+                setCurrentState('ready');
             }
-            setIsReady(true);
+            setIsMatching(true);
         } else {
             toast('접속 실패. 잠시 후 다시 시도 해주세요.');
         }
     };
 
+    // 찾는 중 종료
     const closeReady = async () => {
-        setIsReady(false);
-        RemoveVoiceWaitMutation();
+        setIsMatching(false);
+        setCurrentState('idle');
+        await RemoveVoiceWaitMutation();
     };
 
+    // 연결 중 종료
     const close = () => {
         if (!engine) return;
-        toast('종료');
-        console.log('close');
+        setCurrentState('disconnected');
         engine.leaveChannel();
-        setIsReady(false);
     };
 
+    // 통화 중 종료
+    const disconnect = () => {
+        setIsMatching(false);
+        setCurrentState('idle');
+    };
+
+    const restart = () => {
+        if (engine) {
+            engine.leaveChannel();
+        }
+        ready();
+    };
+
+    // 뒤로 가기 이벤트
+    const exitConfirmEvent = useCallback(() => {
+        if (currentState === 'ready') {
+            RemoveVoiceWaitMutation();
+        } else if (currentState === 'joined' || currentState === 'connected') {
+            if (engine) {
+                engine.leaveChannel();
+            }
+        }
+
+        if (engine) {
+            engine.destroy();
+        }
+
+        setIsExitModalVisible(false);
+        navigation.goBack();
+    }, [currentState]);
+
     useEffect(() => {
+        if (engine) {
+            if (currentState === 'disconnected') {
+                engine.leaveChannel();
+            }
+        }
         const handleBackButtonClick = () => {
-            if (joinSucceed) {
+            if (currentState === 'idle') {
+                return false;
+            } else {
                 console.log('check');
                 setIsExitModalVisible(true);
                 return true;
-            } else {
-                return false;
             }
         };
         BackHandler.addEventListener('hardwareBackPress', handleBackButtonClick);
         return () => BackHandler.removeEventListener('hardwareBackPress', handleBackButtonClick);
-    }, [joinSucceed]);
-
-    useEffect(() => {
-        console.log(peerIds);
-    }, [peerIds]);
+    }, [currentState]);
 
     const VoiceRenderer: React.FunctionComponent = () => {
         if (!isPermit) {
             return <EmptyScreen text="보이스톡을 이용하시려면 권한이 필요해요." />;
-        } else if (isReady) {
-            return <VoiceConnection peerIds={peerIds} close={close} start={start} closeReady={closeReady} />;
+        } else if (isMatching) {
+            return (
+                <VoiceConnection
+                    peerIds={peerIds}
+                    close={close}
+                    start={start}
+                    restart={restart}
+                    closeReady={closeReady}
+                    disconnect={disconnect}
+                    currentState={currentState}
+                />
+            );
         }
 
         return (
             <>
-                <Wrapper>
-                    <Touchable onPress={() => ready()}>
-                        <Text> {`매칭 시작`} </Text>
-                    </Touchable>
-                </Wrapper>
+                <MatchButtonTouchable onPress={() => ready()}>
+                    <MatchButtonText> {`매칭 시작`} </MatchButtonText>
+                </MatchButtonTouchable>
                 <FilterWrapper>
                     <FloatButton
                         onPress={() => setIsFilterModalVisible(true)}
@@ -257,16 +331,6 @@ const Voice: React.FunctionComponent<IProp> = () => {
                 </FilterWrapper>
             </>
         );
-    };
-
-    const exitConfirmEvent = () => {
-        // 연결 중 종료
-        if (engine) {
-            engine.leaveChannel();
-            engine.destroy();
-        }
-        setIsExitModalVisible(false);
-        navigation.goBack();
     };
 
     // Render

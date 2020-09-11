@@ -12,29 +12,10 @@ const Text = styled.Text`
 `;
 
 interface IProp {
-    stop: boolean;
+    time: [number, number];
 }
 
-const Timer: React.FunctionComponent<IProp> = ({ stop }) => {
-    const [minute, setMinute] = useState<number>(0);
-    const [seconds, setSeconds] = useState<number>(0);
-    useEffect(() => {
-        BackgroundTimer.runBackgroundTimer(() => {
-            setSeconds(prev => prev + 1);
-        }, 1000);
-
-        if (stop) {
-            BackgroundTimer.stopBackgroundTimer();
-        }
-    }, [stop]);
-
-    useEffect(() => {
-        if (seconds >= 60) {
-            setMinute(prev => prev + 1);
-            setSeconds(0);
-        }
-    }, [seconds]);
-
+const Timer: React.FunctionComponent<IProp> = ({ time }) => {
     const showTimer = (minute: number, seconds: number) => {
         const convertM = minute >= 10 ? `${minute}` : `0${minute}`;
         const convertS = seconds >= 10 ? `${seconds}` : `0${seconds}`;
@@ -44,7 +25,7 @@ const Timer: React.FunctionComponent<IProp> = ({ stop }) => {
     return (
         <Container>
             <Wrapper>
-                <Text>{showTimer(minute, seconds)}</Text>
+                <Text>{showTimer(time[0], time[1])}</Text>
             </Wrapper>
         </Container>
     );

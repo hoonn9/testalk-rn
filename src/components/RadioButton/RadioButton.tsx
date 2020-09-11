@@ -1,7 +1,6 @@
 import React from 'react';
 import styled from 'styled-components/native';
-import { TextInputProps, TouchableOpacityProps } from 'react-native';
-import constants from '../../constants';
+import { TextInputProps } from 'react-native';
 
 const Container = styled.View`
     width: 100%;
@@ -15,6 +14,9 @@ const Text = styled.Text`
 const Wrapper = styled.View`
     flex-direction: row;
     margin: 16px 16px;
+    border-radius: 32px;
+    border-color: ${(props: any) => props.theme.lightGreyColor};
+    border-width: 1px;
 `;
 interface TouchableViewProp {
     len: number;
