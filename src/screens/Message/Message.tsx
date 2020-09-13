@@ -40,6 +40,7 @@ import ModalAlert from '../../components/ModalAlert';
 import EmptyScreen from '../../components/EmptyScreen';
 import HeaderImageButton from '../../components/HeaderPhotoButton';
 import { useHeaderHeight } from '@react-navigation/stack';
+import { GiftedChat, IMessage } from 'react-native-gifted-chat';
 
 const Container = styled.View`
     flex: 1;
@@ -172,7 +173,7 @@ const Message: React.FunctionComponent<IProp> = ({ route }) => {
     const [chatId, setChatId] = useState<number | null>(null);
     const messageContent = useInput('');
     const [flatRef, setFlatRef] = useState<any>(() => createRef());
-    const [messageList, setMessageList] = useState<Array<ChatLogRowProp>>([]);
+    const [messageList, setMessageList] = useState<Array<IMessage>>([]);
     const MESSAGES_LIMIT: number = 10;
     const [offset, setOffset] = useState<number>(10);
     const [selectCount, setSelectCount] = useState<number>(0);
@@ -238,7 +239,19 @@ const Message: React.FunctionComponent<IProp> = ({ route }) => {
                     const chatLogs = await getChatLogs(chatId, MESSAGES_LIMIT);
                     if (chatLogs) {
                         if (chatLogs.array.length > 0) {
-                            const messages = [...chatLogs.array];
+                            console.log(chatLogs.array);
+                            const messages: IMessage[] = [];
+                            for (const message of chatLogs.array) {
+                                messages.push({
+                                    _id: message._id,
+                                    text: message.content,
+                                    createdAt: message.created_at,
+                                    user: {
+                                        _id: message.user_id,
+                                    },
+                                });
+                            }
+
                             setMessageList(messages);
                             return messages;
                         } else {
@@ -252,18 +265,19 @@ const Message: React.FunctionComponent<IProp> = ({ route }) => {
     }, []);
 
     const addMessageList = (chatId: number, userId: number, text: string, createdAt: string) => {
-        const existSeparate = messageList.find(e => e.created_at >= initTimestamp(parseInt(createdAt)));
-        setMessageList([
-            {
-                _id: messageList.length,
-                chat_id: chatId,
-                user_id: userId,
-                content: text,
-                created_at: parseInt(createdAt),
-                separate: existSeparate ? 0 : 1,
-            },
-            ...messageList,
-        ]);
+        // const existSeparate = messageList.find(e => e.created_at >= initTimestamp(parseInt(createdAt)));
+        setMessageList(prev =>
+            GiftedChat.append(prev, [
+                {
+                    _id: messageList.length,
+                    text: text,
+                    createdAt: parseInt(createdAt),
+                    user: {
+                        _id: userId,
+                    },
+                },
+            ]),
+        );
     };
 
     // Subscribe Chat
@@ -271,32 +285,37 @@ const Message: React.FunctionComponent<IProp> = ({ route }) => {
         if (subscribeData) {
             console.log(subscribeData);
             if (subscribeData.MessageSubscription) {
-                const { userId, text, target, createdAt } = subscribeData.MessageSubscription;
-                console.log(chatId, userId);
+                try {
+                    const { userId, text, target, createdAt } = subscribeData.MessageSubscription;
+                    console.log(chatId, userId);
 
-                if (chatId && userId) {
-                    if (userId !== myId && target === LEAVE) {
-                        // 상대가 떠났을 때
-                        removeChat(userId, chatId);
-                        setIsLeaveModalVisible(true);
-                    } else {
-                        if (text) {
-                            addMessageList(chatId, userId, text, createdAt);
+                    if (chatId && userId) {
+                        if (userId !== myId && target === LEAVE) {
+                            // 상대가 떠났을 때
+                            removeChat(userId, chatId);
+                            setIsLeaveModalVisible(true);
+                        } else {
+                            if (text) {
+                                addMessageList(chatId, userId, text, createdAt);
 
-                            // 수신 시 최하단으로 스크롤
-                            if (flatRef && messageList.length > 0) {
-                                flatRef.scrollToIndex({ index: 0 });
+                                // 수신 시 최하단으로 스크롤
+                                // if (flatRef && messageList.length > 0) {
+                                //     flatRef.scrollToIndex({ index: 0 });
+                                // }
                             }
                         }
+                    } else {
+                        toast('데이터 수신 중 오류가 발생하였습니다.');
                     }
-                } else {
+                } catch (error) {
+                    console.log(error);
                     toast('데이터 수신 중 오류가 발생하였습니다.');
                 }
             }
         }
     }, [subscribeData]);
 
-    const senderOnSubmit = async () => {
+    const senderOnSubmit = async (message: IMessage) => {
         setIsCashVisible(false);
         setIsSendLoading(true);
         if (myId) {
@@ -306,14 +325,15 @@ const Message: React.FunctionComponent<IProp> = ({ route }) => {
                     variables: {
                         chatId,
                         receiveUserId: userId,
-                        text: messageContent.value,
+                        text: message.text,
                         sendTime: now,
                     },
                 });
-
+                console.log(data);
+                console.log(message.text);
                 if (data && data.SendChatMessage.ok && data.SendChatMessage.chatId) {
                     const sendedChatId = data.SendChatMessage.chatId;
-                    addMessage(sendedChatId, myId, userId, messageContent.value, parseInt(now));
+                    addMessage(sendedChatId, myId, userId, message.text, parseInt(now));
                     if (userInfo) {
                         addFriend({
                             userId,
@@ -342,11 +362,11 @@ const Message: React.FunctionComponent<IProp> = ({ route }) => {
 
                     // 첫 대화
                     if (!chatId) {
-                        addMessageList(sendedChatId, myId, messageContent.value, now);
+                        addMessageList(sendedChatId, myId, message.text, now);
                     }
 
                     setChatId(sendedChatId);
-                    messageContent.setValue('');
+                    //messageContent.setValue('');
                 } else {
                     toast('문제가 생겨 메시지를 보낼 수 없어요.');
                 }
@@ -391,57 +411,37 @@ const Message: React.FunctionComponent<IProp> = ({ route }) => {
         }
     }, [getChatUserData, getChatUserLoading, getChatUserError]);
 
-    const sendMessageOnPress = () => {
-        if (!messageContent.value || isSendLoading) {
-            return;
-        } else if (messageContent.value.length >= 500) {
-            toast('메시지는 500자 이내로 전송할 수 있습니다.');
-            return;
-        }
+    const sendMessageOnPress = (message: IMessage[]) => {
+        // if (!messageContent.value || isSendLoading) {
+        //     return;
+        // } else if (messageContent.value.length >= 500) {
+        //     toast('메시지는 500자 이내로 전송할 수 있습니다.');
+        //     return;
+        // }
 
         if (chatId) {
-            senderOnSubmit();
+            senderOnSubmit(message[0]);
         } else {
             setIsCashVisible(true);
         }
     };
 
-    console.log('render message');
+    console.log(messageList);
     return (
         <>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <Container>
                     <Wrapper>
-                        {chatId ? (
-                            <FlatList
-                                inverted
-                                ref={ref => setFlatRef(ref)}
-                                onEndReached={onEndReached}
-                                onEndReachedThreshold={0.01}
-                                data={messageList}
-                                keyExtractor={(e, i) => i.toString()}
-                                renderItem={({ item }) => {
-                                    return (
-                                        <MessageRow
-                                            message={item.content}
-                                            createdAt={item.created_at}
-                                            isDateSeparator={item.separate}
-                                            mine={item.user_id === myId ? true : false}
-                                        />
-                                    );
-                                }}
+                        {chatId && myId ? (
+                            <GiftedChat
+                                messages={messageList}
+                                onSend={message => sendMessageOnPress(message)}
+                                user={{ _id: myId }}
                             />
                         ) : (
                             <EmptyScreen text="상대방이 메시지를 기다리고 있어요!" />
                         )}
                     </Wrapper>
-                    <SenderWrapper>
-                        <SendMessage
-                            value={messageContent.value}
-                            onChangeText={messageContent.onChange}
-                            onPress={sendMessageOnPress}
-                        />
-                    </SenderWrapper>
                 </Container>
             </TouchableWithoutFeedback>
             <Modal

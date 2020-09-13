@@ -5,8 +5,7 @@ import getEnvVars, { AGORA_APP_ID } from '../../enviroments';
 import AsyncStorage from '@react-native-community/async-storage';
 import RtcEngine from 'react-native-agora';
 import { toast } from '../../tools';
-import { StyleSheet, BackHandler, AppState } from 'react-native';
-import constants from '../../constants';
+import { BackHandler, AppState } from 'react-native';
 import { getVoicePermission } from '../../permissions';
 import EmptyScreen from '../../components/EmptyScreen';
 import VoiceConnection from '../../components/VoiceConnection';
@@ -21,7 +20,7 @@ import VoiceFilter from '../../components/VoiceFilter';
 import FloatButton from '../../components/FloatButton';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { HeaderBackButton } from '@react-navigation/stack';
-import useInterval from '../../hooks/useInterval';
+import BackgroundTimer from 'react-native-background-timer';
 
 const View = styled.View``;
 const Container = styled.View`
@@ -84,7 +83,7 @@ const Voice: React.FunctionComponent<IProp> = () => {
     const [gender, setGender] = useState<GenderTarget>(GenderTarget.any);
     const [age, setAge] = useState<AgeType>(20);
     const [distance, setDistance] = useState<number>(100);
-    console.log(gender, age, distance);
+
     const [findVoiceUserMutation] = useMutation<FindVoiceUser, FindVoiceUserVariables>(FIND_VOICE_USER, {
         variables: { gender, age, distance },
     });
@@ -95,23 +94,12 @@ const Voice: React.FunctionComponent<IProp> = () => {
         const engine = await RtcEngine.create(AGORA_APP_ID);
         await engine.enableAudio();
         await engine.setDefaultMuteAllRemoteAudioStreams(false);
-        // Listen for the JoinChannelSuccess callback.
-        // This callback occurs when the local user successfully joins the channel.
+
         engine.addListener('JoinChannelSuccess', (channel, uid, elapsed) => {
             console.log('success', channel);
             setCurrentState('joined');
         });
 
-        engine.addListener('LeaveChannel', stats => {
-            // agora 서버와 연결 끊김
-            console.log('LeaveChannel', stats);
-        });
-
-        engine.addListener('ConnectionLost', () => {
-            // agora 서버와 연결 끊김
-        });
-        // Listen for the UserJoined callback.
-        // This callback occurs when the remote user successfully joins the channel.
         engine.addListener('UserJoined', (uid, elapsed) => {
             console.log('userjoined', uid);
             setCurrentState('connected');
@@ -120,25 +108,21 @@ const Voice: React.FunctionComponent<IProp> = () => {
                 setPeerIds([...peerIds, uid]);
             }
         });
-        // Listen for the UserOffline callback.
-        // This callback occurs when the remote user leaves the channel or drops offline.
+
         engine.addListener('UserOffline', (uid, reason) => {
             console.log('UserOffline', uid, reason);
             setCurrentState('disconnected');
             setPeerIds(peerIds.filter(id => id !== uid));
         });
 
-        engine.addListener('NetworkQuality', (uid, txQuality, rxQuality) => {
-            // agora 서버와 연결 끊김
-            // console.log('NetworkQuality', uid, txQuality, rxQuality);
+        engine.addListener('TokenPrivilegeWillExpire', token => {
+            setTokenWarning(true);
+            console.log(token, '30초 전입니다.');
         });
 
         //engine.setChannelProfile(ChannelProfile.LiveBroadcasting);
         setEngine(engine);
     };
-
-    const appState = useRef(AppState.currentState);
-    const [appStateVisible, setAppStateVisible] = useState(appState.current);
 
     useEffect(() => {
         const init = async () => {
@@ -147,7 +131,11 @@ const Voice: React.FunctionComponent<IProp> = () => {
             initVoice();
         };
         init();
+        return () => console.log('main unrender');
     }, []);
+
+    const appState = useRef(AppState.currentState);
+    const [appStateVisible, setAppStateVisible] = useState(appState.current);
 
     useEffect(() => {
         const handleAppStateChange = (nextAppState: any) => {
@@ -190,7 +178,6 @@ const Voice: React.FunctionComponent<IProp> = () => {
                 console.log('not engine');
                 return;
             }
-            toast('시작');
             const jwt = await AsyncStorage.getItem('jwt');
             const myId = await AsyncStorage.getItem('userId');
             if (jwt && myId) {
@@ -248,10 +235,9 @@ const Voice: React.FunctionComponent<IProp> = () => {
     const close = () => {
         if (!engine) return;
         setCurrentState('disconnected');
-        engine.leaveChannel();
     };
 
-    // 통화 중 종료
+    // 종료화면 완료 버튼 핸들러
     const disconnect = () => {
         setIsMatching(false);
         setCurrentState('idle');
@@ -271,6 +257,7 @@ const Voice: React.FunctionComponent<IProp> = () => {
         } else if (currentState === 'joined' || currentState === 'connected') {
             if (engine) {
                 engine.leaveChannel();
+                setTokenWarning(false);
             }
         }
 
@@ -286,6 +273,8 @@ const Voice: React.FunctionComponent<IProp> = () => {
         if (engine) {
             if (currentState === 'disconnected') {
                 engine.leaveChannel();
+                setMinute(0);
+                setSeconds(0);
             }
         }
         const handleBackButtonClick = () => {
@@ -301,6 +290,41 @@ const Voice: React.FunctionComponent<IProp> = () => {
         return () => BackHandler.removeEventListener('hardwareBackPress', handleBackButtonClick);
     }, [currentState]);
 
+    const [tokenWarning, setTokenWarning] = useState<boolean>(false);
+
+    const [minute, setMinute] = useState<number>(0);
+    const [seconds, setSeconds] = useState<number>(0);
+
+    useEffect(() => {
+        const intervalId = BackgroundTimer.setInterval(async () => {
+            // this will be executed every 200 ms
+            // even when app is the the background
+
+            if (currentState === 'connected') {
+                // 시간 다 되면 종료
+                if (engine) {
+                    const state = await engine.getConnectionState();
+                    if (state !== 3) {
+                        close();
+                    }
+                }
+                setSeconds(prev => prev + 1);
+            }
+        }, 1000);
+
+        return () => {
+            console.log('unrender');
+            BackgroundTimer.clearInterval(intervalId);
+        };
+    }, [currentState]);
+
+    useEffect(() => {
+        if (seconds >= 60) {
+            setMinute(prev => prev + 1);
+            setSeconds(0);
+        }
+    }, [seconds]);
+
     const VoiceRenderer: React.FunctionComponent = () => {
         if (!isPermit) {
             return <EmptyScreen text="보이스톡을 이용하시려면 권한이 필요해요." />;
@@ -314,6 +338,8 @@ const Voice: React.FunctionComponent<IProp> = () => {
                     closeReady={closeReady}
                     disconnect={disconnect}
                     currentState={currentState}
+                    time={[minute, seconds]}
+                    tokenWarning={tokenWarning}
                 />
             );
         }

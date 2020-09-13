@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components/native';
 import Timer from '../Timer/Timer';
 import Icons from 'react-native-vector-icons/MaterialIcons';
@@ -8,7 +8,6 @@ import { VoiceSubscription, VoiceSubscription_VoiceSubscription } from '../../ty
 import { SUBSCRIBE_VOICE } from '../../screens/Voice/Voice.queries';
 import { toast } from '../../tools';
 import { VoiceStateType } from '../../screens/Voice/Voice';
-import { AppState } from 'react-native';
 
 const Container = styled.View`
     flex: 1;
@@ -53,6 +52,8 @@ interface ControllerProp {
     closeReady: Function;
     disconnect: Function;
     currentState: VoiceStateType;
+    time: [number, number];
+    tokenWarning: boolean;
 }
 
 interface IProp extends ControllerProp {
@@ -66,6 +67,8 @@ interface MatchingProp {
 
 interface ConnectedProp {
     close: Function;
+    time: [number, number];
+    tokenWarning: boolean;
 }
 
 interface DisconnectedProp {
@@ -84,9 +87,9 @@ const VoiceConnection: React.FunctionComponent<IProp> = ({
     closeReady,
     disconnect,
     currentState,
+    time,
+    tokenWarning,
 }) => {
-    console.log('render', currentState);
-
     return (
         <Container>
             <VoiceRenderController
@@ -96,6 +99,8 @@ const VoiceConnection: React.FunctionComponent<IProp> = ({
                 closeReady={closeReady}
                 disconnect={disconnect}
                 currentState={currentState}
+                time={time}
+                tokenWarning={tokenWarning}
             />
         </Container>
     );
@@ -108,12 +113,14 @@ const VoiceRenderController: React.FunctionComponent<ControllerProp> = ({
     restart,
     disconnect,
     closeReady,
+    time,
+    tokenWarning,
 }) => {
     switch (currentState) {
         case 'joined':
             return <VoiceJoined close={close} restart={restart} />;
         case 'connected':
-            return <VoiceConnected close={close} />;
+            return <VoiceConnected close={close} time={time} tokenWarning={tokenWarning} />;
         case 'disconnected':
             return <VoiceDisconnected disconnect={disconnect} />;
         default:
@@ -225,60 +232,14 @@ const VoiceJoined: React.FunctionComponent<JoinedProp> = ({ close, restart }) =>
     );
 };
 
-const VoiceConnected: React.FunctionComponent<ConnectedProp> = ({ close }) => {
-    const [minute, setMinute] = useState<number>(0);
-    const [seconds, setSeconds] = useState<number>(0);
-
+const VoiceConnected: React.FunctionComponent<ConnectedProp> = ({ close, time, tokenWarning }) => {
+    const [isWarnShow, setIsWarnShow] = useState<boolean>(false);
     useEffect(() => {
-        const connectionWaitTimer = setInterval(() => {
-            setSeconds(prev => prev + 1);
-        }, 1000);
-
-        return () => clearInterval(connectionWaitTimer);
-    }, []);
-
-    useEffect(() => {
-        if (seconds >= 60) {
-            setMinute(prev => prev + 1);
-            setSeconds(0);
+        if (tokenWarning && !isWarnShow) {
+            toast('30초 남았습니다.');
+            setIsWarnShow(true);
         }
-    }, [seconds]);
-    const [saveTime, setSaveTime] = useState<number>(0);
-    const appState = useRef(AppState.currentState);
-    const [appStateVisible, setAppStateVisible] = useState(appState.current);
-
-    useEffect(() => {
-        const handleAppStateChange = (nextAppState: any) => {
-            if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
-                console.log('App has come to the foreground!');
-            }
-
-            appState.current = nextAppState;
-            setAppStateVisible(appState.current);
-
-            if (appState.current === 'background') {
-                setSaveTime(new Date().getTime());
-            } else if (appState.current === 'active') {
-                console.log(Date.now() - saveTime);
-            }
-            console.log('AppState', appState.current);
-        };
-
-        // navigation.addListener('blur', () => {
-        //     // 스크린 종료 시
-        //     if (engine && ) {
-        //         engine.destroy();
-        //     }
-        //     console.log('didBlur');
-        // });
-
-        AppState.addEventListener('change', handleAppStateChange);
-
-        return () => {
-            AppState.removeEventListener('change', handleAppStateChange);
-        };
-    }, []);
-
+    }, [tokenWarning, isWarnShow]);
     return (
         <>
             <Wrapper>
@@ -286,7 +247,7 @@ const VoiceConnected: React.FunctionComponent<ConnectedProp> = ({ close }) => {
                     <PrimaryText>연결 성공</PrimaryText>
                 </Wrapper>
                 <Wrapper>
-                    <Timer time={[minute, seconds]} />
+                    <Timer time={time} />
                 </Wrapper>
             </Wrapper>
             <Wrapper>
@@ -318,4 +279,4 @@ const VoiceDisconnected: React.FunctionComponent<DisconnectedProp> = ({ disconne
     );
 };
 
-export default VoiceConnection;
+export default React.memo(VoiceConnection);

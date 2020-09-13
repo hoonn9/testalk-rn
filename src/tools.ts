@@ -1,9 +1,15 @@
-import Toast from "react-native-root-toast";
-import { Vibration, Keyboard } from "react-native";
-import constants from "./constants";
-import { useEffect } from "react";
+import Toast from 'react-native-root-toast';
+import { Vibration } from 'react-native';
+import constants from './constants';
 
-export const toast = (message: string, position?: number, onShow?: Function, onShown?: Function, onHide?: Function, onHidden?: Function) => {
+export const toast = (
+    message: string,
+    position?: number,
+    onShow?: Function,
+    onShown?: Function,
+    onHide?: Function,
+    onHidden?: Function,
+) => {
     Toast.show(message, {
         duration: Toast.durations.SHORT,
         position: position || constants.height / 4.5,
@@ -16,9 +22,8 @@ export const toast = (message: string, position?: number, onShow?: Function, onS
         onHide: onHide,
         onHidden: onHidden,
     });
-}
-
+};
 
 const ONE_SECOND_IN_MS = 200;
 
-export const vibration = () => Vibration.vibrate(ONE_SECOND_IN_MS)
+export const vibration = () => Vibration.vibrate(ONE_SECOND_IN_MS);
